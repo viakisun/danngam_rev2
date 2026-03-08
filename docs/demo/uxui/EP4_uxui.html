@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>단감 EP4 UX/UI — 제조사·R&D 연계</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #16a34a;
+    --green-light: #22c55e;
+    --green-dark: #15803d;
+    --indigo: #6366f1;
+    --indigo-light: #818cf8;
+    --indigo-dark: #4f46e5;
+    --indigo-bg: #eef2ff;
+    --bg: #f1f5f9;
+    --card: #fff;
+    --bezel: #1a1a2e;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    --border: #e2e8f0;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* === HEADER === */
+  .header {
+    background: var(--bezel);
+    color: #fff;
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .header-logo {
+    width: 40px; height: 40px; background: var(--indigo);
+    border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-weight: 800; font-size: 14px;
+  }
+  .header-title { font-size: 18px; font-weight: 700; }
+  .header-sub { font-size: 13px; color: var(--text-light); margin-left: auto; }
+
+  /* === TAB BAR === */
+  .tab-bar {
+    background: #fff; border-bottom: 1px solid var(--border);
+    padding: 0 32px; display: flex; gap: 4px; overflow-x: auto;
+  }
+  .tab {
+    padding: 12px 14px; font-size: 12px; font-weight: 500;
+    color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
+    white-space: nowrap; transition: all 0.2s;
+  }
+  .tab:hover { color: var(--indigo); }
+  .tab.active { color: var(--indigo); border-bottom-color: var(--indigo); font-weight: 600; }
+
+  /* === MAIN LAYOUT === */
+  .main { display: flex; gap: 32px; padding: 32px; max-width: 1280px; margin: 0 auto; }
+
+  /* === LEFT PANEL === */
+  .left-panel { flex: 0 0 340px; }
+  .scene-info {
+    background: var(--card); border-radius: 16px; padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .scene-badge {
+    display: inline-block; background: var(--indigo); color: #fff;
+    font-size: 11px; font-weight: 700; padding: 4px 10px;
+    border-radius: 6px; margin-bottom: 12px;
+  }
+  .scene-badge.rnd { background: linear-gradient(135deg, var(--indigo), #7c3aed); }
+  .scene-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; line-height: 1.4; }
+  .scene-section { margin-bottom: 16px; }
+  .scene-section-label {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+  }
+  .scene-section-text { font-size: 13px; line-height: 1.7; color: #334155; }
+  .scene-device-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 500; color: var(--text-muted);
+    background: var(--bg); padding: 6px 12px; border-radius: 8px; margin-top: 8px;
+  }
+
+  /* === NAV BUTTONS === */
+  .nav-buttons { display: flex; gap: 8px; margin-top: 20px; }
+  .nav-btn {
+    flex: 1; padding: 10px; border: 1px solid var(--border); background: #fff;
+    border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: all 0.2s; color: var(--text);
+  }
+  .nav-btn:hover { border-color: var(--indigo); color: var(--indigo); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-btn:disabled:hover { border-color: var(--border); color: var(--text); }
+  .nav-counter { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+
+  /* === RIGHT PANEL === */
+  .right-panel { flex: 1; display: flex; justify-content: center; align-items: flex-start; }
+
+  /* === PHONE FRAME === */
+  .phone-frame {
+    width: 320px; height: 680px; background: var(--bezel);
+    border-radius: 50px; padding: 16px 12px; position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .phone-notch {
+    width: 100px; height: 28px; background: var(--bezel);
+    border-radius: 0 0 16px 16px; position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%); z-index: 10;
+  }
+  .phone-screen {
+    width: 100%; height: 100%; background: var(--bg);
+    border-radius: 38px; overflow: hidden; overflow-y: auto;
+    position: relative;
+  }
+  .phone-screen::-webkit-scrollbar { width: 0; }
+
+  /* === BROWSER FRAME === */
+  .browser-frame {
+    width: 640px; height: 480px; background: #fff;
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .browser-titlebar {
+    height: 36px; background: #f1f3f5; display: flex;
+    align-items: center; padding: 0 14px; gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .browser-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .browser-dot.red { background: #ff5f57; }
+  .browser-dot.yellow { background: #febc2e; }
+  .browser-dot.green { background: #28c840; }
+  .browser-url {
+    flex: 1; margin-left: 12px; background: #fff;
+    border-radius: 6px; padding: 4px 12px; font-size: 11px;
+    color: var(--text-muted); border: 1px solid var(--border);
+  }
+  .browser-content {
+    height: calc(100% - 36px); overflow-y: auto; background: var(--bg);
+  }
+  .browser-content::-webkit-scrollbar { width: 4px; }
+  .browser-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+
+  /* === SHARED UI === */
+  .status-bar {
+    height: 44px; background: #fff; display: flex;
+    align-items: center; justify-content: space-between;
+    padding: 0 20px; font-size: 12px; font-weight: 600;
+  }
+
+  .app-header {
+    height: 48px; background: #fff; display: flex;
+    align-items: center; padding: 0 16px; font-size: 15px;
+    font-weight: 600; border-bottom: 1px solid var(--border);
+  }
+  .app-header .back-arrow { margin-right: 12px; cursor: pointer; }
+
+  .btn-primary {
+    background: var(--green); color: #fff; border: none;
+    padding: 12px 24px; border-radius: 10px; font-size: 14px;
+    font-weight: 600; cursor: pointer; width: 100%;
+  }
+  .btn-indigo {
+    background: var(--indigo); color: #fff; border: none;
+    padding: 12px 24px; border-radius: 10px; font-size: 14px;
+    font-weight: 600; cursor: pointer; width: 100%;
+  }
+  .btn-outline-indigo {
+    background: #fff; color: var(--indigo); border: 2px solid var(--indigo);
+    padding: 10px 24px; border-radius: 10px; font-size: 14px;
+    font-weight: 600; cursor: pointer; width: 100%;
+  }
+
+  .input-field {
+    width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+    border-radius: 10px; font-size: 13px; font-family: 'Inter';
+    background: #fff; color: var(--text); outline: none;
+  }
+  .input-field:focus { border-color: var(--indigo); }
+  .field-label {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    margin-bottom: 4px; display: block;
+  }
+  .field-group { margin-bottom: 10px; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 170px; background: #1e293b; min-height: 100%;
+    padding: 16px 0; flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 8px 16px 20px; font-size: 14px; font-weight: 800; color: #fff;
+  }
+  .sidebar-logo span { font-size: 11px; color: var(--text-light); font-weight: 400; }
+  .sidebar-item {
+    padding: 10px 16px; font-size: 12px; color: var(--text-light);
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+  }
+  .sidebar-item:hover { background: #334155; color: #fff; }
+  .sidebar-item.active { background: var(--indigo); color: #fff; border-radius: 0 8px 8px 0; margin-right: 8px; }
+
+  /* Cards */
+  .card { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  .card-sm { background: #fff; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+
+  /* Badges */
+  .badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .badge-indigo { background: #eef2ff; color: #6366f1; }
+  .badge-green { background: #dcfce7; color: #16a34a; }
+  .badge-amber { background: #fef3c7; color: #d97706; }
+  .badge-red { background: #fee2e2; color: #dc2626; }
+
+  /* Stats */
+  .stat { text-align: center; }
+  .stat .num { font-size: 22px; font-weight: 700; color: #0f172a; }
+  .stat .desc { font-size: 11px; color: var(--text-muted); }
+
+  .divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+  /* Avatar */
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%; background: #c7d2fe;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #4f46e5; flex-shrink: 0;
+  }
+
+  /* Push card */
+  .push-card {
+    background: #fff; border-left: 4px solid var(--indigo); border-radius: 8px;
+    padding: 12px; margin: 8px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .push-title { font-size: 13px; font-weight: 700; color: #0f172a; }
+  .push-body { font-size: 11px; color: #475569; margin-top: 4px; line-height: 1.5; }
+
+  .stars { color: #f59e0b; font-size: 14px; letter-spacing: 1px; }
+
+  /* Progress */
+  .progress-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin: 4px 0; }
+  .progress-fill { height: 100%; border-radius: 4px; }
+
+  /* Table */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .tbl th { background: #f8fafc; padding: 8px 6px; text-align: left; font-weight: 600; color: #475569; border-bottom: 2px solid var(--border); }
+  .tbl td { padding: 8px 6px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+  .tbl tr:hover { background: #f8fafc; }
+
+  .check { width: 16px; height: 16px; border: 2px solid #e2e8f0; border-radius: 4px; display: inline-block; vertical-align: middle; }
+  .check.checked { background: var(--indigo); border-color: var(--indigo); position: relative; }
+  .check.checked::after { content: ''; position: absolute; left: 4px; top: 1px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+
+  /* Upload */
+  .upload-zone {
+    border: 2px dashed #c7d2fe; border-radius: 10px; padding: 16px;
+    text-align: center; color: var(--indigo); font-size: 12px; cursor: pointer; margin: 8px 0;
+  }
+
+  /* Photo grid */
+  .photo-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 8px 0; }
+  .photo-placeholder {
+    background: #e2e8f0; border-radius: 8px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: var(--text-light);
+  }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 20px; }
+  .timeline::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: #c7d2fe; }
+  .timeline-item { position: relative; margin-bottom: 14px; }
+  .timeline-item::before { content: ''; position: absolute; left: -17px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--indigo); border: 2px solid #fff; }
+  .timeline-item .tl-title { font-size: 12px; font-weight: 600; color: #0f172a; }
+  .timeline-item .tl-desc { font-size: 11px; color: var(--text-muted); }
+
+  /* Hidden */
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">EP4</div>
+  <div class="header-title">제조사·R&D 연계</div>
+  <div class="header-sub">단감(DAN-GAM) UX/UI Presentation</div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar" id="tabBar"></div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="left-panel">
+    <div class="scene-info" id="sceneInfo"></div>
+    <div class="nav-buttons">
+      <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">&larr; Prev</button>
+      <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Next &rarr;</button>
+    </div>
+    <div class="nav-counter" id="navCounter"></div>
+  </div>
+  <div class="right-panel" id="devicePanel"></div>
+</div>
+
+<script>
+const STEPS = [
+  {
+    id: "EP4-01",
+    title: "제조사 포털 로그인",
+    device: "browser",
+    url: "mfg.danngam.com/dashboard",
+    desc: "농기계 제조사(대동)가 단감 제조사 포털에 로그인합니다. 대시보드에서 시험포 현황, 최근 피드백, 주요 통계를 한눈에 확인하고 '시험포 모집 등록' 버튼을 통해 신규 모집을 시작합니다.",
+    actor: "제조사 (대동)",
+    action: "로그인 → 대시보드 확인 → 시험포 모집 등록 진입",
+    tags: ["제조사", "포털", "대시보드"],
+    render(el) {
+      el.innerHTML = `
+        <div style="display:flex;height:100%;">
+          <div class="sidebar">
+            <div class="sidebar-logo">DANNGAM<br><span>제조사 포털</span></div>
+            <div class="sidebar-item active">&#128202; 대시보드</div>
+            <div class="sidebar-item">&#128203; 시험포 관리</div>
+            <div class="sidebar-item">&#128200; 리포트</div>
+            <div class="sidebar-item">&#128100; 농가 DB</div>
+            <div class="sidebar-item">&#9881; 설정</div>
+          </div>
+          <div style="flex:1;padding:20px;overflow-y:auto;background:#f1f5f9;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+              <div>
+                <div style="font-size:11px;color:#64748b;">환영합니다</div>
+                <div style="font-size:18px;font-weight:700;color:#0f172a;">대동 농기계</div>
+              </div>
+              <div style="background:var(--indigo);color:#fff;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">+ 시험포 모집 등록</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+              <div class="card stat"><div class="num" style="color:var(--indigo);">12</div><div class="desc">운영 중 시험포</div></div>
+              <div class="card stat"><div class="num" style="color:var(--green);">4.5</div><div class="desc">평균 만족도</div></div>
+              <div class="card stat"><div class="num" style="color:var(--warning);">3</div><div class="desc">모집 진행 중</div></div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:8px;">최근 시험포 현황</div>
+            <div class="card" style="padding:10px;">
+              <table class="tbl">
+                <tr><th>모델</th><th>지역</th><th>농가</th><th>기간</th><th>상태</th></tr>
+                <tr><td style="font-weight:600;">RX8040</td><td>전북 김제</td><td>10</td><td>3개월</td><td><span class="badge badge-green">운영중</span></td></tr>
+                <tr><td style="font-weight:600;">T5100</td><td>전남 해남</td><td>8</td><td>2개월</td><td><span class="badge badge-green">운영중</span></td></tr>
+                <tr><td style="font-weight:600;">CX500</td><td>충남 당진</td><td>5</td><td>3개월</td><td><span class="badge badge-amber">모집중</span></td></tr>
+              </table>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:#0f172a;margin:12px 0 8px;">최근 피드백</div>
+            <div class="card-sm" style="display:flex;gap:8px;align-items:center;">
+              <div class="avatar">김</div>
+              <div style="flex:1;"><div style="font-size:12px;font-weight:600;">김민준 (김제)</div><div style="font-size:11px;color:#475569;">"RX8040 변속 부드럽고 연비 좋음"</div></div>
+              <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9734;</div>
+            </div>
+            <div class="card-sm" style="display:flex;gap:8px;align-items:center;">
+              <div class="avatar">박</div>
+              <div style="flex:1;"><div style="font-size:12px;font-weight:600;">박서연 (해남)</div><div style="font-size:11px;color:#475569;">"T5100 로터리 작업 안정적"</div></div>
+              <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            </div>
+          </div>
+        </div>`;
+    }
+  },
+  {
+    id: "EP4-02",
+    title: "시험포 모집 등록",
+    device: "browser",
+    url: "mfg.danngam.com/trials/new",
+    desc: "제조사가 신규 농기계 모델의 시험포 농가를 모집합니다. 장비 사양(대동 RX8040, 80마력, 자동변속), 모집 조건(전북, 10명, 2,000평+), 혜택(3개월 무상대여), 카탈로그/사진을 등록합니다.",
+    actor: "제조사 (대동)",
+    action: "장비 정보 입력 → 조건 설정 → 카탈로그 업로드 → 모집 시작",
+    tags: ["모집등록", "RX8040", "시험포"],
+    render(el) {
+      el.innerHTML = `
+        <div style="display:flex;height:100%;">
+          <div class="sidebar">
+            <div class="sidebar-logo">DANNGAM<br><span>제조사 포털</span></div>
+            <div class="sidebar-item">&#128202; 대시보드</div>
+            <div class="sidebar-item active">&#128203; 시험포 관리</div>
+            <div class="sidebar-item">&#128200; 리포트</div>
+            <div class="sidebar-item">&#128100; 농가 DB</div>
+            <div class="sidebar-item">&#9881; 설정</div>
+          </div>
+          <div style="flex:1;padding:20px;overflow-y:auto;background:#f1f5f9;">
+            <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:16px;">시험포 모집 등록</div>
+            <div class="card" style="padding:16px;">
+              <div style="font-size:13px;font-weight:600;color:var(--indigo);margin-bottom:10px;">장비 정보</div>
+              <div class="field-group">
+                <label class="field-label">장비 모델명</label>
+                <input class="input-field" value="RX8040" readonly style="background:#f8fafc;font-weight:600;" />
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="field-group"><label class="field-label">마력</label><input class="input-field" value="80마력" /></div>
+                <div class="field-group"><label class="field-label">변속 방식</label><input class="input-field" value="자동변속" /></div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">주요 특징</label>
+                <input class="input-field" value="저진동 캐빈, 자동 수평제어, GPS 연동" />
+              </div>
+              <div class="divider"></div>
+              <div style="font-size:13px;font-weight:600;color:var(--indigo);margin-bottom:10px;">모집 조건</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="field-group"><label class="field-label">모집 지역</label><input class="input-field" value="전북" /></div>
+                <div class="field-group"><label class="field-label">모집 인원</label><input class="input-field" value="10명" /></div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="field-group"><label class="field-label">시험 기간</label><input class="input-field" value="3개월 (무상대여)" /></div>
+                <div class="field-group"><label class="field-label">최소 경작면적</label><input class="input-field" value="2,000평 이상" /></div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">지원 혜택</label>
+                <input class="input-field" value="3개월 무상 사용, 유지보수 무료, 구매 시 20% 할인" />
+              </div>
+              <div class="divider"></div>
+              <div style="font-size:13px;font-weight:600;color:var(--indigo);margin-bottom:10px;">첨부 자료</div>
+              <div class="upload-zone">
+                <div style="font-size:24px;margin-bottom:4px;">&#128206;</div>
+                RX8040_catalog.pdf 업로드됨<br>
+                <span style="font-size:10px;color:var(--text-light);">PDF, 12.3MB</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px;">
+                <div class="photo-placeholder" style="height:50px;border-radius:6px;">&#128247;</div>
+                <div class="photo-placeholder" style="height:50px;border-radius:6px;">&#128247;</div>
+                <div class="photo-placeholder" style="height:50px;border-radius:6px;background:#c7d2fe;color:var(--indigo);font-size:12px;">+추가</div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:14px;">
+                <button class="btn-indigo" style="flex:1;padding:10px;">모집 시작</button>
+                <button class="btn-outline-indigo" style="flex:1;padding:10px;">임시 저장</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+  },
+  {
+    id: "EP4-03",
+    title: "농업인 시험 신청",
+    device: "phone",
+    desc: "농업인이 'RX8040 시험포 모집' 푸시 알림을 받고 앱에서 신청합니다. 필지 정보가 자동 연동되어 3,000평 논이 표시되며, 사용 용도와 보유 장비를 입력한 후 신청을 완료합니다.",
+    actor: "농업인 (김민준)",
+    action: "푸시 수신 → 필지 연동 확인 → 신청 정보 입력 → 신청 완료",
+    tags: ["농업인", "푸시알림", "시험신청"],
+    render(el) {
+      el.innerHTML = `
+        <div class="status-bar">
+          <span>9:41</span>
+          <span style="font-size:10px;">&#128267; &#128246; &#128268;</span>
+        </div>
+        <div class="app-header">
+          <span class="back-arrow">&larr;</span>
+          알림
+        </div>
+        <div style="padding:12px 16px;">
+          <div class="push-card" style="border-left-color:var(--indigo);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div class="push-title">RX8040 시험포 농가 모집</div>
+              <span class="badge badge-indigo">NEW</span>
+            </div>
+            <div class="push-body">대동 RX8040 80마력 트랙터 3개월 무상 시험 농가를 모집합니다. 전북 지역, 2,000평 이상 경작 농가 대상</div>
+            <div style="font-size:10px;color:var(--text-light);margin-top:4px;">3분 전</div>
+          </div>
+
+          <div class="card" style="margin-top:14px;padding:16px;">
+            <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:10px;">시험 신청</div>
+            <div style="background:var(--indigo-bg);border-radius:10px;padding:12px;margin-bottom:12px;">
+              <div style="font-size:11px;font-weight:600;color:var(--indigo);">장비 정보</div>
+              <div style="font-size:14px;font-weight:700;color:#0f172a;margin-top:2px;">대동 RX8040</div>
+              <div style="font-size:11px;color:#475569;">80마력 | 자동변속 | GPS 연동</div>
+            </div>
+
+            <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:6px;">&#10003; 내 필지 자동 연결</div>
+            <div class="card-sm" style="background:#f0fdf4;border:1px solid #bbf7d0;">
+              <div style="font-size:13px;font-weight:600;color:#0f172a;">부량면 논 3필지</div>
+              <div style="display:flex;justify-content:space-between;margin-top:4px;">
+                <span style="font-size:11px;color:#475569;">총 면적</span>
+                <span style="font-size:13px;font-weight:700;color:var(--green);">3,000평</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span style="font-size:11px;color:#475569;">주요 작물</span>
+                <span style="font-size:11px;color:#475569;">벼 (일미)</span>
+              </div>
+            </div>
+
+            <div class="field-group" style="margin-top:12px;">
+              <label class="field-label">주요 사용 용도</label>
+              <input class="input-field" value="로터리 작업, 운반" style="font-size:12px;" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">현재 보유 장비</label>
+              <input class="input-field" value="대동 DK451 (2018년식)" style="font-size:12px;" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">신청 사유</label>
+              <textarea class="input-field" style="height:48px;resize:none;font-size:12px;">노후 장비 교체 검토 중, 자동변속 성능 체험 희망</textarea>
+            </div>
+            <button class="btn-indigo" style="margin-top:8px;font-size:13px;">시험 신청하기</button>
+          </div>
+        </div>`;
+    }
+  },
+  {
+    id: "EP4-04",
+    title: "제조사 선정",
+    device: "browser",
+    url: "mfg.danngam.com/trials/RX8040/applicants",
+    desc: "제조사가 23명의 신청자 목록을 검토합니다. 필지 면적, 보유 장비, 경력 등 조건을 비교하여 김민준 등 6명을 선정합니다. 선정 시 농업인에게 자동 알림이 발송됩니다.",
+    actor: "제조사 (대동)",
+    action: "신청 목록 확인 → 조건 심사 → 김민준 선정 → 알림 발송",
+    tags: ["제조사", "심사", "선정"],
+    render(el) {
+      el.innerHTML = `
+        <div style="display:flex;height:100%;">
+          <div class="sidebar">
+            <div class="sidebar-logo">DANNGAM<br><span>제조사 포털</span></div>
+            <div class="sidebar-item">&#128202; 대시보드</div>
+            <div class="sidebar-item active">&#128203; 시험포 관리</div>
+            <div class="sidebar-item">&#128200; 리포트</div>
+            <div class="sidebar-item">&#128100; 농가 DB</div>
+            <div class="sidebar-item">&#9881; 설정</div>
+          </div>
+          <div style="flex:1;padding:20px;overflow-y:auto;background:#f1f5f9;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <div>
+                <div style="font-size:16px;font-weight:700;color:#0f172a;">RX8040 시험포 신청 현황</div>
+                <div style="font-size:12px;color:var(--text-muted);">전북 지역 | 모집 10명</div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <span class="badge badge-indigo" style="font-size:12px;padding:4px 12px;">신청 23명</span>
+                <span class="badge badge-green" style="font-size:12px;padding:4px 12px;">선정 6명</span>
+              </div>
+            </div>
+            <div class="card" style="padding:10px;overflow-x:auto;">
+              <table class="tbl">
+                <tr><th style="width:30px;"></th><th>이름</th><th>지역</th><th>면적</th><th>보유장비</th><th>경력</th><th>상태</th></tr>
+                <tr style="background:#eef2ff;">
+                  <td><span class="check checked"></span></td>
+                  <td style="font-weight:700;">김민준</td>
+                  <td>김제 부량면</td>
+                  <td style="font-weight:600;">3,000평</td>
+                  <td>DK451 (2018)</td>
+                  <td>12년</td>
+                  <td><span class="badge badge-green">선정</span></td>
+                </tr>
+                <tr>
+                  <td><span class="check checked"></span></td>
+                  <td style="font-weight:600;">이서윤</td>
+                  <td>김제 백산면</td>
+                  <td>5,200평</td>
+                  <td>L3800 (2016)</td>
+                  <td>18년</td>
+                  <td><span class="badge badge-green">선정</span></td>
+                </tr>
+                <tr>
+                  <td><span class="check checked"></span></td>
+                  <td>박지호</td>
+                  <td>익산 왕궁면</td>
+                  <td>2,800평</td>
+                  <td>DK551 (2020)</td>
+                  <td>8년</td>
+                  <td><span class="badge badge-green">선정</span></td>
+                </tr>
+                <tr>
+                  <td><span class="check"></span></td>
+                  <td>정하늘</td>
+                  <td>군산 옥구읍</td>
+                  <td>4,100평</td>
+                  <td>T4020 (2019)</td>
+                  <td>15년</td>
+                  <td><span class="badge badge-amber">검토중</span></td>
+                </tr>
+                <tr>
+                  <td><span class="check"></span></td>
+                  <td>최은비</td>
+                  <td>정읍 북면</td>
+                  <td style="color:var(--danger);">1,800평</td>
+                  <td>없음</td>
+                  <td>3년</td>
+                  <td><span class="badge badge-red">미달</span></td>
+                </tr>
+              </table>
+            </div>
+            <div style="margin-top:12px;background:#f0fdf4;border-radius:8px;padding:10px;border:1px solid #bbf7d0;">
+              <div style="font-size:11px;color:var(--green);font-weight:600;">&#10003; 김민준 선정 완료</div>
+              <div style="font-size:11px;color:#475569;margin-top:2px;">선정 알림이 농업인 앱으로 발송되었습니다.</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;">
+              <button class="btn-outline-indigo" style="width:auto;font-size:12px;padding:8px 16px;">전체 목록 내보내기</button>
+              <button class="btn-indigo" style="width:auto;font-size:12px;padding:8px 16px;">선정 확정 (6명)</button>
+            </div>
+          </div>
+        </div>`;
+    }
+  },
+  {
+    id: "EP4-05",
+    title: "주간 리포트",
+    device: "phone",
+    desc: "시험포 농가가 주간 리포트를 작성합니다. 작업일(3일), 작업 면적(1,500평), 연비(8L/h), 만족도(4점), 특이사항과 작업 사진 3장을 첨부하여 제출합니다.",
+    actor: "농업인 (김민준)",
+    action: "작업 기록 입력 → 연비/만족도 → 사진 첨부 → 리포트 제출",
+    tags: ["주간리포트", "피드백", "4주차"],
+    render(el) {
+      el.innerHTML = `
+        <div class="status-bar">
+          <span>9:41</span>
+          <span style="font-size:10px;">&#128267; &#128246; &#128268;</span>
+        </div>
+        <div class="app-header">
+          <span class="back-arrow">&larr;</span>
+          주간 리포트 작성
+        </div>
+        <div style="padding:12px 16px;">
+          <div style="background:var(--indigo-bg);border-radius:10px;padding:12px;margin-bottom:12px;">
+            <div style="font-size:11px;color:var(--indigo);font-weight:600;">RX8040 시험포 | 4주차</div>
+            <div style="font-size:14px;font-weight:700;color:#0f172a;">2026.03.02 ~ 03.08</div>
+          </div>
+
+          <div class="card" style="padding:14px;">
+            <div class="field-group">
+              <label class="field-label">작업일</label>
+              <input class="input-field" value="2026-03-04, 03-06, 03-07" style="font-size:12px;" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">주요 작업</label>
+              <input class="input-field" value="로터리 작업 (봄 경운)" style="font-size:12px;" />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div class="field-group"><label class="field-label">작업 면적</label><input class="input-field" value="1,500평" style="font-size:12px;" /></div>
+              <div class="field-group"><label class="field-label">연비</label><input class="input-field" value="8 L/h" style="font-size:12px;" /></div>
+            </div>
+
+            <label class="field-label">만족도</label>
+            <div style="display:flex;gap:6px;margin-bottom:12px;">
+              <div style="width:36px;height:36px;border-radius:8px;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">1</div>
+              <div style="width:36px;height:36px;border-radius:8px;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">2</div>
+              <div style="width:36px;height:36px;border-radius:8px;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">3</div>
+              <div style="width:36px;height:36px;border-radius:8px;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">4</div>
+              <div style="width:36px;height:36px;border-radius:8px;background:#e2e8f0;color:var(--text-light);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">5</div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">특이사항</label>
+              <textarea class="input-field" style="height:48px;resize:none;font-size:12px;">습한 논에서도 접지력 좋음. 자동변속 전환 시 약간 딜레이 있음 (0.5초)</textarea>
+            </div>
+
+            <label class="field-label">작업 사진 (3장)</label>
+            <div class="photo-grid">
+              <div class="photo-placeholder">&#128247;</div>
+              <div class="photo-placeholder">&#128247;</div>
+              <div class="photo-placeholder" style="background:#c7d2fe;color:var(--indigo);font-size:12px;">&#128247;</div>
+            </div>
+
+            <button class="btn-indigo" style="margin-top:12px;font-size:13px;">리포트 제출</button>
+          </div>
+        </div>`;
+    }
+  },
+  {
+    id: "EP4-06",
+    title: "종합 리포트",
+    device: "browser",
+    url: "mfg.danngam.com/trials/RX8040/report",
+    desc: "제조사가 10곳 시험포 농가의 종합 리포트를 확인합니다. 평균 만족도 4.6, 평균 연비 7.5L/h, 항목별 만족도, 피드백 요약을 확인하고 PDF로 다운로드합니다.",
+    actor: "제조사 (대동)",
+    action: "종합 통계 확인 → 항목별 분석 → 피드백 요약 → PDF 다운로드",
+    tags: ["종합리포트", "통계", "다운로드"],
+    render(el) {
+      el.innerHTML = `
+        <div style="display:flex;height:100%;">
+          <div class="sidebar">
+            <div class="sidebar-logo">DANNGAM<br><span>제조사 포털</span></div>
+            <div class="sidebar-item">&#128202; 대시보드</div>
+            <div class="sidebar-item">&#128203; 시험포 관리</div>
+            <div class="sidebar-item active">&#128200; 리포트</div>
+            <div class="sidebar-item">&#128100; 농가 DB</div>
+            <div class="sidebar-item">&#9881; 설정</div>
+          </div>
+          <div style="flex:1;padding:20px;overflow-y:auto;background:#f1f5f9;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+              <div>
+                <div style="font-size:16px;font-weight:700;color:#0f172a;">RX8040 종합 리포트</div>
+                <div style="font-size:12px;color:var(--text-muted);">2026.01 ~ 03 | 전북 지역 | 10곳</div>
+              </div>
+              <div style="background:var(--indigo);color:#fff;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">&#8681; PDF 다운로드</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+              <div class="card stat"><div class="num" style="color:var(--indigo);">10</div><div class="desc">참여 농가</div></div>
+              <div class="card stat"><div class="num" style="color:var(--green);">4.6</div><div class="desc">평균 만족도</div></div>
+              <div class="card stat"><div class="num" style="color:var(--warning);">7.5L/h</div><div class="desc">평균 연비</div></div>
+              <div class="card stat"><div class="num" style="color:#0f172a;">92%</div><div class="desc">재구매 의향</div></div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div class="card" style="padding:14px;">
+                <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">항목별 만족도</div>
+                <div style="margin-bottom:8px;">
+                  <div style="display:flex;justify-content:space-between;font-size:11px;"><span>변속 성능</span><span style="font-weight:600;">4.8</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:96%;background:var(--indigo);"></div></div>
+                </div>
+                <div style="margin-bottom:8px;">
+                  <div style="display:flex;justify-content:space-between;font-size:11px;"><span>승차감</span><span style="font-weight:600;">4.5</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:90%;background:var(--indigo);"></div></div>
+                </div>
+                <div style="margin-bottom:8px;">
+                  <div style="display:flex;justify-content:space-between;font-size:11px;"><span>연비</span><span style="font-weight:600;">4.3</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:86%;background:var(--indigo);"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;"><span>내구성</span><span style="font-weight:600;">4.7</span></div>
+                  <div class="progress-bar"><div class="progress-fill" style="width:94%;background:var(--indigo);"></div></div>
+                </div>
+              </div>
+
+              <div class="card" style="padding:14px;">
+                <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">연비 분포 (L/h)</div>
+                <div style="display:flex;align-items:flex-end;gap:6px;height:100px;padding-top:10px;">
+                  <div style="flex:1;text-align:center;"><div style="height:20px;background:#c7d2fe;border-radius:4px 4px 0 0;"></div><div style="font-size:9px;color:var(--text-muted);margin-top:2px;">6~7</div></div>
+                  <div style="flex:1;text-align:center;"><div style="height:55px;background:var(--indigo-light);border-radius:4px 4px 0 0;"></div><div style="font-size:9px;color:var(--text-muted);margin-top:2px;">7~8</div></div>
+                  <div style="flex:1;text-align:center;"><div style="height:80px;background:var(--indigo);border-radius:4px 4px 0 0;"></div><div style="font-size:9px;color:var(--text-muted);margin-top:2px;">8~9</div></div>
+                  <div style="flex:1;text-align:center;"><div style="height:35px;background:var(--indigo-light);border-radius:4px 4px 0 0;"></div><div style="font-size:9px;color:var(--text-muted);margin-top:2px;">9~10</div></div>
+                  <div style="flex:1;text-align:center;"><div style="height:10px;background:#c7d2fe;border-radius:4px 4px 0 0;"></div><div style="font-size:9px;color:var(--text-muted);margin-top:2px;">10+</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="padding:14px;margin-top:12px;">
+              <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:8px;">피드백 요약</div>
+              <div class="card-sm" style="background:#f0fdf4;"><span style="font-size:11px;color:var(--green);font-weight:600;">긍정</span><span style="font-size:11px;color:#475569;"> --- 자동변속 부드럽고 습한 논에서 접지력 우수. 캐빈 진동 적음.</span></div>
+              <div class="card-sm" style="background:#fef3c7;"><span style="font-size:11px;color:#d97706;font-weight:600;">개선</span><span style="font-size:11px;color:#475569;"> --- 변속 전환 시 0.3~0.5초 딜레이. 야간 조명 각도 조절 필요.</span></div>
+              <div class="card-sm" style="background:var(--indigo-bg);"><span style="font-size:11px;color:var(--indigo);font-weight:600;">요청</span><span style="font-size:11px;color:#475569;"> --- GPS 자동조향 옵션 추가 희망. 앞바퀴 웨이트 옵션.</span></div>
+            </div>
+          </div>
+        </div>`;
+    }
+  },
+  {
+    id: "EP4-07",
+    title: "R&D 실증사업 신청",
+    device: "phone",
+    desc: "농업인이 '자율주행 농기계 실증' R&D 프로그램에 마을 단위로 신청합니다. 부량면 신용리를 선택하면 15가구, 25ha 정보가 자동 연결됩니다.",
+    actor: "농업인 (김민준)",
+    action: "실증 프로그램 확인 → 마을 선택(부량면 신용리) → 15가구 25ha 확인 → 신청",
+    tags: ["R&D", "실증사업", "자율주행"],
+    isRnD: true,
+    render(el) {
+      el.innerHTML = `
+        <div class="status-bar">
+          <span>9:41</span>
+          <span style="font-size:10px;">&#128267; &#128246; &#128268;</span>
+        </div>
+        <div class="app-header">
+          <span class="back-arrow">&larr;</span>
+          R&D 실증 신청
+        </div>
+        <div style="padding:12px 16px;">
+          <div class="card" style="border-left:4px solid var(--indigo);padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <span class="badge badge-indigo" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);">R&D 실증</span>
+                <div style="font-size:15px;font-weight:700;color:#0f172a;margin-top:6px;">자율주행 농기계 실증</div>
+                <div style="font-size:11px;color:#475569;margin-top:2px;">농촌진흥청 + 대동 공동 연구</div>
+              </div>
+              <div style="background:var(--indigo);color:#fff;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:700;">D-15</div>
+            </div>
+            <div class="divider"></div>
+            <div style="font-size:11px;color:#475569;line-height:1.6;">
+              GPS+AI 기반 자율주행 트랙터 마을 단위 실증. 로터리, 이앙, 방제 전 과정 자동화 테스트. 마을 단위 신청만 가능.
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:4px;">
+            <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">마을 선택</div>
+            <div class="card-sm" style="border:2px solid var(--indigo);background:var(--indigo-bg);">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div style="font-size:13px;font-weight:700;color:#0f172a;">부량면 신용리</div>
+                  <div style="font-size:11px;color:#475569;">김제시 부량면</div>
+                </div>
+                <div style="color:var(--indigo);font-size:18px;font-weight:700;">&#10003;</div>
+              </div>
+            </div>
+
+            <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-top:10px;">
+              <div style="font-size:11px;font-weight:600;color:var(--indigo);margin-bottom:8px;">자동 연결 정보</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div style="text-align:center;">
+                  <div style="font-size:20px;font-weight:700;color:#0f172a;">15</div>
+                  <div style="font-size:10px;color:var(--text-muted);">등록 가구</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-size:20px;font-weight:700;color:#0f172a;">25ha</div>
+                  <div style="font-size:10px;color:var(--text-muted);">총 경작면적</div>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:#475569;">
+                <span>주요 작물</span><span style="font-weight:600;color:#0f172a;">벼 (일미, 새누리)</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:#475569;margin-top:4px;">
+                <span>평균 필지 규모</span><span style="font-weight:600;color:#0f172a;">1.67ha</span>
+              </div>
+            </div>
+
+            <div class="field-group" style="margin-top:12px;">
+              <label class="field-label">이장 연락처</label>
+              <input class="input-field" value="010-XXXX-5678 (김OO 이장)" style="font-size:12px;" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">마을 특이사항</label>
+              <textarea class="input-field" style="height:40px;resize:none;font-size:12px;">대형 구획 정리 완료, 진입로 넓음, GPS 수신 양호</textarea>
+            </div>
+
+            <button class="btn-indigo" style="margin-top:8px;font-size:13px;background:linear-gradient(135deg,var(--indigo),#7c3aed);">실증 신청하기</button>
+          </div>
+        </div>`;
+    }
+  },
+  {
+    id: "EP4-08",
+    title: "선정 + 매칭",
+    device: "phone",
+    desc: "마을이 R&D 실증에 선정되어 알림을 수신합니다. 농가가 첨단농가 DB에 등록되고, 이를 기반으로 다른 제조사(LS엠트론, TYM)의 시험포/실증 매칭 제안이 표시됩니다.",
+    actor: "농업인 (김민준)",
+    action: "선정 알림 수신 → 첨단농가 DB 등록 → 제조사 매칭 제안 확인",
+    tags: ["선정", "첨단농가DB", "매칭"],
+    isRnD: true,
+    render(el) {
+      el.innerHTML = `
+        <div class="status-bar">
+          <span>9:41</span>
+          <span style="font-size:10px;">&#128267; &#128246; &#128268;</span>
+        </div>
+        <div class="app-header">
+          <span class="back-arrow">&larr;</span>
+          알림
+        </div>
+        <div style="padding:12px 16px;">
+          <div class="push-card" style="border-left-color:var(--green);">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div style="width:28px;height:28px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;font-size:14px;">&#127881;</div>
+              <div>
+                <div class="push-title">실증 마을 선정!</div>
+                <div class="push-body">부량면 신용리가 자율주행 농기계 실증 마을로 선정되었습니다.</div>
+              </div>
+            </div>
+            <div style="font-size:10px;color:var(--text-light);margin-top:4px;">방금 전</div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:4px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div style="font-size:14px;font-weight:700;color:#0f172a;">내 첨단농가 DB</div>
+              <span class="badge badge-indigo" style="font-size:11px;padding:4px 10px;">&#9733; 등록완료</span>
+            </div>
+
+            <div style="background:linear-gradient(135deg,#eef2ff,#e0e7ff);border-radius:12px;padding:14px;margin-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div style="font-size:12px;color:var(--indigo);font-weight:600;">첨단농가 인증</div>
+                  <div style="font-size:16px;font-weight:700;color:#0f172a;">김민준</div>
+                  <div style="font-size:11px;color:#475569;">부량면 신용리 | 3,000평</div>
+                </div>
+                <div style="width:48px;height:48px;border-radius:12px;background:var(--indigo);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;">&#9733;</div>
+              </div>
+              <div class="divider" style="border-color:#c7d2fe;"></div>
+              <div style="display:flex;gap:12px;font-size:10px;color:#475569;">
+                <span>R&D 참여: 1건</span>
+                <span>시험포: 1건</span>
+                <span>등록일: 2026.03</span>
+              </div>
+            </div>
+
+            <div style="font-size:12px;font-weight:600;color:#0f172a;margin-bottom:8px;">참여 이력</div>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="tl-title">RX8040 시험포 농가</div>
+                <div class="tl-desc">대동 | 2026.01~03 | 만족도 4.2</div>
+              </div>
+              <div class="timeline-item">
+                <div class="tl-title">자율주행 농기계 실증</div>
+                <div class="tl-desc">농진청+대동 | 2026.04~ | <span class="badge badge-green">진행예정</span></div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+            <div style="font-size:12px;font-weight:600;color:#0f172a;margin-bottom:8px;">제조사 매칭 제안</div>
+            <div class="card-sm" style="border:1px solid #e0e7ff;">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div class="avatar" style="background:#fef3c7;color:#d97706;font-size:11px;">LS</div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:600;color:#0f172a;">LS 엠트론 MT5 시험포</div>
+                  <div style="font-size:10px;color:#475569;">100마력 트랙터 | 전북 모집 중</div>
+                </div>
+                <span class="badge badge-amber">추천</span>
+              </div>
+            </div>
+            <div class="card-sm" style="border:1px solid #e0e7ff;">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div class="avatar" style="background:#dcfce7;color:var(--green);font-size:11px;">TY</div>
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:600;color:#0f172a;">TYM 드론 방제 실증</div>
+                  <div style="font-size:10px;color:#475569;">자동 비행 방제 | 마을 단위</div>
+                </div>
+                <span class="badge badge-indigo">NEW</span>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+  }
+];
+
+// --- State ---
+let currentStep = 0;
+
+// --- Render ---
+function renderStep(idx) {
+  currentStep = idx;
+  const step = STEPS[idx];
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+
+  // Info panel
+  const badgeClass = step.isRnD ? 'scene-badge rnd' : 'scene-badge';
+  document.getElementById('sceneInfo').innerHTML = `
+    <span class="${badgeClass}">${step.id}</span>
+    <div class="scene-title">${step.title}</div>
+    <div class="scene-section">
+      <div class="scene-section-label">Description</div>
+      <div class="scene-section-text">${step.desc}</div>
+    </div>
+    <div class="scene-section">
+      <div class="scene-section-label">Actor</div>
+      <div class="scene-section-text">${step.actor}</div>
+    </div>
+    <div class="scene-section">
+      <div class="scene-section-label">Action Flow</div>
+      <div class="scene-section-text">${step.action}</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">
+      ${step.tags.map(t => `<span style="display:inline-block;background:var(--indigo-bg);color:var(--indigo);font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;">${t}</span>`).join('')}
+    </div>
+    <div class="scene-device-tag" style="margin-top:12px;">
+      ${step.device === 'phone' ? '&#128241; iPhone' : '&#128187; Browser'}
+    </div>
+  `;
+
+  // Nav
+  document.getElementById('prevBtn').disabled = idx === 0;
+  document.getElementById('nextBtn').disabled = idx === STEPS.length - 1;
+  document.getElementById('navCounter').textContent = `${idx + 1} / ${STEPS.length}`;
+
+  // Device
+  const panel = document.getElementById('devicePanel');
+  panel.innerHTML = '';
+
+  if (step.device === 'phone') {
+    const frame = document.createElement('div');
+    frame.className = 'phone-frame';
+    const notch = document.createElement('div');
+    notch.className = 'phone-notch';
+    const screen = document.createElement('div');
+    screen.className = 'phone-screen';
+    step.render(screen);
+    frame.appendChild(notch);
+    frame.appendChild(screen);
+    panel.appendChild(frame);
+  } else {
+    const frame = document.createElement('div');
+    frame.className = 'browser-frame';
+    const titlebar = document.createElement('div');
+    titlebar.className = 'browser-titlebar';
+    titlebar.innerHTML = `
+      <span class="browser-dot red"></span>
+      <span class="browser-dot yellow"></span>
+      <span class="browser-dot green"></span>
+      <span class="browser-url">${step.url || ''}</span>
+    `;
+    const content = document.createElement('div');
+    content.className = 'browser-content';
+    content.style.padding = '0';
+    step.render(content);
+    frame.appendChild(titlebar);
+    frame.appendChild(content);
+    panel.appendChild(frame);
+  }
+}
+
+function navigate(dir) {
+  const next = currentStep + dir;
+  if (next >= 0 && next < STEPS.length) {
+    renderStep(next);
+  }
+}
+
+// --- Init ---
+const tabBar = document.getElementById('tabBar');
+STEPS.forEach((step, i) => {
+  const tab = document.createElement('div');
+  tab.className = 'tab' + (i === 0 ? ' active' : '');
+  tab.textContent = `${step.id} ${step.title}`;
+  tab.onclick = () => renderStep(i);
+  tabBar.appendChild(tab);
+});
+
+renderStep(0);
+</script>
+</body>
+</html>

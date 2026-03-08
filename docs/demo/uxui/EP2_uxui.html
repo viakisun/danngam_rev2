@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>단감 EP2 — 매칭·거래·건조·정산 전 사이클</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-bottom: 1px solid #334155;
+}
+.badge {
+  background: #16a34a;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+.header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+.header .step-counter {
+  margin-left: auto;
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Tabs */
+.tabs-container {
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  padding: 0 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-container::-webkit-scrollbar { display: none; }
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 0;
+  min-width: max-content;
+}
+.tab {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  color: #94a3b8;
+  background: transparent;
+  border: 1px solid transparent;
+}
+.tab:hover { color: #e2e8f0; background: #334155; }
+.tab.active {
+  background: #16a34a;
+  color: #fff;
+  border-color: #16a34a;
+}
+.tab.active-blue {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+.tab .tab-num {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  font-size: 10px;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+/* Main layout */
+.main {
+  display: flex;
+  height: calc(100vh - 110px);
+  overflow: hidden;
+}
+
+/* Info panel */
+.info-panel {
+  width: 380px;
+  min-width: 380px;
+  padding: 32px;
+  overflow-y: auto;
+  border-right: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.info-panel .scene-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.info-panel .scene-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.info-panel h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #f8fafc;
+  line-height: 1.3;
+}
+.info-panel .user-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.user-tag.requester {
+  background: rgba(22,163,74,0.15);
+  color: #4ade80;
+  border: 1px solid rgba(22,163,74,0.3);
+}
+.user-tag.worker {
+  background: rgba(37,99,235,0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(37,99,235,0.3);
+}
+.info-panel .narration {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #cbd5e1;
+}
+.info-panel .narration strong {
+  color: #f1f5f9;
+}
+
+/* Phone frame */
+.phone-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.iphone-frame {
+  width: 320px;
+  height: 680px;
+  background: #1a1a2e;
+  border-radius: 50px;
+  padding: 14px;
+  position: relative;
+  box-shadow: 0 0 0 2px #334155, 0 20px 60px rgba(0,0,0,0.5);
+}
+.notch {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 28px;
+  background: #1a1a2e;
+  border-radius: 0 0 18px 18px;
+  z-index: 10;
+}
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: 38px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Phone inner components */
+.phone-status-bar {
+  height: 44px;
+  background: inherit;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 24px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e293b;
+}
+.phone-nav {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  border-bottom: 1px solid #e2e8f0;
+}
+.phone-nav.green { background: #f0fdf4; border-color: #bbf7d0; }
+.phone-nav.blue { background: #eff6ff; border-color: #bfdbfe; }
+.phone-nav.cyan { background: #ecfeff; border-color: #a5f3fc; }
+.phone-nav .back-arrow { font-size: 18px; color: #64748b; }
+.phone-body {
+  padding: 12px 16px;
+  overflow-y: auto;
+  height: calc(100% - 44px - 41px);
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.5;
+}
+.phone-body::-webkit-scrollbar { width: 0; }
+.phone-body.no-nav { height: calc(100% - 44px); }
+
+/* Reusable phone UI */
+.p-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.p-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+.p-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #334155;
+  background: #fff;
+  margin-bottom: 6px;
+}
+.p-btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  margin-top: 8px;
+}
+.p-btn.green { background: #16a34a; }
+.p-btn.blue { background: #2563eb; }
+.p-btn.cyan { background: #0891b2; }
+.p-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 4px;
+  display: block;
+}
+.p-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+.p-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+.p-divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 8px 0;
+}
+.p-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.p-toast {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.p-progress-bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+.p-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s;
+}
+.star { color: #f59e0b; font-size: 16px; }
+.star.empty { color: #e2e8f0; }
+
+/* Chat bubbles */
+.chat-msg {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+.chat-msg.sent { align-items: flex-end; }
+.chat-msg.received { align-items: flex-start; }
+.chat-bubble {
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.chat-msg.sent .chat-bubble {
+  background: #16a34a;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.chat-msg.received .chat-bubble {
+  background: #f1f5f9;
+  color: #334155;
+  border-bottom-left-radius: 4px;
+}
+.chat-sender {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+.chat-time {
+  font-size: 9px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* Map placeholder */
+.map-area {
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 50%, #6ee7b7 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.map-area::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(255,255,255,0.3) 0%, transparent 40%),
+    radial-gradient(circle at 70% 60%, rgba(255,255,255,0.2) 0%, transparent 30%);
+}
+.map-pin {
+  width: 24px;
+  height: 24px;
+  background: #dc2626;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.map-pin::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Photo grid */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 8px 0;
+}
+.photo-thumb {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+/* Navigation buttons */
+.nav-buttons {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px;
+  background: linear-gradient(0deg, #0f172a 0%, rgba(15,23,42,0.95) 100%);
+  border-top: 1px solid #334155;
+}
+.nav-btn {
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.nav-btn.prev {
+  background: #334155;
+  color: #e2e8f0;
+}
+.nav-btn.prev:hover { background: #475569; }
+.nav-btn.next {
+  background: #16a34a;
+  color: #fff;
+}
+.nav-btn.next:hover { background: #15803d; }
+.nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.nav-dots {
+  display: flex;
+  gap: 5px;
+}
+.nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #475569;
+  transition: all 0.2s;
+}
+.nav-dot.active {
+  background: #16a34a;
+  width: 18px;
+  border-radius: 3px;
+}
+
+/* Push notification overlay */
+.push-notif {
+  position: absolute;
+  top: 50px;
+  left: 12px;
+  right: 12px;
+  background: rgba(255,255,255,0.97);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  z-index: 20;
+}
+.push-icon {
+  width: 32px;
+  height: 32px;
+  background: #16a34a;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.push-text { flex: 1; }
+.push-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.push-body {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Bottom tab bar */
+.phone-tab-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+  border-radius: 0 0 38px 38px;
+}
+.phone-tab-bar .tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 9px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+.phone-tab-bar .tab-item.active { color: #16a34a; }
+.phone-tab-bar .tab-item .tab-icon { font-size: 18px; }
+
+/* Calendar styles */
+.cal-month {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.cal-month .cal-label {
+  width: 40px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.cal-month .cal-task {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Worker card */
+.worker-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.worker-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.worker-info { flex: 1; }
+.worker-name { font-size: 13px; font-weight: 600; color: #1e293b; }
+.worker-meta { font-size: 11px; color: #64748b; }
+.worker-action {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Contract modal */
+.contract-box {
+  background: #fff;
+  border: 2px solid #1e293b;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 8px 0;
+}
+.contract-header {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #1e293b;
+  margin-bottom: 10px;
+}
+.contract-row {
+  display: flex;
+  padding: 4px 0;
+  font-size: 12px;
+}
+.contract-label {
+  width: 70px;
+  color: #64748b;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.contract-value {
+  color: #1e293b;
+  font-weight: 600;
+}
+.signature-line {
+  border-bottom: 1px dashed #94a3b8;
+  padding: 4px 0;
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #64748b;
+}
+.sig-done {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+/* Dashboard stat cards */
+.stat-card {
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.stat-card.blue-grad {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-color: #bfdbfe;
+}
+.stat-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1e293b;
+}
+.stat-label {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Leaderboard */
+.lb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  margin-bottom: 4px;
+}
+.lb-item.first { background: linear-gradient(135deg, #fef9c3, #fef3c7); }
+.lb-rank {
+  font-size: 16px;
+  font-weight: 800;
+  width: 24px;
+  text-align: center;
+}
+.lb-name { flex: 1; font-size: 13px; font-weight: 600; color: #1e293b; }
+.lb-amount { font-size: 12px; font-weight: 700; color: #16a34a; }
+
+/* Escrow status */
+.escrow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.escrow-badge.holding {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+.escrow-badge.done {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="badge">EP2</span>
+  <h1>매칭·거래·건조·정산 전 사이클</h1>
+  <span class="step-counter" id="stepCounter">Scene 1 / 17</span>
+</div>
+
+<div class="tabs-container" id="tabsContainer">
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<div class="main">
+  <div class="info-panel" id="infoPanel"></div>
+  <div class="phone-area">
+    <div class="iphone-frame">
+      <div class="notch"></div>
+      <div class="phone-screen" id="phoneScreen"></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-buttons">
+  <button class="nav-btn prev" id="prevBtn" onclick="go(-1)">&#8592; 이전</button>
+  <div class="nav-dots" id="navDots"></div>
+  <button class="nav-btn next" id="nextBtn" onclick="go(1)">다음 &#8594;</button>
+</div>
+
+<script>
+const STEPS = [
+  {
+    id: 1, title: '필지 등록', user: 'requester', userName: '김민준',
+    narration: '의뢰자 <strong>김민준</strong>이 자신의 농지를 등록합니다. 주소를 입력하면 카카오맵에 핀이 자동으로 찍히고, 면적과 작물을 선택합니다.',
+    screen: `
+      <div class="phone-status-bar"><span>9:41</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav green"><span class="back-arrow">‹</span> 내 농지 등록</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="map-area"><div class="map-pin"></div></div>
+        <div class="p-card">
+          <div class="p-card-title">📍 농지 주소</div>
+          <div class="p-input" style="color:#1e293b;font-weight:500;">전북 김제시 부량면 신용리 산 12번지</div>
+          <div style="font-size:10px;color:#16a34a;font-weight:500;">✓ 카카오맵 위치 확인 완료</div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">🌾 농지 정보</div>
+          <div class="p-label">면적</div>
+          <div class="p-input" style="color:#1e293b;font-weight:500;">3,000평</div>
+          <div class="p-label">작물</div>
+          <div style="display:flex;gap:6px;">
+            <span style="padding:6px 14px;background:#16a34a;color:#fff;border-radius:20px;font-size:12px;font-weight:600;">벼</span>
+            <span style="padding:6px 14px;background:#f1f5f9;color:#64748b;border-radius:20px;font-size:12px;font-weight:500;">고구마</span>
+            <span style="padding:6px 14px;background:#f1f5f9;color:#64748b;border-radius:20px;font-size:12px;font-weight:500;">마늘</span>
+          </div>
+        </div>
+        <div class="p-btn green">농지 등록하기</div>
+        <div class="p-toast">✓ 농지가 등록되었습니다</div>
+      </div>
+      <div class="phone-tab-bar">
+        <div class="tab-item active"><span class="tab-icon">🏠</span>홈</div>
+        <div class="tab-item"><span class="tab-icon">📋</span>내 작업</div>
+        <div class="tab-item"><span class="tab-icon">💬</span>채팅</div>
+        <div class="tab-item"><span class="tab-icon">👤</span>MY</div>
+      </div>
+    `
+  },
+  {
+    id: 2, title: '연간 캘린더', user: 'requester', userName: '김민준',
+    narration: '필지를 등록하면 <strong>AI가 연간 작업 일정</strong>을 자동으로 추천합니다. 로터리, 모내기, 방제, 벼베기, 건조 위탁까지 한 해 작업이 한눈에 보입니다.',
+    screen: `
+      <div class="phone-status-bar"><span>9:41</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav green"><span class="back-arrow">‹</span> 연간 작업 캘린더</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <span style="font-size:14px;font-weight:700;color:#1e293b;">2026년</span>
+          <span class="p-badge" style="background:#dbeafe;color:#2563eb;">AI 추천</span>
+        </div>
+        <div style="font-size:11px;color:#64748b;margin-bottom:8px;">김제시 부량면 · 벼 3,000평 기준</div>
+        <div class="cal-month" style="background:#f0fdf4;">
+          <span class="cal-label">3월</span>
+          <span class="cal-task" style="background:#16a34a;color:#fff;">로터리 작업</span>
+        </div>
+        <div class="cal-month" style="background:#f0fdf4;">
+          <span class="cal-label">5월</span>
+          <span class="cal-task" style="background:#16a34a;color:#fff;">모내기</span>
+        </div>
+        <div class="cal-month" style="background:#eff6ff;">
+          <span class="cal-label">6월</span>
+          <span class="cal-task" style="background:#2563eb;color:#fff;">방제 1차</span>
+        </div>
+        <div class="cal-month" style="background:#eff6ff;">
+          <span class="cal-label">7월</span>
+          <span class="cal-task" style="background:#2563eb;color:#fff;">방제 2차</span>
+        </div>
+        <div class="cal-month" style="background:#eff6ff;">
+          <span class="cal-label">8월</span>
+          <span class="cal-task" style="background:#2563eb;color:#fff;">방제 3차</span>
+        </div>
+        <div class="cal-month" style="background:#fef9c3;">
+          <span class="cal-label">9월</span>
+          <span class="cal-task" style="background:#f59e0b;color:#fff;">벼베기</span>
+        </div>
+        <div class="cal-month" style="background:#ecfeff;">
+          <span class="cal-label">10월</span>
+          <span class="cal-task" style="background:#0891b2;color:#fff;">건조 위탁</span>
+        </div>
+        <div class="p-btn green">전체 수락</div>
+        <div class="p-toast">✓ 연간 작업 일정이 등록되었습니다</div>
+      </div>
+    `
+  },
+  {
+    id: 3, title: '시즌 알림', user: 'requester', userName: '김민준',
+    narration: '9월이 되면 <strong>벼베기 시즌 알림</strong>이 옵니다. 거리순·평점순으로 추천 작업자가 표시됩니다. 이철수 작업자가 2km, 평점 4.8점으로 최상위입니다.',
+    screen: `
+      <div class="phone-status-bar"><span>9:41</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav green"><span class="back-arrow">‹</span> 추천 작업자</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="push-notif" style="position:relative;top:0;left:0;right:0;margin-bottom:12px;">
+          <div class="push-icon">🌾</div>
+          <div class="push-text">
+            <div class="push-title">벼베기 시즌입니다!</div>
+            <div class="push-body">콤바인 보유 작업자 5명이 주변에 있습니다</div>
+          </div>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:#1e293b;margin-bottom:8px;">📍 내 주변 추천 작업자</div>
+        <div class="worker-card" style="border-color:#16a34a;border-width:2px;">
+          <div class="worker-avatar" style="background:#d1fae5;">👨‍🌾</div>
+          <div class="worker-info">
+            <div class="worker-name">이철수</div>
+            <div class="worker-meta">⭐ 4.8 · 2km · 콤바인 R532</div>
+            <div style="font-size:10px;color:#16a34a;font-weight:500;">🏆 이 지역 TOP 작업자</div>
+          </div>
+          <button class="worker-action" style="background:#16a34a;">추천</button>
+        </div>
+        <div class="worker-card">
+          <div class="worker-avatar" style="background:#dbeafe;">👨‍🌾</div>
+          <div class="worker-info">
+            <div class="worker-name">박영호</div>
+            <div class="worker-meta">⭐ 4.5 · 5km · 콤바인 DC-68G</div>
+          </div>
+          <button class="worker-action" style="background:#94a3b8;">보기</button>
+        </div>
+        <div class="worker-card">
+          <div class="worker-avatar" style="background:#fef3c7;">👨‍🌾</div>
+          <div class="worker-info">
+            <div class="worker-name">김수현</div>
+            <div class="worker-meta">⭐ 4.2 · 8km · 콤바인 R520</div>
+          </div>
+          <button class="worker-action" style="background:#94a3b8;">보기</button>
+        </div>
+        <div class="p-btn green" style="margin-top:12px;">지금 의뢰 등록 →</div>
+      </div>
+    `
+  },
+  {
+    id: 4, title: '의뢰 등록', user: 'requester', userName: '김민준',
+    narration: '등록된 필지 정보가 자동으로 채워지고, 작업 종류와 희망일을 선택합니다. 시스템이 <strong>최근 평균 거래 가격(평당 4,500원)</strong>을 안내해줍니다. 평당 5,000원, 총 1,500만원으로 의뢰 등록.',
+    screen: `
+      <div class="phone-status-bar"><span>9:41</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav green"><span class="back-arrow">‹</span> 의뢰 등록</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="p-card">
+          <div class="p-card-title">📍 필지 정보 <span class="p-badge" style="background:#d1fae5;color:#16a34a;">자동입력</span></div>
+          <div style="font-size:12px;color:#475569;">전북 김제시 부량면 신용리 산 12번지</div>
+          <div style="font-size:12px;color:#475569;">벼 · 3,000평</div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">🔧 작업 선택</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span style="padding:6px 12px;background:#16a34a;color:#fff;border-radius:20px;font-size:11px;font-weight:600;">벼베기</span>
+            <span style="padding:6px 12px;background:#f1f5f9;color:#64748b;border-radius:20px;font-size:11px;">로터리</span>
+            <span style="padding:6px 12px;background:#f1f5f9;color:#64748b;border-radius:20px;font-size:11px;">모내기</span>
+            <span style="padding:6px 12px;background:#f1f5f9;color:#64748b;border-radius:20px;font-size:11px;">방제</span>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">📅 희망 일자</div>
+          <div class="p-input" style="color:#1e293b;font-weight:500;">2026. 09. 15 ~ 09. 20</div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">💰 예산 설정</div>
+          <div style="background:#eff6ff;padding:8px;border-radius:8px;margin-bottom:8px;">
+            <div style="font-size:11px;color:#2563eb;font-weight:600;">📊 최근 평균: 평당 4,500원</div>
+            <div style="font-size:10px;color:#64748b;">김제시 부량면 벼베기 기준 최근 30일</div>
+          </div>
+          <div class="p-label">평당 단가</div>
+          <div class="p-input" style="color:#1e293b;font-weight:600;">5,000원</div>
+          <div class="p-divider"></div>
+          <div class="p-row">
+            <span style="font-size:12px;color:#64748b;">총 예산</span>
+            <span style="font-size:16px;font-weight:800;color:#1e293b;">15,000,000원</span>
+          </div>
+        </div>
+        <div class="p-btn green">의뢰 등록하기</div>
+        <div class="p-toast">✓ 의뢰가 등록되었습니다</div>
+      </div>
+    `
+  },
+  {
+    id: 5, title: '작업자 지원', user: 'worker', userName: '이철수',
+    narration: '작업자 <strong>이철수</strong>의 화면입니다. 푸시 알림을 받고, 보유 장비와 가능 일시를 적어 <strong>지원</strong>합니다.',
+    screen: `
+      <div class="phone-status-bar" style="color:#1e293b;"><span>9:41</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav blue"><span class="back-arrow">‹</span> 작업 상세</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="push-notif" style="position:relative;top:0;left:0;right:0;margin-bottom:12px;">
+          <div class="push-icon" style="background:#2563eb;">📢</div>
+          <div class="push-text">
+            <div class="push-title">새 작업 알림</div>
+            <div class="push-body">부량면 벼베기 3,000평 · 평당 5,000원</div>
+          </div>
+        </div>
+        <div class="p-card" style="border-color:#2563eb;">
+          <div class="p-card-title">벼베기 · 3,000평</div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:6px;">전북 김제시 부량면 · 2km 거리</div>
+          <div class="p-row"><span class="p-label" style="margin:0;">희망일</span><span class="p-value">09.15 ~ 09.20</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">예산</span><span class="p-value" style="color:#16a34a;">평당 5,000원</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">총 금액</span><span class="p-value" style="color:#16a34a;font-size:15px;">15,000,000원</span></div>
+          <div class="p-divider"></div>
+          <div style="font-size:11px;color:#64748b;">의뢰자: 김민준 ⭐ 4.7</div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">💬 지원 메시지</div>
+          <div class="p-input" style="height:60px;color:#1e293b;font-weight:500;">R532 콤바인 보유, 9/15 오전 6시 도착 가능합니다. 3,000평 하루 작업 가능.</div>
+        </div>
+        <div class="p-btn blue">지원하기</div>
+        <div class="p-toast">✓ 지원이 완료되었습니다</div>
+      </div>
+    `
+  },
+  {
+    id: 6, title: '매칭', user: 'requester', userName: '김민준',
+    narration: '의뢰자 화면으로 돌아갑니다. <strong>3명이 지원</strong>했고, 이철수 작업자를 선택합니다. 매칭이 완료되면 자동으로 채팅방이 만들어집니다.',
+    screen: `
+      <div class="phone-status-bar"><span>9:42</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav green"><span class="back-arrow">‹</span> 지원자 목록 <span class="p-badge" style="background:#ef4444;color:#fff;margin-left:6px;">3명</span></div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="worker-card" style="border-color:#16a34a;border-width:2px;background:#f0fdf4;">
+          <div class="worker-avatar" style="background:#d1fae5;">👨‍🌾</div>
+          <div class="worker-info">
+            <div class="worker-name">이철수 <span class="p-badge" style="background:#16a34a;color:#fff;">선택됨</span></div>
+            <div class="worker-meta">⭐ 4.8 · 2km · R532 콤바인</div>
+            <div style="font-size:10px;color:#475569;margin-top:2px;">"9/15 오전 6시 도착 가능합니다"</div>
+          </div>
+        </div>
+        <div class="worker-card" style="opacity:0.5;">
+          <div class="worker-avatar" style="background:#dbeafe;">👨‍🌾</div>
+          <div class="worker-info">
+            <div class="worker-name">박영호</div>
+            <div class="worker-meta">⭐ 4.5 · 5km · DC-68G</div>
+          </div>
+        </div>
+        <div class="worker-card" style="opacity:0.5;">
+          <div class="worker-avatar" style="background:#fef3c7;">👨‍🌾</div>
+          <div class="worker-info">
+            <div class="worker-name">김수현</div>
+            <div class="worker-meta">⭐ 4.2 · 8km · R520</div>
+          </div>
+        </div>
+        <div class="p-divider"></div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:24px;margin-bottom:4px;">🤝</div>
+          <div style="font-size:14px;font-weight:700;color:#16a34a;">매칭 완료!</div>
+          <div style="font-size:11px;color:#475569;margin-top:4px;">이철수 작업자와 채팅방이 생성되었습니다</div>
+          <div class="p-btn green" style="margin-top:8px;font-size:12px;">채팅방으로 이동 →</div>
+        </div>
+      </div>
+    `
+  },
+  {
+    id: 7, title: '채팅 협의', user: 'requester', userName: '김민준',
+    narration: '<strong>김민준</strong>과 <strong>이철수</strong>가 채팅에서 구체적인 일정, 진입로 상태, 금액을 확인합니다. 평당 5,000원, 총 1,500만원으로 합의.',
+    screen: `
+      <div class="phone-status-bar"><span>9:43</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav green"><span class="back-arrow">‹</span> 이철수 · 벼베기 3,000평</div>
+      <div class="phone-body" style="padding:12px;padding-bottom:70px;">
+        <div style="text-align:center;margin-bottom:12px;">
+          <span class="p-badge" style="background:#f1f5f9;color:#64748b;">오늘 오전 9:42</span>
+        </div>
+        <div class="chat-msg sent">
+          <div class="chat-sender" style="text-align:right;">김민준</div>
+          <div class="chat-bubble">9/15 오전에 가능하시죠?</div>
+          <div class="chat-time" style="text-align:right;">9:42 ✓✓</div>
+        </div>
+        <div class="chat-msg received">
+          <div class="chat-sender">이철수</div>
+          <div class="chat-bubble">네, 6시에 도착하겠습니다. 진입로가 좁은데 괜찮습니까?</div>
+          <div class="chat-time">9:42</div>
+        </div>
+        <div class="chat-msg sent">
+          <div class="chat-sender" style="text-align:right;">김민준</div>
+          <div class="chat-bubble">네, 2톤까지 가능합니다 👍</div>
+          <div class="chat-time" style="text-align:right;">9:43 ✓✓</div>
+        </div>
+        <div class="chat-msg received">
+          <div class="chat-sender">이철수</div>
+          <div class="chat-bubble">평당 5,000원 총 1,500만원 맞습니다. 계약 진행할까요?</div>
+          <div class="chat-time">9:43</div>
+        </div>
+        <div style="text-align:center;margin-top:12px;">
+          <div style="display:inline-flex;gap:8px;">
+            <div style="padding:8px 16px;background:#16a34a;color:#fff;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;">📝 계약 체결</div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute;bottom:50px;left:0;right:0;padding:8px 12px;background:#fff;border-top:1px solid #e2e8f0;display:flex;gap:8px;">
+        <div style="flex:1;padding:8px 12px;background:#f1f5f9;border-radius:20px;font-size:12px;color:#94a3b8;">메시지 입력...</div>
+        <div style="width:32px;height:32px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">↑</div>
+      </div>
+      <div class="phone-tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span>홈</div>
+        <div class="tab-item"><span class="tab-icon">📋</span>내 작업</div>
+        <div class="tab-item active"><span class="tab-icon">💬</span>채팅</div>
+        <div class="tab-item"><span class="tab-icon">👤</span>MY</div>
+      </div>
+    `
+  },
+  {
+    id: 8, title: '계약 체결', user: 'requester', userName: '김민준',
+    narration: '합의가 끝나면 <strong>계약을 체결</strong>합니다. 계약서에 작업 내용과 금액이 정리되고, 양측이 서명하면 계약이 체결됩니다.',
+    screen: `
+      <div class="phone-status-bar"><span>9:44</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav green"><span class="back-arrow">‹</span> 계약 체결</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="contract-box">
+          <div class="contract-header">농작업 계약서</div>
+          <div class="contract-row"><span class="contract-label">작업 내용</span><span class="contract-value">벼베기</span></div>
+          <div class="contract-row"><span class="contract-label">위치</span><span class="contract-value">김제시 부량면 신용리</span></div>
+          <div class="contract-row"><span class="contract-label">면적</span><span class="contract-value">3,000평</span></div>
+          <div class="contract-row"><span class="contract-label">작업일</span><span class="contract-value">2026. 09. 15</span></div>
+          <div class="contract-row"><span class="contract-label">단가</span><span class="contract-value">평당 5,000원</span></div>
+          <div class="contract-row"><span class="contract-label">총 금액</span><span class="contract-value" style="color:#16a34a;font-size:15px;">15,000,000원</span></div>
+          <div class="p-divider" style="margin:10px 0;"></div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:6px;">서명</div>
+          <div class="signature-line">
+            <span>의뢰자: 김민준</span>
+            <span class="sig-done">✓ 서명 완료</span>
+          </div>
+          <div class="signature-line">
+            <span>작업자: 이철수</span>
+            <span class="sig-done">✓ 서명 완료</span>
+          </div>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px;text-align:center;font-size:12px;color:#16a34a;font-weight:600;">
+          ✓ 양측 서명 완료 — 계약이 체결되었습니다
+        </div>
+        <div class="p-btn green">에스크로 결제로 이동 →</div>
+      </div>
+    `
+  },
+  {
+    id: 9, title: '에스크로 결제', user: 'requester', userName: '김민준',
+    narration: '에스크로는 작업 완료까지 결제 금액을 <strong>안전하게 보관</strong>하는 시스템입니다. 1,500만원을 결제하면 에스크로에 보관되어 의뢰자도 안심할 수 있습니다.',
+    screen: `
+      <div class="phone-status-bar"><span>9:45</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav green"><span class="back-arrow">‹</span> 에스크로 결제</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="p-card" style="text-align:center;background:#f8fafc;">
+          <div style="font-size:11px;color:#64748b;">결제 금액</div>
+          <div style="font-size:28px;font-weight:800;color:#1e293b;margin:4px 0;">15,000,000원</div>
+          <div class="escrow-badge holding" style="margin-top:4px;">🔒 에스크로 보관 예정</div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">결제 수단 선택</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#eff6ff;border:2px solid #2563eb;border-radius:10px;">
+              <span style="font-size:20px;">💳</span>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:#1e293b;">토스페이먼츠</div>
+                <div style="font-size:10px;color:#64748b;">간편결제</div>
+              </div>
+              <span style="margin-left:auto;color:#2563eb;font-weight:600;font-size:12px;">✓</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;">
+              <span style="font-size:20px;">🏦</span>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:#1e293b;">카드결제</div>
+                <div style="font-size:10px;color:#64748b;">신용/체크카드</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;">
+              <span style="font-size:20px;">📱</span>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:#1e293b;">계좌이체</div>
+                <div style="font-size:10px;color:#64748b;">실시간 이체</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:10px;font-size:11px;color:#92400e;">
+          🔒 결제 금액은 작업 완료 확인 후 작업자에게 정산됩니다.
+        </div>
+        <div class="p-btn green">결제하기</div>
+        <div class="p-toast">✓ 결제 완료 · 에스크로 보관 중</div>
+      </div>
+    `
+  },
+  {
+    id: 10, title: '작업 완료', user: 'worker', userName: '이철수',
+    narration: '9월 15일 작업이 완료되었습니다. 작업자 <strong>이철수</strong>가 완료 사진과 작업 내역을 등록하면 의뢰자에게 알림이 갑니다.',
+    screen: `
+      <div class="phone-status-bar" style="color:#1e293b;"><span>17:30</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav blue"><span class="back-arrow">‹</span> 작업 완료 보고</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="p-card" style="border-color:#2563eb;">
+          <div class="p-card-title">📸 완료 사진</div>
+          <div class="photo-grid">
+            <div class="photo-thumb" style="background:linear-gradient(135deg,#86efac,#4ade80);">🌾</div>
+            <div class="photo-thumb" style="background:linear-gradient(135deg,#a7f3d0,#6ee7b7);">🚜</div>
+            <div class="photo-thumb" style="background:linear-gradient(135deg,#bbf7d0,#86efac);">✅</div>
+          </div>
+          <div style="font-size:10px;color:#16a34a;font-weight:500;">3장 업로드 완료</div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">📋 작업 내역</div>
+          <div class="p-row"><span class="p-label" style="margin:0;">작업 종류</span><span class="p-value">벼베기</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">작업 면적</span><span class="p-value">3,000평</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">작업 시간</span><span class="p-value">8시간 (06:00~14:00)</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">장비</span><span class="p-value">R532 콤바인</span></div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">💬 메모</div>
+          <div class="p-input" style="color:#1e293b;font-weight:500;height:40px;">진입로 상태 양호, 예정대로 완료했습니다.</div>
+        </div>
+        <div class="p-btn blue">완료 보고 제출</div>
+        <div class="p-toast">✓ 의뢰자에게 알림이 발송되었습니다</div>
+      </div>
+    `
+  },
+  {
+    id: 11, title: '건조시설 검색', user: 'requester', userName: '김민준',
+    narration: '벼베기가 끝나면 수확한 벼를 건조해야 합니다. <strong>부량 건조장</strong>은 2km 거리, 가마당 3,000원, 순환식 건조 방식으로 예상 3일이면 완료됩니다.',
+    screen: `
+      <div class="phone-status-bar"><span>17:35</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav cyan"><span class="back-arrow">‹</span> 건조시설 찾기</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="map-area" style="background:linear-gradient(135deg,#cffafe,#a5f3fc,#67e8f9);height:100px;">
+          <div class="map-pin" style="background:#0891b2;"></div>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:#1e293b;margin-bottom:8px;">📍 주변 건조시설</div>
+        <div class="p-card" style="border-color:#0891b2;border-width:2px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <div class="p-card-title" style="color:#0891b2;">부량 건조장</div>
+              <div style="font-size:11px;color:#64748b;">📍 2km · 순환식</div>
+            </div>
+            <span class="p-badge" style="background:#ecfeff;color:#0891b2;">추천</span>
+          </div>
+          <div class="p-divider"></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">가마당</span><span class="p-value" style="color:#0891b2;">3,000원</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">가용량</span><span class="p-value">30가마</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">예상 건조일</span><span class="p-value">3일</span></div>
+          <div class="p-btn cyan" style="font-size:12px;">건조 위탁 신청 →</div>
+        </div>
+        <div class="p-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <div class="p-card-title">죽산 건조장</div>
+              <div style="font-size:11px;color:#64748b;">📍 5km · 순환식</div>
+            </div>
+          </div>
+          <div class="p-divider"></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">가마당</span><span class="p-value">2,800원</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">가용량</span><span class="p-value">15가마</span></div>
+        </div>
+      </div>
+    `
+  },
+  {
+    id: 12, title: '건조 위탁 신청', user: 'requester', userName: '김민준',
+    narration: '9월 16일 입고 예정, <strong>50가마</strong>, 목표 수분율 <strong>14%</strong>로 건조 위탁을 신청합니다.',
+    screen: `
+      <div class="phone-status-bar"><span>17:40</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav cyan"><span class="back-arrow">‹</span> 건조 위탁 신청</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="p-card" style="background:#ecfeff;border-color:#a5f3fc;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:24px;">🏭</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#1e293b;">부량 건조장</div>
+              <div style="font-size:11px;color:#64748b;">김제시 부량면 · 순환식</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">📅 입고 예정일</div>
+          <div class="p-input" style="color:#1e293b;font-weight:500;">2026. 09. 16</div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">🌾 위탁 수량</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="p-input" style="flex:1;color:#1e293b;font-weight:600;text-align:center;font-size:18px;margin:0;">50</div>
+            <span style="font-size:13px;font-weight:500;color:#64748b;">가마 (벼)</span>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">💧 목표 수분율</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="p-input" style="flex:1;color:#1e293b;font-weight:600;text-align:center;font-size:18px;margin:0;">14</div>
+            <span style="font-size:13px;font-weight:500;color:#64748b;">%</span>
+          </div>
+          <div style="font-size:10px;color:#0891b2;margin-top:4px;">ℹ️ 일반미 기준 권장 수분율 14~15%</div>
+        </div>
+        <div class="p-card">
+          <div class="p-row"><span class="p-label" style="margin:0;">예상 비용</span><span class="p-value" style="color:#0891b2;">150,000원</span></div>
+          <div style="font-size:10px;color:#64748b;">50가마 × 3,000원</div>
+        </div>
+        <div class="p-btn cyan">건조 위탁 신청하기</div>
+        <div class="p-toast">✓ 건조 위탁이 신청되었습니다</div>
+      </div>
+    `
+  },
+  {
+    id: 13, title: '건조 진행', user: 'requester', userName: '김민준',
+    narration: '건조가 진행되는 동안 <strong>실시간으로 수분율 변화</strong>를 확인할 수 있습니다. 현재 22%에서 목표 14%까지, 9월 19일 완료 예정.',
+    screen: `
+      <div class="phone-status-bar"><span>10:00</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav cyan"><span class="back-arrow">‹</span> 건조 현황</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="p-card" style="background:linear-gradient(135deg,#ecfeff,#cffafe);border-color:#a5f3fc;">
+          <div style="text-align:center;">
+            <div style="font-size:11px;color:#0891b2;font-weight:600;">건조 진행 중</div>
+            <div style="font-size:32px;font-weight:800;color:#0891b2;margin:4px 0;">22%</div>
+            <div style="font-size:11px;color:#64748b;">현재 수분율</div>
+          </div>
+          <div class="p-progress-bar" style="height:12px;margin:10px 0;">
+            <div class="p-progress-fill" style="width:63%;background:linear-gradient(90deg,#0891b2,#06b6d4);"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;">
+            <span style="color:#64748b;">시작 28%</span>
+            <span style="font-weight:600;color:#0891b2;">현재 22%</span>
+            <span style="color:#64748b;">목표 14%</span>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">📊 건조 상세</div>
+          <div class="p-row"><span class="p-label" style="margin:0;">시설</span><span class="p-value">부량 건조장</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">입고량</span><span class="p-value">50가마</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">입고일</span><span class="p-value">09. 16 (월)</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">예상 완료</span><span class="p-value" style="color:#0891b2;">09. 19 (목)</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">건조 방식</span><span class="p-value">순환식</span></div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">📈 수분율 변화</div>
+          <div style="display:flex;align-items:flex-end;gap:3px;height:60px;padding:4px 0;">
+            <div style="flex:1;background:#0891b2;border-radius:3px 3px 0 0;height:100%;"></div>
+            <div style="flex:1;background:#0891b2;border-radius:3px 3px 0 0;height:90%;"></div>
+            <div style="flex:1;background:#06b6d4;border-radius:3px 3px 0 0;height:78%;"></div>
+            <div style="flex:1;background:#22d3ee;border-radius:3px 3px 0 0;height:63%;opacity:0.5;border:1px dashed #0891b2;"></div>
+            <div style="flex:1;background:#a5f3fc;border-radius:3px 3px 0 0;height:50%;opacity:0.3;border:1px dashed #0891b2;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:#64748b;">
+            <span>09.16</span><span>09.17</span><span>09.18</span><span>09.19</span><span>완료</span>
+          </div>
+        </div>
+      </div>
+    `
+  },
+  {
+    id: 14, title: '수율·품질', user: 'requester', userName: '김민준',
+    narration: '투입 50가마에서 <strong>43가마가 산출</strong>되어 수율 <strong>86%</strong>. 품질은 <strong>1등급</strong>, 수분 13.8%, 동할미율 2.1%.',
+    screen: `
+      <div class="phone-status-bar"><span>14:00</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav cyan"><span class="back-arrow">‹</span> 건조 완료 · 수율 보고</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="p-card" style="background:linear-gradient(135deg,#ecfeff,#cffafe);border-color:#0891b2;text-align:center;">
+          <div style="font-size:11px;color:#0891b2;font-weight:600;">건조 수율</div>
+          <div style="font-size:42px;font-weight:800;color:#0891b2;">86%</div>
+          <div style="display:flex;justify-content:center;gap:16px;margin-top:4px;">
+            <div><div style="font-size:18px;font-weight:700;color:#1e293b;">50</div><div style="font-size:10px;color:#64748b;">투입(가마)</div></div>
+            <div style="font-size:18px;color:#94a3b8;">→</div>
+            <div><div style="font-size:18px;font-weight:700;color:#16a34a;">43</div><div style="font-size:10px;color:#64748b;">산출(가마)</div></div>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">🏆 품질 등급</div>
+          <div style="text-align:center;margin:8px 0;">
+            <span style="display:inline-block;padding:8px 24px;background:#16a34a;color:#fff;border-radius:12px;font-size:18px;font-weight:800;">1등급</span>
+          </div>
+          <div class="p-divider"></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">수분 함량</span><span class="p-value" style="color:#0891b2;">13.8%</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">동할미율</span><span class="p-value">2.1%</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">색상</span><span class="p-value">양호</span></div>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px;font-size:11px;color:#16a34a;text-align:center;font-weight:500;">
+          ✓ 목표 수분율 14% 이하 달성 · 1등급 판정
+        </div>
+        <div class="p-btn cyan">출고 확인</div>
+        <div class="p-toast">✓ 건조가 완료되었습니다. 수율 86%</div>
+      </div>
+    `
+  },
+  {
+    id: 15, title: '평가', user: 'requester', userName: '김민준',
+    narration: '의뢰자가 작업 결과를 확인하고, <strong>별점 5점</strong>과 후기 "깔끔하게 작업해주셨습니다"를 남깁니다.',
+    screen: `
+      <div class="phone-status-bar"><span>14:10</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav green"><span class="back-arrow">‹</span> 작업 평가</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="p-card" style="text-align:center;">
+          <div class="worker-avatar" style="background:#d1fae5;margin:0 auto 8px;width:56px;height:56px;font-size:28px;">👨‍🌾</div>
+          <div style="font-size:15px;font-weight:700;color:#1e293b;">이철수</div>
+          <div style="font-size:11px;color:#64748b;">벼베기 · 3,000평 · 09.15</div>
+        </div>
+        <div class="p-card" style="text-align:center;">
+          <div class="p-card-title" style="text-align:center;">작업 만족도</div>
+          <div style="font-size:32px;letter-spacing:4px;margin:8px 0;">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+          </div>
+          <div style="font-size:12px;color:#f59e0b;font-weight:600;">5.0 / 5.0</div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">✍️ 후기</div>
+          <div class="p-input" style="height:50px;color:#1e293b;font-weight:500;">깔끔하게 작업해주셨습니다. 시간도 정확하고 논 상태도 좋습니다.</div>
+        </div>
+        <div class="p-card" style="background:#f0fdf4;">
+          <div class="p-card-title" style="color:#16a34a;">📋 작업 요약</div>
+          <div class="p-row"><span class="p-label" style="margin:0;">벼베기</span><span class="p-value">3,000평 완료 ✓</span></div>
+          <div class="p-row"><span class="p-label" style="margin:0;">건조</span><span class="p-value">수율 86% · 1등급 ✓</span></div>
+        </div>
+        <div class="p-btn green">평가 완료</div>
+        <div class="p-toast">✓ 평가가 등록되었습니다</div>
+      </div>
+    `
+  },
+  {
+    id: 16, title: '에스크로 정산', user: 'requester', userName: '김민준',
+    narration: '작업 확인이 완료되면 에스크로 금액이 자동 정산됩니다. <strong>1,500만원</strong>에서 수수료 3%(45만원)을 차감하고 <strong>1,455만원</strong>이 작업자에게 입금됩니다. 건조비 15만원은 별도.',
+    screen: `
+      <div class="phone-status-bar"><span>14:15</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav green"><span class="back-arrow">‹</span> 정산 내역</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div class="p-card" style="text-align:center;background:#f0fdf4;border-color:#bbf7d0;">
+          <div class="escrow-badge done" style="margin-bottom:6px;">✓ 정산 완료</div>
+          <div style="font-size:11px;color:#64748b;">작업자 이철수에게 입금</div>
+          <div style="font-size:28px;font-weight:800;color:#16a34a;margin:4px 0;">14,550,000원</div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">📊 정산 상세</div>
+          <div class="p-row">
+            <span style="font-size:12px;color:#475569;">작업비</span>
+            <span style="font-size:13px;font-weight:600;color:#1e293b;">15,000,000원</span>
+          </div>
+          <div class="p-row" style="color:#ef4444;">
+            <span style="font-size:12px;">플랫폼 수수료 (3%)</span>
+            <span style="font-size:13px;font-weight:600;">-450,000원</span>
+          </div>
+          <div class="p-divider"></div>
+          <div class="p-row">
+            <span style="font-size:13px;font-weight:700;color:#1e293b;">작업자 입금액</span>
+            <span style="font-size:15px;font-weight:800;color:#16a34a;">14,550,000원</span>
+          </div>
+        </div>
+        <div class="p-card" style="background:#ecfeff;border-color:#a5f3fc;">
+          <div class="p-card-title" style="color:#0891b2;">🏭 건조비 (별도 정산)</div>
+          <div class="p-row">
+            <span style="font-size:12px;color:#475569;">50가마 × 3,000원</span>
+            <span style="font-size:13px;font-weight:600;color:#0891b2;">150,000원</span>
+          </div>
+          <div style="font-size:10px;color:#64748b;margin-top:4px;">→ 부량 건조장으로 직접 정산</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;font-size:11px;color:#64748b;text-align:center;">
+          정산일: 2026. 09. 19 · 농협 352-****-1234
+        </div>
+      </div>
+    `
+  },
+  {
+    id: 17, title: '수익 대시보드', user: 'worker', userName: '이철수',
+    narration: '작업자 <strong>이철수</strong>의 수익 대시보드입니다. 이번 주 1,455만원, 이번 달 2,850만원. 평점 4.9, <strong>우리 동네 수입왕 1위</strong>!',
+    screen: `
+      <div class="phone-status-bar" style="color:#1e293b;"><span>18:00</span><span>●●● WiFi 🔋</span></div>
+      <div class="phone-nav blue"><span class="back-arrow">‹</span> 수익 대시보드</div>
+      <div class="phone-body" style="padding-bottom:60px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+          <div class="stat-card blue-grad">
+            <div class="stat-value">1,455만</div>
+            <div class="stat-label">이번 주 수익</div>
+          </div>
+          <div class="stat-card blue-grad">
+            <div class="stat-value">2,850만</div>
+            <div class="stat-label">이번 달 수익</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+          <div class="stat-card">
+            <div style="font-size:26px;">⭐</div>
+            <div class="stat-value">4.9</div>
+            <div class="stat-label">평균 평점</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:26px;">🔧</div>
+            <div class="stat-value">12건</div>
+            <div class="stat-label">이번 달 작업</div>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-title">🏆 이번주 우리동네 수입왕</div>
+          <div class="lb-item first">
+            <div class="lb-rank" style="color:#f59e0b;">🥇</div>
+            <div class="worker-avatar" style="background:#dbeafe;width:32px;height:32px;font-size:14px;">👨‍🌾</div>
+            <div class="lb-name">이철수 <span class="p-badge" style="background:#dbeafe;color:#2563eb;">나</span></div>
+            <div class="lb-amount">1,455만</div>
+          </div>
+          <div class="lb-item">
+            <div class="lb-rank" style="color:#94a3b8;">🥈</div>
+            <div class="worker-avatar" style="background:#f1f5f9;width:32px;height:32px;font-size:14px;">👨‍🌾</div>
+            <div class="lb-name">박영호</div>
+            <div class="lb-amount">980만</div>
+          </div>
+          <div class="lb-item">
+            <div class="lb-rank" style="color:#d97706;">🥉</div>
+            <div class="worker-avatar" style="background:#f1f5f9;width:32px;height:32px;font-size:14px;">👨‍🌾</div>
+            <div class="lb-name">김수현</div>
+            <div class="lb-amount">720만</div>
+          </div>
+        </div>
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px;text-align:center;font-size:12px;color:#2563eb;font-weight:600;">
+          최근 후기: "깔끔하게 작업해주셨습니다" ⭐5.0
+        </div>
+      </div>
+      <div class="phone-tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span>홈</div>
+        <div class="tab-item"><span class="tab-icon">📋</span>내 작업</div>
+        <div class="tab-item"><span class="tab-icon">💬</span>채팅</div>
+        <div class="tab-item active" style="color:#2563eb;"><span class="tab-icon">📊</span>수익</div>
+      </div>
+    `
+  }
+];
+
+let currentIndex = 0;
+
+function buildTabs() {
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = STEPS.map((s, i) => {
+    return '<div class="tab" data-index="' + i + '" onclick="goTo(' + i + ')">' +
+      '<span class="tab-num">' + s.id + '</span>' + s.title + '</div>';
+  }).join('');
+}
+
+function buildDots() {
+  const dotsEl = document.getElementById('navDots');
+  dotsEl.innerHTML = STEPS.map((_, i) => '<div class="nav-dot" data-index="' + i + '"></div>').join('');
+}
+
+function renderStep(index) {
+  const step = STEPS[index];
+  const isWorker = step.user === 'worker';
+
+  // Update counter
+  document.getElementById('stepCounter').textContent = 'Scene ' + step.id + ' / ' + STEPS.length;
+
+  // Update tabs
+  document.querySelectorAll('.tab').forEach(function(t, i) {
+    t.classList.remove('active', 'active-blue');
+    if (i === index) {
+      t.classList.add(isWorker ? 'active-blue' : 'active');
+    }
+  });
+
+  // Scroll active tab into view
+  var activeTab = document.querySelector('.tab[data-index="' + index + '"]');
+  if (activeTab) {
+    activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
+
+  // Update dots
+  document.querySelectorAll('.nav-dot').forEach(function(d, i) {
+    d.classList.toggle('active', i === index);
+    if (i === index) {
+      d.style.background = isWorker ? '#2563eb' : '#16a34a';
+    } else {
+      d.style.background = '#475569';
+    }
+  });
+
+  // Update info panel
+  var userTag = isWorker
+    ? '<span class="user-tag worker">👨‍🌾 ' + step.userName + ' (작업자)</span>'
+    : '<span class="user-tag requester">👤 ' + step.userName + ' (의뢰자)</span>';
+
+  var dotColor = isWorker ? '#2563eb' : '#16a34a';
+
+  document.getElementById('infoPanel').innerHTML =
+    '<div class="scene-badge"><span class="dot" style="background:' + dotColor + ';"></span>Scene ' + step.id + '</div>' +
+    '<h2>' + step.title + '</h2>' +
+    userTag +
+    '<div class="narration">' + step.narration + '</div>';
+
+  // Update phone screen
+  document.getElementById('phoneScreen').innerHTML = step.screen;
+
+  // Update nav buttons
+  document.getElementById('prevBtn').disabled = index === 0;
+  document.getElementById('nextBtn').disabled = index === STEPS.length - 1;
+  document.getElementById('nextBtn').innerHTML = index === STEPS.length - 1 ? '완료' : '다음 &#8594;';
+
+  // Update next button color
+  var nextBtn = document.getElementById('nextBtn');
+  var nextStep = STEPS[index + 1];
+  if (nextStep && nextStep.user === 'worker') {
+    nextBtn.style.background = '#2563eb';
+  } else {
+    nextBtn.style.background = '#16a34a';
+  }
+
+  currentIndex = index;
+}
+
+function go(dir) {
+  var newIndex = currentIndex + dir;
+  if (newIndex >= 0 && newIndex < STEPS.length) {
+    renderStep(newIndex);
+  }
+}
+
+function goTo(index) {
+  renderStep(index);
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowLeft') go(-1);
+  if (e.key === 'ArrowRight') go(1);
+});
+
+// Init
+buildTabs();
+buildDots();
+renderStep(0);
+</script>
+
+</body>
+</html>

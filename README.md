@@ -128,6 +128,32 @@ GitHub Actions로 자동화:
 - [Milestones](https://github.com/viakisun/danngam_rev2/milestones) — EP1~EP5 Gate
 - [Labels](https://github.com/viakisun/danngam_rev2/labels) — EP, 모듈(M01~M12), 레이어, 사이즈
 
+## 데모 자료
+
+### 촬영 스크립트
+
+EP별 영상 촬영용 스크립트 (`[화면]`, `[나레이션]`, `[액션]` 형식):
+
+| EP | 스크립트 | 예상 길이 |
+|----|---------|----------|
+| EP1 | [EP1_demo_script.md](docs/demo/EP1_demo_script.md) | 5~7분 |
+| EP2 | [EP2_demo_script.md](docs/demo/EP2_demo_script.md) | 8~10분 |
+| EP3 | [EP3_demo_script.md](docs/demo/EP3_demo_script.md) | 8~10분 |
+| EP4 | [EP4_demo_script.md](docs/demo/EP4_demo_script.md) | 5~7분 |
+| EP5 | [EP5_demo_script.md](docs/demo/EP5_demo_script.md) | 7~9분 |
+
+### UX/UI 프리젠테이션
+
+디자이너 참고용 인터랙티브 HTML 목업 (아이폰 프레임 + 브라우저 프레임):
+
+| EP | UX/UI HTML | Scenes |
+|----|-----------|--------|
+| EP1 | [EP1_uxui.html](docs/demo/uxui/EP1_uxui.html) | 10 Scenes |
+| EP2 | [EP2_uxui.html](docs/demo/uxui/EP2_uxui.html) | 17 Scenes |
+| EP3 | [EP3_uxui.html](docs/demo/uxui/EP3_uxui.html) | 16 Scenes |
+| EP4 | [EP4_uxui.html](docs/demo/uxui/EP4_uxui.html) | 8 Scenes |
+| EP5 | [EP5_uxui.html](docs/demo/uxui/EP5_uxui.html) | 14 Scenes |
+
 ## 라이선스
 
 Private repository. All rights reserved.

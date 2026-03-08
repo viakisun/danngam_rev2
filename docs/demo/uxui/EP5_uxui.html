@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EP5 UX/UI — 데이터/AI + 스케줄링</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#e2e8f0; display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:24px; }
+  h1 { font-size:20px; font-weight:700; color:#0f172a; margin-bottom:4px; }
+  .subtitle { font-size:13px; color:#64748b; margin-bottom:16px; }
+
+  /* Tabs */
+  .tabs { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:20px; justify-content:center; max-width:900px; }
+  .tab { padding:6px 12px; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; border:2px solid transparent; background:#fff; color:#475569; transition:all .2s; }
+  .tab:hover { background:#f1f5f9; }
+  .tab.active { background:#ec4899; color:#fff; border-color:#ec4899; }
+  .tab.sched { background:#fff; }
+  .tab.sched.active { background:#f59e0b; color:#fff; border-color:#f59e0b; }
+
+  /* Layout */
+  .scene { display:none; gap:32px; justify-content:center; align-items:flex-start; flex-wrap:wrap; }
+  .scene.active { display:flex; }
+
+  /* Info panel */
+  .info { width:280px; background:#fff; border-radius:16px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .info .label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+  .info .label.ai { color:#ec4899; }
+  .info .label.sched { color:#f59e0b; }
+  .info h2 { font-size:16px; font-weight:700; color:#0f172a; margin-bottom:10px; }
+  .info p { font-size:12px; color:#475569; line-height:1.6; }
+  .info .tag { display:inline-block; font-size:10px; font-weight:600; padding:2px 8px; border-radius:4px; margin-top:8px; }
+  .tag-pink { background:#fce7f3; color:#ec4899; }
+  .tag-amber { background:#fef3c7; color:#d97706; }
+  .tag-green { background:#dcfce7; color:#16a34a; }
+  .tag-indigo { background:#eef2ff; color:#6366f1; }
+
+  /* Phone frame */
+  .phone { width:320px; height:680px; background:#f1f5f9; border-radius:40px; border:3px solid #1e293b; overflow:hidden; position:relative; box-shadow:0 8px 32px rgba(0,0,0,.15); }
+  .phone-notch { width:140px; height:28px; background:#1e293b; border-radius:0 0 18px 18px; margin:0 auto; position:relative; z-index:10; }
+  .phone-screen { height:calc(100% - 28px); overflow-y:auto; background:#f1f5f9; }
+  .phone-bar { display:flex; align-items:center; padding:10px 16px; background:#fff; border-bottom:1px solid #e2e8f0; }
+  .phone-bar .back { font-size:18px; color:#16a34a; margin-right:10px; cursor:pointer; }
+  .phone-bar .title { font-size:15px; font-weight:700; color:#0f172a; flex:1; }
+
+  /* Browser frame */
+  .browser { width:640px; height:480px; background:#fff; border-radius:12px; border:2px solid #cbd5e1; overflow:hidden; box-shadow:0 8px 32px rgba(0,0,0,.12); }
+  .browser-bar { display:flex; align-items:center; padding:8px 12px; background:#f1f5f9; border-bottom:1px solid #e2e8f0; gap:6px; }
+  .browser-dot { width:10px; height:10px; border-radius:50%; }
+  .browser-dot.r { background:#ef4444; } .browser-dot.y { background:#f59e0b; } .browser-dot.g { background:#22c55e; }
+  .browser-url { flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:4px 10px; font-size:11px; color:#64748b; margin-left:8px; }
+  .browser-content { height:calc(100% - 36px); overflow-y:auto; padding:20px; background:#f1f5f9; }
+
+  /* Shared */
+  .card { background:#fff; border-radius:12px; padding:14px; margin-bottom:10px; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+  .card-sm { background:#fff; border-radius:8px; padding:10px 12px; margin-bottom:8px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+  .badge { display:inline-block; font-size:10px; font-weight:600; padding:2px 8px; border-radius:4px; }
+  .badge-pink { background:#fce7f3; color:#ec4899; }
+  .badge-green { background:#dcfce7; color:#16a34a; }
+  .badge-amber { background:#fef3c7; color:#d97706; }
+  .badge-red { background:#fee2e2; color:#dc2626; }
+  .badge-indigo { background:#eef2ff; color:#6366f1; }
+  .badge-slate { background:#f1f5f9; color:#475569; }
+  .btn { display:inline-block; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600; border:none; cursor:pointer; text-align:center; }
+  .btn-primary { background:#16a34a; color:#fff; }
+  .btn-pink { background:#ec4899; color:#fff; }
+  .btn-amber { background:#f59e0b; color:#fff; }
+  .btn-outline { background:#fff; border:2px solid #e2e8f0; color:#475569; }
+  .input { width:100%; padding:8px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:12px; font-family:'Inter'; margin-bottom:8px; background:#fff; }
+  .label-sm { font-size:11px; font-weight:600; color:#475569; margin-bottom:4px; display:block; }
+  .stat { text-align:center; }
+  .stat .num { font-size:22px; font-weight:700; color:#0f172a; }
+  .stat .desc { font-size:11px; color:#64748b; }
+  .divider { height:1px; background:#e2e8f0; margin:10px 0; }
+  .progress-bar { height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden; margin:4px 0; }
+  .progress-fill { height:100%; border-radius:4px; }
+  .tbl { width:100%; border-collapse:collapse; font-size:11px; }
+  .tbl th { background:#f8fafc; padding:8px 6px; text-align:left; font-weight:600; color:#475569; border-bottom:2px solid #e2e8f0; }
+  .tbl td { padding:8px 6px; border-bottom:1px solid #f1f5f9; color:#334155; }
+  .avatar { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+  .push-card { background:#fff; border-left:4px solid #ec4899; border-radius:8px; padding:12px; margin:8px 16px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+
+  /* Sidebar */
+  .sidebar { width:180px; background:#1e293b; padding:16px 0; min-height:100%; }
+  .sidebar-item { padding:10px 16px; font-size:12px; color:#94a3b8; cursor:pointer; display:flex; align-items:center; gap:8px; }
+  .sidebar-item:hover { background:#334155; color:#fff; }
+  .sidebar-item.active { color:#fff; border-radius:0 8px 8px 0; margin-right:8px; }
+  .sidebar-item.active.pink { background:#ec4899; }
+  .sidebar-item.active.amber { background:#f59e0b; }
+  .sidebar-logo { padding:12px 16px 20px; font-size:14px; font-weight:700; color:#fff; }
+  .sidebar-section { padding:8px 16px 4px; font-size:9px; text-transform:uppercase; color:#64748b; letter-spacing:1px; }
+
+  /* Map placeholder */
+  .korea-map { width:100%; height:160px; background:#e0f2fe; border-radius:10px; position:relative; overflow:hidden; margin-bottom:10px; }
+  .map-dot { position:absolute; width:10px; height:10px; border-radius:50%; }
+  .map-label { position:absolute; font-size:8px; font-weight:600; color:#0f172a; }
+
+  /* Timeline for schedule */
+  .sched-row { display:flex; align-items:center; gap:4px; margin-bottom:6px; }
+  .sched-block { padding:4px 8px; border-radius:6px; font-size:10px; font-weight:600; color:#fff; white-space:nowrap; }
+
+  /* Route line */
+  .route-step { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .route-dot { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff; flex-shrink:0; }
+  .route-line { width:2px; height:16px; background:#e2e8f0; margin-left:9px; }
+
+  .check-box { width:16px; height:16px; border:2px solid #e2e8f0; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; margin-right:4px; }
+  .check-box.on { background:#16a34a; border-color:#16a34a; color:#fff; font-size:10px; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+  .pulse { animation: pulse 1.5s infinite; }
+</style>
+</head>
+<body>
+
+<h1>EP5 — 데이터/AI + 스케줄링</h1>
+<p class="subtitle">Part A: 데이터/AI (01~08) | Part B: 스케줄링 (09~14)</p>
+
+<div class="tabs" id="tabs"></div>
+<div id="scenes"></div>
+
+<script>
+const STEPS = [
+  // ===== PART A: 데이터/AI =====
+  {
+    id:"EP5-01", title:"데이터 대시보드", part:"A",
+    desc:"전국 농작업 데이터를 실시간 히트맵과 트렌드 차트로 시각화합니다. 다가오는 성수기 카운트다운도 표시됩니다.",
+    tags:["데이터","히트맵","트렌드"], device:"browser", url:"admin.danngam.com/data/dashboard",
+    render(el) {
+      el.innerHTML = `
+      <div style="display:flex;height:100%;">
+        <div class="sidebar">
+          <div class="sidebar-logo">DANNGAM<br><span style="font-size:11px;color:#94a3b8;font-weight:400;">데이터 센터</span></div>
+          <div class="sidebar-section">데이터/AI</div>
+          <div class="sidebar-item active pink">대시보드</div>
+          <div class="sidebar-item">수요 예측</div>
+          <div class="sidebar-item">AI Agent</div>
+          <div class="sidebar-item">가격 분석</div>
+          <div class="sidebar-item">정책 리포트</div>
+          <div class="sidebar-item">API 관리</div>
+          <div class="sidebar-section">스케줄링</div>
+          <div class="sidebar-item">전국 보드</div>
+          <div class="sidebar-item">대행단</div>
+        </div>
+        <div style="flex:1;padding:16px;overflow-y:auto;background:#f1f5f9;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:16px;font-weight:700;color:#0f172a;">전국 농작업 데이터</div>
+            <div style="background:#fce7f3;color:#ec4899;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;">&#9200; 9월 벼베기 D-30</div>
+          </div>
+          <!-- Korea map heatmap -->
+          <div class="korea-map" style="background:linear-gradient(180deg,#dbeafe,#e0f2fe);">
+            <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:600;color:#1e40af;">전국 작업 밀도 히트맵</div>
+            <!-- Dots representing regions -->
+            <div class="map-dot" style="background:#ef4444;top:45px;left:120px;width:16px;height:16px;opacity:.8;"></div>
+            <div class="map-label" style="top:62px;left:115px;">전북</div>
+            <div class="map-dot" style="background:#f59e0b;top:55px;left:90px;width:14px;height:14px;opacity:.7;"></div>
+            <div class="map-label" style="top:70px;left:85px;">전남</div>
+            <div class="map-dot" style="background:#f59e0b;top:35px;left:140px;width:13px;height:13px;opacity:.7;"></div>
+            <div class="map-label" style="top:49px;left:135px;">경북</div>
+            <div class="map-dot" style="background:#22c55e;top:50px;left:155px;width:11px;height:11px;opacity:.6;"></div>
+            <div class="map-label" style="top:62px;left:150px;">경남</div>
+            <div class="map-dot" style="background:#ef4444;top:30px;left:100px;width:15px;height:15px;opacity:.8;"></div>
+            <div class="map-label" style="top:46px;left:97px;">충남</div>
+            <div class="map-dot" style="background:#22c55e;top:20px;left:120px;width:10px;height:10px;opacity:.5;"></div>
+            <div class="map-label" style="top:31px;left:115px;">강원</div>
+            <div class="map-dot" style="background:#3b82f6;top:25px;left:105px;width:8px;height:8px;opacity:.4;"></div>
+            <div class="map-label" style="top:34px;left:98px;">경기</div>
+            <!-- Legend -->
+            <div style="position:absolute;bottom:8px;right:10px;display:flex;gap:8px;font-size:9px;color:#475569;">
+              <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;"></span> 높음</span>
+              <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f59e0b;"></span> 중간</span>
+              <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;"></span> 낮음</span>
+            </div>
+          </div>
+          <!-- Trend -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="card" style="padding:12px;">
+              <div style="font-size:12px;font-weight:600;color:#0f172a;margin-bottom:8px;">월별 작업 건수</div>
+              <div style="display:flex;align-items:flex-end;gap:3px;height:60px;">
+                <div style="flex:1;text-align:center;"><div style="height:15px;background:#fecdd3;border-radius:3px 3px 0 0;"></div><div style="font-size:8px;color:#94a3b8;">1</div></div>
+                <div style="flex:1;text-align:center;"><div style="height:18px;background:#fecdd3;border-radius:3px 3px 0 0;"></div><div style="font-size:8px;color:#94a3b8;">2</div></div>
+                <div style="flex:1;text-align:center;"><div style="height:25px;background:#fda4af;border-radius:3px 3px 0 0;"></div><div style="font-size:8px;color:#94a3b8;">3</div></div>
+                <div style="flex:1;text-align:center;"><div style="height:40px;background:#fb7185;border-radius:3px 3px 0 0;"></div><div style="font-size:8px;color:#94a3b8;">4</div></div>
+                <div style="flex:1;text-align:center;"><div style="height:55px;background:#f43f5e;border-radius:3px 3px 0 0;"></div><div style="font-size:8px;color:#94a3b8;">5</div></div>
+                <div style="flex:1;text-align:center;"><div style="height:50px;background:#fb7185;border-radius:3px 3px 0 0;"></div><div style="font-size:8px;color:#94a3b8;">6</div></div>
+                <div style="flex:1;text-align:center;"><div style="height:30px;background:#fda4af;border-radius:3px 3px 0 0;"></div><div style="font-size:8px;color:#94a3b8;">7</div></div>
+                <div style="flex:1;text-align:center;"><div style="height:20px;background:#fecdd3;border-radius:3px 3px 0 0;"></div><div style="font-size:8px;color:#94a3b8;">8</div></div>
+                <div style="flex:1;text-align:center;"><div style="height:60px;background:#ec4899;border-radius:3px 3px 0 0;"></div><div style="font-size:8px;font-weight:700;color:#ec4899;">9</div></div>
+                <div style="flex:1;text-align:center;"><div style="height:55px;background:#f43f5e;border-radius:3px 3px 0 0;"></div><div style="font-size:8px;color:#94a3b8;">10</div></div>
+                <div style="flex:1;text-align:center;"><div style="height:25px;background:#fda4af;border-radius:3px 3px 0 0;"></div><div style="font-size:8px;color:#94a3b8;">11</div></div>
+                <div style="flex:1;text-align:center;"><div style="height:10px;background:#fecdd3;border-radius:3px 3px 0 0;"></div><div style="font-size:8px;color:#94a3b8;">12</div></div>
+              </div>
+            </div>
+            <div class="card" style="padding:12px;">
+              <div style="font-size:12px;font-weight:600;color:#0f172a;margin-bottom:6px;">실시간 현황</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <div class="stat"><div class="num" style="font-size:18px;color:#ec4899;">1,240</div><div class="desc">오늘 작업</div></div>
+                <div class="stat"><div class="num" style="font-size:18px;color:#16a34a;">892</div><div class="desc">진행 중</div></div>
+                <div class="stat"><div class="num" style="font-size:18px;color:#f59e0b;">348</div><div class="desc">대기 중</div></div>
+                <div class="stat"><div class="num" style="font-size:18px;color:#6366f1;">97%</div><div class="desc">매칭률</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+  {
+    id:"EP5-02", title:"AI 수요 예측", part:"A",
+    desc:"AI가 과거 데이터와 기상 정보를 분석하여 지역별 작업 수요를 예측합니다. 인력 부족 지역을 사전 감지합니다.",
+    tags:["AI","수요예측","부족률"], device:"browser", url:"admin.danngam.com/data/forecast",
+    render(el) {
+      el.innerHTML = `
+      <div style="padding:4px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div style="font-size:16px;font-weight:700;color:#0f172a;">AI 수요 예측 — 2026년 9월</div>
+          <span class="badge badge-pink" style="font-size:11px;padding:4px 10px;">AI 분석 완료</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div class="card" style="border-top:3px solid #ec4899;padding:14px;">
+            <div style="font-size:11px;color:#64748b;">전국 예상 수요</div>
+            <div style="font-size:26px;font-weight:700;color:#0f172a;">12,400건</div>
+            <div style="font-size:12px;color:#ec4899;font-weight:600;">&#8593; +8% (전년 대비)</div>
+          </div>
+          <div class="card" style="border-top:3px solid #f59e0b;padding:14px;">
+            <div style="font-size:11px;color:#64748b;">가용 인력</div>
+            <div style="font-size:26px;font-weight:700;color:#0f172a;">10,530명</div>
+            <div style="font-size:12px;color:#f59e0b;font-weight:600;">&#8593; +3% (등록 증가)</div>
+          </div>
+          <div class="card" style="border-top:3px solid #ef4444;padding:14px;">
+            <div style="font-size:11px;color:#64748b;">전국 부족률</div>
+            <div style="font-size:26px;font-weight:700;color:#ef4444;">15%</div>
+            <div style="font-size:12px;color:#ef4444;font-weight:600;">1,870건 인력 부족 예상</div>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:8px;">지역별 수급 예측</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="card" style="padding:12px;border-left:4px solid #ef4444;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:14px;font-weight:700;color:#0f172a;">김제시</div>
+              <span class="badge badge-red">부족</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;">
+              <span style="color:#64748b;">예상 수요</span><span style="font-weight:600;">420건</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;">
+              <span style="color:#64748b;">가용 인력</span><span style="font-weight:600;">85명</span>
+            </div>
+            <div style="margin-top:6px;">
+              <div style="display:flex;justify-content:space-between;font-size:10px;"><span>수급 충족률</span><span style="color:#ef4444;font-weight:600;">72%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:72%;background:#ef4444;"></div></div>
+            </div>
+          </div>
+          <div class="card" style="padding:12px;border-left:4px solid #f59e0b;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:14px;font-weight:700;color:#0f172a;">익산시</div>
+              <span class="badge badge-amber">주의</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;">
+              <span style="color:#64748b;">예상 수요</span><span style="font-weight:600;">380건</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;">
+              <span style="color:#64748b;">가용 인력</span><span style="font-weight:600;">92명</span>
+            </div>
+            <div style="margin-top:6px;">
+              <div style="display:flex;justify-content:space-between;font-size:10px;"><span>수급 충족률</span><span style="color:#f59e0b;font-weight:600;">85%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:85%;background:#f59e0b;"></div></div>
+            </div>
+          </div>
+          <div class="card" style="padding:12px;border-left:4px solid #22c55e;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:14px;font-weight:700;color:#0f172a;">해남군</div>
+              <span class="badge badge-green">양호</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;">
+              <span style="color:#64748b;">예상 수요</span><span style="font-weight:600;">310건</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;">
+              <span style="color:#64748b;">가용 인력</span><span style="font-weight:600;">105명</span>
+            </div>
+            <div style="margin-top:6px;">
+              <div style="display:flex;justify-content:space-between;font-size:10px;"><span>수급 충족률</span><span style="color:#22c55e;font-weight:600;">98%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:98%;background:#22c55e;"></div></div>
+            </div>
+          </div>
+          <div class="card" style="padding:12px;border-left:4px solid #f59e0b;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:14px;font-weight:700;color:#0f172a;">정읍시</div>
+              <span class="badge badge-amber">주의</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;">
+              <span style="color:#64748b;">예상 수요</span><span style="font-weight:600;">280건</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;">
+              <span style="color:#64748b;">가용 인력</span><span style="font-weight:600;">68명</span>
+            </div>
+            <div style="margin-top:6px;">
+              <div style="display:flex;justify-content:space-between;font-size:10px;"><span>수급 충족률</span><span style="color:#f59e0b;font-weight:600;">82%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:82%;background:#f59e0b;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+  {
+    id:"EP5-03", title:"AI Agent 알림", part:"A",
+    desc:"AI Agent가 인력 부족 지역에 인근 작업자들에게 자동으로 알림을 발송합니다. 발송 상태를 실시간으로 확인합니다.",
+    tags:["AI Agent","자동발송","인력배치"], device:"browser", url:"admin.danngam.com/data/agent",
+    render(el) {
+      el.innerHTML = `
+      <div style="padding:4px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#0f172a;">AI Agent 자동 배치</div>
+            <div style="font-size:12px;color:#64748b;">부족 지역 인력 자동 알림 발송</div>
+          </div>
+          <div class="badge badge-pink pulse" style="font-size:12px;padding:6px 14px;">&#9889; AI 작동 중</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="card" style="border-left:4px solid #ec4899;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#0f172a;">익산시 인력 배치</div>
+                <div style="font-size:11px;color:#64748b;">반경 30km 내 유휴 작업자 검색</div>
+              </div>
+              <span class="badge badge-green">발송완료</span>
+            </div>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+              <span style="color:#64748b;">대상 작업자</span><span style="font-weight:600;">12명</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+              <span style="color:#64748b;">알림 발송</span><span style="font-weight:600;color:#16a34a;">12/12 완료</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+              <span style="color:#64748b;">수락 현황</span><span style="font-weight:600;color:#ec4899;">8명 수락</span>
+            </div>
+            <div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" style="width:67%;background:#ec4899;"></div></div>
+            <div style="font-size:10px;color:#64748b;text-align:right;">수락률 67%</div>
+          </div>
+
+          <div class="card" style="border-left:4px solid #f59e0b;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#0f172a;">정읍시 인력 배치</div>
+                <div style="font-size:11px;color:#64748b;">반경 30km 내 유휴 작업자 검색</div>
+              </div>
+              <span class="badge badge-amber">발송중</span>
+            </div>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+              <span style="color:#64748b;">대상 작업자</span><span style="font-weight:600;">8명</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+              <span style="color:#64748b;">알림 발송</span><span style="font-weight:600;color:#f59e0b;">5/8 진행중</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+              <span style="color:#64748b;">수락 현황</span><span style="font-weight:600;">대기 중</span>
+            </div>
+            <div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" style="width:63%;background:#f59e0b;"></div></div>
+            <div style="font-size:10px;color:#64748b;text-align:right;">발송 63%</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:10px;padding:12px;">
+          <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:8px;">발송 로그</div>
+          <table class="tbl">
+            <tr><th>시간</th><th>지역</th><th>작업자</th><th>상태</th></tr>
+            <tr><td>14:32</td><td>익산</td><td>최영호 (콤바인)</td><td><span class="badge badge-green">수락</span></td></tr>
+            <tr><td>14:31</td><td>익산</td><td>박준서 (콤바인)</td><td><span class="badge badge-green">수락</span></td></tr>
+            <tr><td>14:30</td><td>정읍</td><td>이하늘 (드론)</td><td><span class="badge badge-amber">대기</span></td></tr>
+            <tr><td>14:29</td><td>익산</td><td>정수현 (트랙터)</td><td><span class="badge badge-red">거절</span></td></tr>
+            <tr><td>14:28</td><td>정읍</td><td>김도윤 (콤바인)</td><td><span class="badge badge-amber">발송</span></td></tr>
+          </table>
+        </div>
+      </div>`;
+    }
+  },
+  {
+    id:"EP5-04", title:"가격 예측", part:"A",
+    desc:"AI가 시장 데이터를 분석하여 농작업 단가와 건조비 추이를 예측합니다. 전년 대비 변동률과 트렌드를 제공합니다.",
+    tags:["가격예측","단가","트렌드"], device:"browser", url:"admin.danngam.com/data/pricing",
+    render(el) {
+      el.innerHTML = `
+      <div style="padding:4px;">
+        <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:14px;">AI 가격 예측 — 2026년 9월</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div class="card" style="padding:16px;text-align:center;border-top:3px solid #ec4899;">
+            <div style="font-size:11px;color:#64748b;">벼베기 예상 단가</div>
+            <div style="font-size:28px;font-weight:700;color:#0f172a;margin:4px 0;">&#8361;4,800<span style="font-size:14px;color:#64748b;">/평</span></div>
+            <div style="display:inline-flex;align-items:center;gap:4px;background:#fce7f3;color:#ec4899;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:600;">&#9650; +6.7%</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:4px;">전년: &#8361;4,500/평</div>
+          </div>
+          <div class="card" style="padding:16px;text-align:center;border-top:3px solid #f59e0b;">
+            <div style="font-size:11px;color:#64748b;">건조비 예상 단가</div>
+            <div style="font-size:28px;font-weight:700;color:#0f172a;margin:4px 0;">&#8361;3,200<span style="font-size:14px;color:#64748b;">/가마</span></div>
+            <div style="display:inline-flex;align-items:center;gap:4px;background:#fef3c7;color:#d97706;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:600;">&#9650; +7.0%</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:4px;">전년: &#8361;2,990/가마</div>
+          </div>
+          <div class="card" style="padding:16px;text-align:center;border-top:3px solid #6366f1;">
+            <div style="font-size:11px;color:#64748b;">드론 방제 예상 단가</div>
+            <div style="font-size:28px;font-weight:700;color:#0f172a;margin:4px 0;">&#8361;1,200<span style="font-size:14px;color:#64748b;">/평</span></div>
+            <div style="display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:#16a34a;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:600;">&#9660; -2.4%</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:4px;">전년: &#8361;1,230/평</div>
+          </div>
+        </div>
+        <div class="card" style="padding:14px;">
+          <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">벼베기 단가 추이 (2024~2026)</div>
+          <div style="display:flex;align-items:flex-end;gap:2px;height:80px;">
+            ${[3200,3400,3500,3800,4000,4200,4300,4500,4800].map((v,i) => {
+              const h = Math.round((v/5000)*80);
+              const yr = i<3?'24':i<6?'25':'26';
+              const q = ['상','중','하'][i%3];
+              return `<div style="flex:1;text-align:center;"><div style="height:${h}px;background:${i>=6?'#ec4899':'#fda4af'};border-radius:3px 3px 0 0;"></div><div style="font-size:7px;color:#94a3b8;">${yr}${q}</div></div>`;
+            }).join('')}
+          </div>
+        </div>
+        <div class="card" style="padding:12px;margin-top:0;">
+          <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:6px;">가격 변동 요인</div>
+          <div class="card-sm" style="background:#fce7f3;"><span style="font-size:11px;color:#ec4899;font-weight:600;">수요 증가</span><span style="font-size:11px;color:#475569;"> — 고령화로 위탁 작업 수요 8% 증가</span></div>
+          <div class="card-sm" style="background:#fef3c7;"><span style="font-size:11px;color:#d97706;font-weight:600;">유류비</span><span style="font-size:11px;color:#475569;"> — 경유 가격 5% 상승 반영</span></div>
+          <div class="card-sm" style="background:#dcfce7;"><span style="font-size:11px;color:#16a34a;font-weight:600;">경쟁 확대</span><span style="font-size:11px;color:#475569;"> — 드론 방제 사업자 증가로 단가 안정</span></div>
+        </div>
+      </div>`;
+    }
+  },
+  {
+    id:"EP5-05", title:"정책 리포트", part:"A",
+    desc:"AI가 축적된 데이터를 기반으로 지자체용 정책 리포트를 자동 생성합니다. 대상 기관을 선택하고 발송할 수 있습니다.",
+    tags:["정책","리포트","AI생성"], device:"browser", url:"admin.danngam.com/data/report",
+    render(el) {
+      el.innerHTML = `
+      <div style="padding:4px;">
+        <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:14px;">AI 정책 리포트 생성기</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="card" style="padding:16px;">
+            <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">리포트 설정</div>
+            <label class="label-sm">대상 기관</label>
+            <div class="input" style="display:flex;align-items:center;justify-content:space-between;">
+              <span>전북특별자치도청</span><span style="color:#94a3b8;">&#9660;</span>
+            </div>
+            <label class="label-sm">리포트 유형</label>
+            <div class="input" style="display:flex;align-items:center;justify-content:space-between;">
+              <span>분기별 농작업 수급 현황</span><span style="color:#94a3b8;">&#9660;</span>
+            </div>
+            <label class="label-sm">포함 데이터</label>
+            <div style="font-size:11px;color:#475569;margin-bottom:10px;">
+              <div><span class="check-box on">&#10003;</span> 지역별 수요/공급 통계</div>
+              <div><span class="check-box on">&#10003;</span> 인력 부족 분석</div>
+              <div><span class="check-box on">&#10003;</span> 가격 추이</div>
+              <div><span class="check-box on">&#10003;</span> 건조시설 수율 현황</div>
+              <div><span class="check-box">&#8203;</span> R&D 실증 현황</div>
+            </div>
+            <label class="label-sm">기간</label>
+            <input class="input" value="2026년 1분기 (1월~3월)" />
+            <div class="btn btn-pink" style="width:100%;margin-top:8px;">&#9889; AI 리포트 생성</div>
+          </div>
+          <div class="card" style="padding:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div style="font-size:13px;font-weight:700;color:#0f172a;">생성 미리보기</div>
+              <span class="badge badge-pink pulse">생성 중...</span>
+            </div>
+            <div style="background:#f8fafc;border-radius:8px;padding:12px;font-size:11px;color:#475569;line-height:1.8;">
+              <div style="font-weight:700;color:#0f172a;font-size:13px;margin-bottom:6px;">전북 농작업 수급 현황 보고서</div>
+              <div style="font-weight:600;color:#0f172a;">1. 개요</div>
+              2026년 1분기 전북 지역 농작업 매칭 건수 4,230건 (전년 동기 대비 +12%)...<br><br>
+              <div style="font-weight:600;color:#0f172a;">2. 지역별 현황</div>
+              김제시 820건, 익산시 690건, 정읍시 540건...<br>
+              인력 부족률: 김제 15%, 정읍 12%...<br><br>
+              <div style="font-weight:600;color:#0f172a;">3. 건조시설</div>
+              평균 수율 87.2%, 1등급 비율 62%...<br><br>
+              <div style="background:#fce7f3;padding:6px;border-radius:4px;margin-top:6px;">
+                <span style="color:#ec4899;font-weight:600;">&#9889; AI 분석:</span> 9월 벼베기 성수기 인력 부족 예상. 타지역 인력 사전 확보 권고.
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;">
+              <div class="btn btn-pink" style="flex:1;font-size:12px;padding:8px;">전북도청 발송</div>
+              <div class="btn btn-outline" style="flex:1;font-size:12px;padding:8px;">PDF 다운로드</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+  {
+    id:"EP5-06", title:"데이터 API", part:"A",
+    desc:"외부 기관과 연구자에게 데이터 API를 제공합니다. API 키 발급, 접근 범위 설정, 엔드포인트 목록을 관리합니다.",
+    tags:["API","데이터","개방"], device:"browser", url:"admin.danngam.com/data/api",
+    render(el) {
+      el.innerHTML = `
+      <div style="padding:4px;">
+        <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:14px;">데이터 API 관리</div>
+        <div class="card" style="padding:16px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:700;color:#0f172a;">API Key</div>
+            <span class="badge badge-green">활성</span>
+          </div>
+          <div style="background:#1e293b;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:#22c55e;margin-bottom:8px;">
+            dnng_api_sk_live_7f8a9b2c3d4e5f6g7h8i9j0k
+          </div>
+          <div style="display:flex;gap:8px;">
+            <div class="btn btn-outline" style="font-size:11px;padding:6px 12px;">키 재발급</div>
+            <div class="btn btn-outline" style="font-size:11px;padding:6px 12px;">사용 통계</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="card" style="padding:14px;">
+            <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">접근 범위 설정</div>
+            <div style="font-size:11px;color:#475569;">
+              <div style="margin-bottom:6px;"><span class="check-box on">&#10003;</span> 작업 통계 (집계 데이터)</div>
+              <div style="margin-bottom:6px;"><span class="check-box on">&#10003;</span> 가격 정보 (평균 단가)</div>
+              <div style="margin-bottom:6px;"><span class="check-box on">&#10003;</span> 건조시설 수율 통계</div>
+              <div style="margin-bottom:6px;"><span class="check-box on">&#10003;</span> 지역별 수급 현황</div>
+              <div style="margin-bottom:6px;"><span class="check-box">&#8203;</span> 개별 작업 상세 (비공개)</div>
+              <div style="margin-bottom:6px;"><span class="check-box">&#8203;</span> 사용자 정보 (비공개)</div>
+            </div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:8px;">일일 요청 한도: 10,000건</div>
+          </div>
+          <div class="card" style="padding:14px;">
+            <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">API 엔드포인트</div>
+            <div style="font-size:11px;font-family:monospace;">
+              <div class="card-sm" style="background:#f8fafc;">
+                <span style="color:#16a34a;font-weight:600;">GET</span>
+                <span style="color:#0f172a;">/api/v1/data/stats</span>
+                <div style="font-size:10px;color:#94a3b8;font-family:Inter;">전국 작업 통계</div>
+              </div>
+              <div class="card-sm" style="background:#f8fafc;">
+                <span style="color:#3b82f6;font-weight:600;">GET</span>
+                <span style="color:#0f172a;">/api/v1/data/pricing</span>
+                <div style="font-size:10px;color:#94a3b8;font-family:Inter;">작업별 단가 정보</div>
+              </div>
+              <div class="card-sm" style="background:#f8fafc;">
+                <span style="color:#16a34a;font-weight:600;">GET</span>
+                <span style="color:#0f172a;">/api/v1/data/supply</span>
+                <div style="font-size:10px;color:#94a3b8;font-family:Inter;">지역별 수급 현황</div>
+              </div>
+              <div class="card-sm" style="background:#f8fafc;">
+                <span style="color:#16a34a;font-weight:600;">GET</span>
+                <span style="color:#0f172a;">/api/v1/data/drying</span>
+                <div style="font-size:10px;color:#94a3b8;font-family:Inter;">건조시설 수율 통계</div>
+              </div>
+              <div class="card-sm" style="background:#f8fafc;">
+                <span style="color:#f59e0b;font-weight:600;">POST</span>
+                <span style="color:#0f172a;">/api/v1/data/forecast</span>
+                <div style="font-size:10px;color:#94a3b8;font-family:Inter;">AI 수요 예측 조회</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+  {
+    id:"EP5-07", title:"수출 이력 추적", part:"A",
+    desc:"농산물의 전 과정을 타임라인으로 추적합니다. 로터리부터 도정까지, 건조 수율과 등급이 QR코드로 연결됩니다.",
+    tags:["이력추적","QR","수출"], device:"browser", url:"admin.danngam.com/data/trace/KR-JB-2026-00142",
+    render(el) {
+      el.innerHTML = `
+      <div style="padding:4px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#0f172a;">수출 이력 추적</div>
+            <div style="font-size:12px;color:#64748b;">로트번호: KR-JB-2026-00142</div>
+          </div>
+          <span class="badge badge-green" style="font-size:12px;padding:6px 14px;">&#10003; 이력 완성</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1.2fr 0.8fr;gap:14px;">
+          <div class="card" style="padding:16px;">
+            <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:12px;">생산 이력 타임라인</div>
+            <div style="position:relative;padding-left:28px;">
+              <div style="position:absolute;left:10px;top:0;bottom:0;width:2px;background:#e2e8f0;"></div>
+              ${[
+                {icon:'&#127793;',color:'#16a34a',title:'로터리 작업',date:'2026-04-10',desc:'봄 경운 | 김민준 농장 3,000평',badge:''},
+                {icon:'&#127806;',color:'#16a34a',title:'모내기',date:'2026-05-20',desc:'일미 품종 | 기계이앙',badge:''},
+                {icon:'&#128681;',color:'#3b82f6',title:'드론 방제 (3회)',date:'2026-06~08',desc:'살충제+살균제 | 드론팀 정확방제',badge:''},
+                {icon:'&#127813;',color:'#f59e0b',title:'벼베기',date:'2026-09-25',desc:'6조식 콤바인 | 수확량 4,200kg',badge:''},
+                {icon:'&#9728;',color:'#ec4899',title:'건조',date:'2026-09-27',desc:'투입 4,200kg → 산출 3,612kg',badge:'<span class="badge badge-pink">수율 86% | 1등급</span>'},
+                {icon:'&#9881;',color:'#6366f1',title:'도정',date:'2026-10-02',desc:'현미→백미 | 도정률 91%',badge:''},
+                {icon:'&#128230;',color:'#0f172a',title:'출하 (수출)',date:'2026-10-10',desc:'일본 도쿄 수출 | 20kg×50포',badge:'<span class="badge badge-green">QR 생성</span>'}
+              ].map(s => `
+                <div style="position:relative;margin-bottom:14px;">
+                  <div style="position:absolute;left:-24px;top:0;width:20px;height:20px;border-radius:50%;background:${s.color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;border:2px solid #fff;z-index:1;">${s.icon}</div>
+                  <div style="font-size:12px;font-weight:600;color:#0f172a;">${s.title}</div>
+                  <div style="font-size:10px;color:#94a3b8;">${s.date}</div>
+                  <div style="font-size:11px;color:#475569;">${s.desc}</div>
+                  ${s.badge ? '<div style="margin-top:2px;">'+s.badge+'</div>' : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div>
+            <div class="card" style="padding:16px;text-align:center;">
+              <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">QR 이력 코드</div>
+              <div style="width:120px;height:120px;background:#f1f5f9;border:2px solid #e2e8f0;border-radius:12px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;">
+                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;width:80px;">
+                  ${Array(49).fill(0).map(()=>`<div style="width:8px;height:8px;background:${Math.random()>.4?'#1e293b':'#fff'};border-radius:1px;"></div>`).join('')}
+                </div>
+              </div>
+              <div style="font-size:10px;color:#64748b;">스캔하여 전 과정 확인</div>
+              <div style="font-size:9px;color:#94a3b8;margin-top:2px;font-family:monospace;">KR-JB-2026-00142</div>
+            </div>
+            <div class="card" style="padding:14px;">
+              <div style="font-size:12px;font-weight:600;color:#0f172a;margin-bottom:8px;">품질 요약</div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+                <span style="color:#64748b;">건조 수율</span><span style="font-weight:600;color:#ec4899;">86%</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+                <span style="color:#64748b;">수분함량</span><span style="font-weight:600;">14.2%</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+                <span style="color:#64748b;">등급</span><span style="font-weight:700;color:#16a34a;">1등급</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;">
+                <span style="color:#64748b;">방제 이력</span><span style="font-weight:600;">3회 (정량)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+  {
+    id:"EP5-08", title:"종합 통계", part:"A",
+    desc:"플랫폼 전체 핵심 KPI를 한눈에 확인합니다. 사용자, 장비, 거래, 건조, AI 정확도 등 8개 주요 지표를 표시합니다.",
+    tags:["KPI","종합통계","현황"], device:"browser", url:"admin.danngam.com/data/overview",
+    render(el) {
+      el.innerHTML = `
+      <div style="padding:4px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div style="font-size:16px;font-weight:700;color:#0f172a;">단감 플랫폼 종합 통계</div>
+          <div style="font-size:11px;color:#64748b;">2026.03.08 기준</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
+          <div class="card" style="padding:16px;text-align:center;border-top:3px solid #16a34a;">
+            <div style="font-size:28px;font-weight:700;color:#16a34a;">45,000</div>
+            <div style="font-size:12px;color:#0f172a;font-weight:600;">등록 사용자</div>
+            <div style="font-size:10px;color:#64748b;">농업인 38K + 작업자 7K</div>
+          </div>
+          <div class="card" style="padding:16px;text-align:center;border-top:3px solid #6366f1;">
+            <div style="font-size:28px;font-weight:700;color:#6366f1;">8,500</div>
+            <div style="font-size:12px;color:#0f172a;font-weight:600;">등록 장비</div>
+            <div style="font-size:10px;color:#64748b;">콤바인 3.2K, 트랙터 4.1K, 드론 1.2K</div>
+          </div>
+          <div class="card" style="padding:16px;text-align:center;border-top:3px solid #ec4899;">
+            <div style="font-size:28px;font-weight:700;color:#ec4899;">102,000</div>
+            <div style="font-size:12px;color:#0f172a;font-weight:600;">누적 매칭</div>
+            <div style="font-size:10px;color:#64748b;">매칭 성공률 94.2%</div>
+          </div>
+          <div class="card" style="padding:16px;text-align:center;border-top:3px solid #f59e0b;">
+            <div style="font-size:28px;font-weight:700;color:#f59e0b;">2,340억</div>
+            <div style="font-size:12px;color:#0f172a;font-weight:600;">누적 거래액</div>
+            <div style="font-size:10px;color:#64748b;">월평균 195억</div>
+          </div>
+          <div class="card" style="padding:16px;text-align:center;border-top:3px solid #22c55e;">
+            <div style="font-size:28px;font-weight:700;color:#22c55e;">12,000</div>
+            <div style="font-size:12px;color:#0f172a;font-weight:600;">건조 실적</div>
+            <div style="font-size:10px;color:#64748b;">평균 수율 87.2%</div>
+          </div>
+          <div class="card" style="padding:16px;text-align:center;border-top:3px solid #8b5cf6;">
+            <div style="font-size:28px;font-weight:700;color:#8b5cf6;">120</div>
+            <div style="font-size:12px;color:#0f172a;font-weight:600;">건조시설</div>
+            <div style="font-size:10px;color:#64748b;">전국 8개도 운영</div>
+          </div>
+          <div class="card" style="padding:16px;text-align:center;border-top:3px solid #0ea5e9;">
+            <div style="font-size:28px;font-weight:700;color:#0ea5e9;">185억</div>
+            <div style="font-size:12px;color:#0f172a;font-weight:600;">정책 보조금 연계</div>
+            <div style="font-size:10px;color:#64748b;">42개 지자체</div>
+          </div>
+          <div class="card" style="padding:16px;text-align:center;border-top:3px solid #ec4899;">
+            <div style="font-size:28px;font-weight:700;color:#ec4899;">92%</div>
+            <div style="font-size:12px;color:#0f172a;font-weight:600;">AI 예측 정확도</div>
+            <div style="font-size:10px;color:#64748b;">수요 예측 기준</div>
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+  // ===== PART B: 스케줄링 =====
+  {
+    id:"EP5-09", title:"전국 스케줄 보드", part:"B",
+    desc:"전국 대형 장비 현황을 지도 위에 표시합니다. 콤바인, 드론, 자율주행 장비의 위치와 이동 경로를 관리합니다.",
+    tags:["스케줄","전국","장비현황"], device:"browser", url:"admin.danngam.com/schedule/board",
+    render(el) {
+      el.innerHTML = `
+      <div style="display:flex;height:100%;">
+        <div class="sidebar">
+          <div class="sidebar-logo">DANNGAM<br><span style="font-size:11px;color:#94a3b8;font-weight:400;">스케줄링</span></div>
+          <div class="sidebar-section">데이터/AI</div>
+          <div class="sidebar-item">대시보드</div>
+          <div class="sidebar-item">수요 예측</div>
+          <div class="sidebar-section">스케줄링</div>
+          <div class="sidebar-item active amber">전국 보드</div>
+          <div class="sidebar-item">대행단</div>
+          <div class="sidebar-item">경로 최적화</div>
+          <div class="sidebar-item">의뢰 관리</div>
+        </div>
+        <div style="flex:1;padding:16px;overflow-y:auto;background:#f1f5f9;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:16px;font-weight:700;color:#0f172a;">전국 장비 스케줄 보드</div>
+            <div style="font-size:11px;color:#64748b;">2026.09 벼베기 성수기</div>
+          </div>
+          <!-- Map with markers -->
+          <div class="korea-map" style="height:200px;background:linear-gradient(180deg,#dbeafe,#bfdbfe);">
+            <div style="position:absolute;top:8px;left:10px;font-size:10px;font-weight:600;color:#1e40af;">실시간 장비 위치</div>
+            <!-- Equipment markers -->
+            <div style="position:absolute;top:100px;left:80px;width:18px;height:18px;border-radius:50%;background:#f59e0b;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700;">C</div>
+            <div class="map-label" style="top:120px;left:72px;">해남</div>
+            <div style="position:absolute;top:75px;left:100px;width:18px;height:18px;border-radius:50%;background:#f59e0b;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700;">C</div>
+            <div class="map-label" style="top:95px;left:92px;">영광</div>
+            <div style="position:absolute;top:65px;left:130px;width:18px;height:18px;border-radius:50%;background:#ec4899;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700;">D</div>
+            <div class="map-label" style="top:85px;left:125px;">김제</div>
+            <div style="position:absolute;top:40px;left:115px;width:18px;height:18px;border-radius:50%;background:#ec4899;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700;">D</div>
+            <div class="map-label" style="top:60px;left:110px;">당진</div>
+            <div style="position:absolute;top:55px;left:155px;width:18px;height:18px;border-radius:50%;background:#6366f1;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700;">A</div>
+            <div class="map-label" style="top:75px;left:148px;">상주</div>
+            <!-- Legend -->
+            <div style="position:absolute;bottom:8px;right:10px;display:flex;gap:10px;font-size:9px;color:#475569;background:rgba(255,255,255,.8);padding:4px 8px;border-radius:6px;">
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;"></span> 콤바인 42대</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ec4899;"></span> 드론 28팀</span>
+              <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6366f1;"></span> 자율주행 15대</span>
+            </div>
+          </div>
+          <!-- Schedule overview -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <div class="card stat" style="padding:12px;">
+              <div class="num" style="font-size:20px;color:#f59e0b;">42</div>
+              <div class="desc">콤바인 가동중</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:78%;background:#f59e0b;"></div></div>
+              <div style="font-size:9px;color:#64748b;">가동률 78%</div>
+            </div>
+            <div class="card stat" style="padding:12px;">
+              <div class="num" style="font-size:20px;color:#ec4899;">28</div>
+              <div class="desc">드론팀 가동중</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:92%;background:#ec4899;"></div></div>
+              <div style="font-size:9px;color:#64748b;">가동률 92%</div>
+            </div>
+            <div class="card stat" style="padding:12px;">
+              <div class="num" style="font-size:20px;color:#6366f1;">15</div>
+              <div class="desc">자율주행 실증</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:100%;background:#6366f1;"></div></div>
+              <div style="font-size:9px;color:#64748b;">가동률 100%</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+  {
+    id:"EP5-10", title:"대행단 스케줄", part:"B",
+    desc:"해남 대형장비팀의 장비 목록과 이동 스케줄을 타임라인으로 확인합니다. 빈 일정에 신규 의뢰를 배정할 수 있습니다.",
+    tags:["대행단","타임라인","스케줄"], device:"browser", url:"admin.danngam.com/schedule/teams/haenam",
+    render(el) {
+      el.innerHTML = `
+      <div style="padding:4px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#0f172a;">해남 대형장비팀</div>
+            <div style="font-size:12px;color:#64748b;">팀장: 오영수 | 장비 3대 | 인원 5명</div>
+          </div>
+          <span class="badge badge-amber" style="font-size:12px;padding:6px 14px;">&#128197; 9월 스케줄</span>
+        </div>
+        <div class="card" style="padding:14px;margin-bottom:12px;">
+          <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">보유 장비</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <div class="card-sm" style="text-align:center;border:1px solid #fef3c7;">
+              <div style="font-size:20px;margin-bottom:2px;">&#128668;</div>
+              <div style="font-size:12px;font-weight:700;color:#0f172a;">DC130</div>
+              <div style="font-size:10px;color:#475569;">6조식 콤바인</div>
+              <div style="font-size:9px;color:#f59e0b;font-weight:600;">1일 5,000평</div>
+            </div>
+            <div class="card-sm" style="text-align:center;border:1px solid #fef3c7;">
+              <div style="font-size:20px;margin-bottom:2px;">&#128668;</div>
+              <div style="font-size:12px;font-weight:700;color:#0f172a;">ER6120</div>
+              <div style="font-size:10px;color:#475569;">6조식 콤바인</div>
+              <div style="font-size:9px;color:#f59e0b;font-weight:600;">1일 4,500평</div>
+            </div>
+            <div class="card-sm" style="text-align:center;border:1px solid #e0e7ff;">
+              <div style="font-size:20px;margin-bottom:2px;">&#128665;</div>
+              <div style="font-size:12px;font-weight:700;color:#0f172a;">T5100</div>
+              <div style="font-size:10px;color:#475569;">운반 트랙터</div>
+              <div style="font-size:9px;color:#6366f1;font-weight:600;">지원 차량</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="padding:14px;">
+          <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">이동 스케줄 타임라인</div>
+          <div style="font-size:10px;color:#64748b;display:flex;margin-bottom:8px;">
+            <div style="width:60px;">날짜</div>
+            <div style="flex:1;">9/10</div><div style="flex:1;">9/12</div><div style="flex:1;">9/14</div><div style="flex:1;">9/16</div><div style="flex:1;">9/18</div><div style="flex:1;">9/20</div><div style="flex:1;">9/22</div><div style="flex:1;">9/24</div>
+          </div>
+          <div class="sched-row">
+            <div style="width:60px;font-size:10px;font-weight:600;color:#475569;">DC130</div>
+            <div style="flex:2;"><div class="sched-block" style="background:#f59e0b;">해남 18,000평</div></div>
+            <div style="flex:1.5;"><div class="sched-block" style="background:#22c55e;">영광 12,000평</div></div>
+            <div style="flex:1;"><div class="sched-block" style="background:#e2e8f0;color:#94a3b8;border:2px dashed #94a3b8;">빈 일정</div></div>
+            <div style="flex:1.5;"><div class="sched-block" style="background:#3b82f6;">당진 15,000평</div></div>
+          </div>
+          <div class="sched-row">
+            <div style="width:60px;font-size:10px;font-weight:600;color:#475569;">ER6120</div>
+            <div style="flex:2;"><div class="sched-block" style="background:#f59e0b;">해남 15,000평</div></div>
+            <div style="flex:1.5;"><div class="sched-block" style="background:#22c55e;">영광 10,000평</div></div>
+            <div style="flex:1;"><div class="sched-block" style="background:#e2e8f0;color:#94a3b8;border:2px dashed #94a3b8;">빈 일정</div></div>
+            <div style="flex:1.5;"><div class="sched-block" style="background:#3b82f6;">당진 12,000평</div></div>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;font-size:9px;color:#64748b;">
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f59e0b;"></span> 해남</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#22c55e;"></span> 영광</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#e2e8f0;border:1px dashed #94a3b8;"></span> 빈 일정</span>
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#3b82f6;"></span> 당진</span>
+          </div>
+          <div style="margin-top:10px;background:#fef3c7;border-radius:8px;padding:8px 12px;font-size:11px;color:#92400e;">
+            &#128161; 9/16~18 빈 일정 2일 — 이동 경로상 김제 지역 의뢰 배정 가능
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+  {
+    id:"EP5-11", title:"가용 장비 검색", part:"B",
+    desc:"농업인이 필요한 장비를 날짜와 지역으로 검색합니다. 대형 장비팀의 가용 일정과 처리 능력을 확인할 수 있습니다.",
+    tags:["검색","가용장비","콤바인"], device:"phone",
+    render(el) {
+      el.innerHTML = `
+        <div class="phone-bar">
+          <span class="back">&larr;</span>
+          <span class="title">가용 장비 검색</span>
+        </div>
+        <div style="padding:12px 16px;">
+          <div class="card" style="padding:14px;">
+            <label class="label-sm">장비 종류</label>
+            <div class="input" style="display:flex;align-items:center;justify-content:space-between;">
+              <span>6조식 콤바인</span><span style="color:#94a3b8;">&#9660;</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div><label class="label-sm">시작일</label><input class="input" value="2026-09-15" /></div>
+              <div><label class="label-sm">종료일</label><input class="input" value="2026-09-20" /></div>
+            </div>
+            <label class="label-sm">지역</label>
+            <input class="input" value="전북 김제" />
+            <div class="btn btn-amber" style="width:100%;text-align:center;">&#128269; 검색</div>
+          </div>
+
+          <div style="font-size:13px;font-weight:700;color:#0f172a;margin:14px 0 8px;">검색 결과 (2건)</div>
+
+          <div class="card" style="border-left:4px solid #f59e0b;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:14px;font-weight:700;color:#0f172a;">해남 대형장비팀</div>
+                <div style="font-size:11px;color:#475569;">DC130 (6조식) | 대동</div>
+              </div>
+              <span class="badge badge-green">가용</span>
+            </div>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+              <span style="color:#64748b;">가용 일정</span>
+              <span style="font-weight:600;color:#16a34a;">9/16 ~ 9/20 (5일)</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+              <span style="color:#64748b;">일 처리량</span>
+              <span style="font-weight:600;">5,000평/일</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+              <span style="color:#64748b;">단가</span>
+              <span style="font-weight:600;color:#f59e0b;">&#8361;3,500/평 (대형할인)</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;">
+              <span style="color:#64748b;">평점</span>
+              <span style="color:#f59e0b;">&#9733; 4.8 (128건)</span>
+            </div>
+            <div class="btn btn-amber" style="width:100%;margin-top:10px;text-align:center;">의뢰하기</div>
+          </div>
+
+          <div class="card" style="border-left:4px solid #94a3b8;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <div style="font-size:14px;font-weight:700;color:#0f172a;">익산 농기계팀</div>
+                <div style="font-size:11px;color:#475569;">ER6120 (6조식) | 대동</div>
+              </div>
+              <span class="badge badge-amber">일부가용</span>
+            </div>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+              <span style="color:#64748b;">가용 일정</span>
+              <span style="font-weight:600;color:#d97706;">9/18 ~ 9/20만 (3일)</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+              <span style="color:#64748b;">일 처리량</span>
+              <span style="font-weight:600;">4,500평/일</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;">
+              <span style="color:#64748b;">단가</span>
+              <span style="font-weight:600;">&#8361;4,200/평</span>
+            </div>
+            <div class="btn btn-outline" style="width:100%;margin-top:10px;text-align:center;border-color:#f59e0b;color:#d97706;">상세 보기</div>
+          </div>
+        </div>`;
+    }
+  },
+  {
+    id:"EP5-12", title:"대형 장비 의뢰", part:"B",
+    desc:"해남팀 DC130 콤바인으로 20,000평 벼베기를 4일간 의뢰합니다. 대형 면적 할인 단가가 적용됩니다.",
+    tags:["의뢰","대형장비","DC130"], device:"phone",
+    render(el) {
+      el.innerHTML = `
+        <div class="phone-bar">
+          <span class="back">&larr;</span>
+          <span class="title">대형 장비 의뢰</span>
+        </div>
+        <div style="padding:12px 16px;">
+          <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:12px;padding:14px;margin-bottom:12px;">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <div style="width:48px;height:48px;border-radius:12px;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;">&#128668;</div>
+              <div>
+                <div style="font-size:15px;font-weight:700;color:#0f172a;">DC130 6조식 콤바인</div>
+                <div style="font-size:12px;color:#92400e;">해남 대형장비팀 | 오영수</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;">
+            <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:10px;">의뢰 내용</div>
+            <label class="label-sm">작업 종류</label>
+            <input class="input" value="벼베기 (콤바인)" readonly style="background:#f8fafc;" />
+            <label class="label-sm">작업 면적</label>
+            <input class="input" value="20,000평" />
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div><label class="label-sm">시작일</label><input class="input" value="2026-09-16" /></div>
+              <div><label class="label-sm">종료일</label><input class="input" value="2026-09-19" /></div>
+            </div>
+            <label class="label-sm">작업 위치</label>
+            <input class="input" value="김제시 부량면 일대" />
+
+            <div class="divider"></div>
+            <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:8px;">비용 산출</div>
+            <div style="background:#fffbeb;border-radius:8px;padding:12px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                <span style="color:#475569;">일 처리량</span>
+                <span style="font-weight:600;">5,000평/일</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                <span style="color:#475569;">소요 기간</span>
+                <span style="font-weight:600;">4일</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                <span style="color:#475569;">단가</span>
+                <span style="font-weight:600;">&#8361;3,500/평</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;">
+                <span style="color:#16a34a;font-weight:600;">&#10003; 대형 면적 할인 적용</span>
+                <span style="color:#16a34a;font-weight:600;">-&#8361;300/평</span>
+              </div>
+              <div class="divider"></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;">
+                <span style="font-weight:700;color:#0f172a;">총 예상 비용</span>
+                <span style="font-weight:700;color:#f59e0b;">&#8361;7,000만</span>
+              </div>
+            </div>
+
+            <div class="btn btn-amber" style="width:100%;margin-top:12px;text-align:center;">의뢰 요청 보내기</div>
+          </div>
+        </div>`;
+    }
+  },
+  {
+    id:"EP5-13", title:"AI 경로 최적화", part:"B",
+    desc:"AI가 해남팀의 이동 경로에 김제 의뢰를 삽입하여 공차 이동을 최소화합니다. 최적화 전후 비교를 표시합니다.",
+    tags:["AI","경로최적화","공차절감"], device:"browser", url:"admin.danngam.com/schedule/optimize/haenam",
+    render(el) {
+      el.innerHTML = `
+      <div style="padding:4px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#0f172a;">AI 경로 최적화</div>
+            <div style="font-size:12px;color:#64748b;">해남 대형장비팀 | DC130</div>
+          </div>
+          <span class="badge badge-pink" style="font-size:12px;padding:6px 14px;">&#9889; AI 최적화 완료</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <!-- Before -->
+          <div class="card" style="padding:14px;border-top:3px solid #94a3b8;">
+            <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:10px;">기존 경로</div>
+            <div style="padding-left:4px;">
+              ${[
+                {name:'해남',color:'#f59e0b',date:'9/10~14',area:'18,000평'},
+                {name:'영광',color:'#22c55e',date:'9/15~16',area:'12,000평'},
+                {name:'(공차 이동 2일)',color:'#e2e8f0',date:'9/17~18',area:'',empty:true},
+                {name:'당진',color:'#3b82f6',date:'9/19~22',area:'15,000평'}
+              ].map((s,i,arr) => `
+                <div class="route-step">
+                  <div class="route-dot" style="background:${s.color};${s.empty?'border:2px dashed #94a3b8;background:#fff;color:#94a3b8;font-size:8px;':''}">${s.empty?'':'&#10003;'}</div>
+                  <div style="flex:1;">
+                    <div style="font-size:12px;font-weight:600;color:${s.empty?'#94a3b8':'#0f172a'};">${s.name}</div>
+                    <div style="font-size:10px;color:#64748b;">${s.date} ${s.area?'| '+s.area:''}</div>
+                  </div>
+                </div>
+                ${i<arr.length-1?'<div class="route-line"></div>':''}
+              `).join('')}
+            </div>
+            <div style="background:#fee2e2;border-radius:6px;padding:6px 10px;font-size:11px;color:#dc2626;font-weight:600;margin-top:8px;">
+              &#9888; 공차 이동 2일 발생
+            </div>
+          </div>
+          <!-- After -->
+          <div class="card" style="padding:14px;border-top:3px solid #ec4899;">
+            <div style="font-size:12px;font-weight:700;color:#ec4899;margin-bottom:10px;">&#9889; AI 최적화 경로</div>
+            <div style="padding-left:4px;">
+              ${[
+                {name:'해남',color:'#f59e0b',date:'9/10~14',area:'18,000평'},
+                {name:'영광',color:'#22c55e',date:'9/15~16',area:'12,000평'},
+                {name:'김제 부량',color:'#ec4899',date:'9/16~19',area:'20,000평',isNew:true},
+                {name:'김제 백산',color:'#8b5cf6',date:'9/20',area:'5,000평'},
+                {name:'당진',color:'#3b82f6',date:'9/21~24',area:'15,000평'}
+              ].map((s,i,arr) => `
+                <div class="route-step">
+                  <div class="route-dot" style="background:${s.color};">${s.isNew?'&#9733;':'&#10003;'}</div>
+                  <div style="flex:1;">
+                    <div style="font-size:12px;font-weight:600;color:#0f172a;">${s.name} ${s.isNew?'<span class="badge badge-pink">NEW</span>':''}</div>
+                    <div style="font-size:10px;color:#64748b;">${s.date} | ${s.area}</div>
+                  </div>
+                </div>
+                ${i<arr.length-1?'<div class="route-line" style="background:#fce7f3;"></div>':''}
+              `).join('')}
+            </div>
+            <div style="background:#dcfce7;border-radius:6px;padding:6px 10px;font-size:11px;color:#16a34a;font-weight:600;margin-top:8px;">
+              &#10003; 공차 2일 &#8594; 1일로 개선
+            </div>
+          </div>
+        </div>
+        <div class="card" style="padding:14px;">
+          <div style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:8px;">최적화 효과</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <div style="text-align:center;background:#f0fdf4;border-radius:8px;padding:10px;">
+              <div style="font-size:20px;font-weight:700;color:#16a34a;">-1일</div>
+              <div style="font-size:10px;color:#475569;">공차 이동 절감</div>
+            </div>
+            <div style="text-align:center;background:#fce7f3;border-radius:8px;padding:10px;">
+              <div style="font-size:20px;font-weight:700;color:#ec4899;">+7,000만</div>
+              <div style="font-size:10px;color:#475569;">추가 매출 기회</div>
+            </div>
+            <div style="text-align:center;background:#fef3c7;border-radius:8px;padding:10px;">
+              <div style="font-size:20px;font-weight:700;color:#d97706;">98km</div>
+              <div style="font-size:10px;color:#475569;">이동 거리 절감</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+  {
+    id:"EP5-14", title:"스케줄 확정", part:"B",
+    desc:"해남팀이 김제 부량 20,000평 의뢰를 수락하고, 스케줄이 확정됩니다. 의뢰자에게 확정 알림이 발송됩니다.",
+    tags:["수락","확정","알림"], device:"phone",
+    render(el) {
+      el.innerHTML = `
+        <div class="phone-bar">
+          <span class="back">&larr;</span>
+          <span class="title">의뢰 관리</span>
+        </div>
+        <div style="padding:12px 16px;">
+          <div class="push-card" style="border-left-color:#f59e0b;margin:0 0 12px;">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div style="width:28px;height:28px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:14px;">&#128668;</div>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#0f172a;">새 대형 의뢰 도착</div>
+                <div style="font-size:11px;color:#475569;">김제 부량 20,000평 벼베기</div>
+              </div>
+            </div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:4px;">5분 전</div>
+          </div>
+
+          <div class="card" style="padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div style="font-size:15px;font-weight:700;color:#0f172a;">의뢰 상세</div>
+              <span class="badge badge-amber">검토중</span>
+            </div>
+            <div style="background:#fffbeb;border-radius:8px;padding:10px;margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                <span style="color:#64748b;">의뢰자</span><span style="font-weight:600;">김민준 (부량면)</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                <span style="color:#64748b;">작업</span><span style="font-weight:600;">벼베기 (콤바인)</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                <span style="color:#64748b;">면적</span><span style="font-weight:700;color:#f59e0b;">20,000평</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                <span style="color:#64748b;">일정</span><span style="font-weight:600;">9/16 ~ 9/19 (4일)</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;">
+                <span style="color:#64748b;">총 금액</span><span style="font-weight:700;color:#0f172a;">&#8361;7,000만</span>
+              </div>
+            </div>
+
+            <div style="background:#fce7f3;border-radius:8px;padding:8px 10px;font-size:11px;color:#be185d;margin-bottom:10px;">
+              &#9889; AI 추천: 영광→김제 이동 경로 최적. 공차 1일 절감 가능.
+            </div>
+
+            <div style="display:flex;gap:8px;">
+              <div class="btn btn-amber" style="flex:1;text-align:center;">수락</div>
+              <div class="btn btn-outline" style="flex:1;text-align:center;">협의 요청</div>
+            </div>
+          </div>
+
+          <!-- After accept -->
+          <div style="margin-top:16px;border-top:2px dashed #e2e8f0;padding-top:16px;">
+            <div style="text-align:center;margin-bottom:12px;">
+              <div style="font-size:32px;margin-bottom:4px;">&#10003;</div>
+              <div style="font-size:16px;font-weight:700;color:#16a34a;">스케줄 확정!</div>
+              <div style="font-size:12px;color:#64748b;">의뢰자에게 확정 알림이 발송되었습니다</div>
+            </div>
+
+            <div class="card" style="padding:12px;">
+              <div style="font-size:12px;font-weight:600;color:#0f172a;margin-bottom:8px;">확정된 스케줄</div>
+              <div style="display:flex;gap:4px;align-items:center;margin-bottom:4px;">
+                <div style="width:8px;height:8px;border-radius:2px;background:#f59e0b;"></div>
+                <span style="font-size:11px;color:#475569;">9/10~14 해남</span>
+              </div>
+              <div style="display:flex;gap:4px;align-items:center;margin-bottom:4px;">
+                <div style="width:8px;height:8px;border-radius:2px;background:#22c55e;"></div>
+                <span style="font-size:11px;color:#475569;">9/15~16 영광</span>
+              </div>
+              <div style="display:flex;gap:4px;align-items:center;margin-bottom:4px;">
+                <div style="width:8px;height:8px;border-radius:2px;background:#ec4899;"></div>
+                <span style="font-size:11px;font-weight:600;color:#ec4899;">9/16~19 김제 부량 &#9733; NEW</span>
+              </div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="width:8px;height:8px;border-radius:2px;background:#3b82f6;"></div>
+                <span style="font-size:11px;color:#475569;">9/21~24 당진</span>
+              </div>
+            </div>
+
+            <div class="push-card" style="border-left-color:#16a34a;margin:8px 0;">
+              <div style="font-size:12px;font-weight:700;color:#0f172a;">&#128276; 의뢰자 알림 발송됨</div>
+              <div style="font-size:11px;color:#475569;">"김민준님, 해남 대형장비팀이 벼베기 의뢰를 수락했습니다. 9/16 작업 시작 예정입니다."</div>
+            </div>
+          </div>
+        </div>`;
+    }
+  }
+];
+
+// --- Render ---
+const tabsEl = document.getElementById('tabs');
+const scenesEl = document.getElementById('scenes');
+
+STEPS.forEach((step, i) => {
+  const tab = document.createElement('div');
+  tab.className = 'tab' + (step.part === 'B' ? ' sched' : '') + (i === 0 ? ' active' : '');
+  tab.textContent = step.id;
+  tab.onclick = () => showStep(i);
+  tabsEl.appendChild(tab);
+
+  if ((i === 0) || (i === 8 && step.part === 'B')) {
+    const sep = document.createElement('div');
+    sep.style.cssText = 'width:100%;text-align:center;font-size:10px;font-weight:700;color:#64748b;padding:4px 0;';
+    sep.textContent = i === 0 ? 'Part A: 데이터/AI' : 'Part B: 스케줄링';
+    if (i === 8) tabsEl.appendChild(sep);
+  }
+
+  const scene = document.createElement('div');
+  scene.className = 'scene' + (i === 0 ? ' active' : '');
+
+  // Info
+  const info = document.createElement('div');
+  info.className = 'info';
+  const labelClass = step.part === 'B' ? 'sched' : 'ai';
+  const tagClass = step.part === 'B' ? 'tag-amber' : 'tag-pink';
+  info.innerHTML = `
+    <div class="label ${labelClass}">${step.id} | Part ${step.part}</div>
+    <h2>${step.title}</h2>
+    <p>${step.desc}</p>
+    <div style="margin-top:8px;">${step.tags.map(t => `<span class="tag ${tagClass}">${t}</span> `).join('')}</div>
+  `;
+  scene.appendChild(info);
+
+  // Device
+  if (step.device === 'phone') {
+    const phone = document.createElement('div');
+    phone.className = 'phone';
+    phone.innerHTML = '<div class="phone-notch"></div>';
+    const screen = document.createElement('div');
+    screen.className = 'phone-screen';
+    step.render(screen);
+    phone.appendChild(screen);
+    scene.appendChild(phone);
+  } else {
+    const browser = document.createElement('div');
+    browser.className = 'browser';
+    const bar = document.createElement('div');
+    bar.className = 'browser-bar';
+    bar.innerHTML = `<span class="browser-dot r"></span><span class="browser-dot y"></span><span class="browser-dot g"></span><span class="browser-url">${step.url||''}</span>`;
+    const content = document.createElement('div');
+    content.className = 'browser-content';
+    content.style.padding = '0';
+    step.render(content);
+    browser.appendChild(bar);
+    browser.appendChild(content);
+    scene.appendChild(browser);
+  }
+
+  scenesEl.appendChild(scene);
+});
+
+// Part B separator in tabs
+const allTabs = tabsEl.querySelectorAll('.tab');
+if (allTabs.length > 8) {
+  const sep = document.createElement('div');
+  sep.style.cssText = 'width:100%;text-align:center;font-size:10px;font-weight:700;color:#64748b;padding:2px 0;margin-top:4px;';
+  sep.textContent = '--- Part B: 스케줄링 ---';
+  tabsEl.insertBefore(sep, allTabs[8]);
+}
+
+function showStep(idx) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  document.querySelectorAll('.scene').forEach((s, i) => s.classList.toggle('active', i === idx));
+}
+</script>
+</body>
+</html>
