@@ -1,0 +1,33 @@
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+
+# Database
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+
+# Settings
+pydantic-settings==2.7.0
+pydantic[email]==2.10.3
+
+# Auth
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Redis
+redis==5.2.1
+
+# HTTP client
+httpx==0.28.1
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.25.0
+pytest-cov==6.0.0
+fakeredis==2.26.2
+httpx==0.28.1
+
+# Linting/Formatting (dev)
+ruff==0.8.4
+black==24.10.0

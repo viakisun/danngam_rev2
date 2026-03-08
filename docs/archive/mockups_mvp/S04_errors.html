@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S04 — 오류 및 경계값 | 단감 목업</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
+  .header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 16px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .header-badge { background: #dc2626; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+  .header-title { font-size: 16px; font-weight: 700; color: #0f172a; }
+  .header-sub { font-size: 12px; color: #64748b; margin-left: auto; }
+  .tabs { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 24px; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 10px 11px; font-size: 11px; font-weight: 500; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; }
+  .tab:hover { color: #7c3aed; }
+  .tab.active { color: #7c3aed; border-bottom-color: #7c3aed; font-weight: 600; }
+  .tab.ok { color: #16a34a; }
+  .tab.ok.active { color: #16a34a; border-bottom-color: #16a34a; }
+  .tab.err { color: #dc2626; }
+  .tab.err.active { color: #dc2626; border-bottom-color: #dc2626; }
+  .main { display: flex; gap: 32px; padding: 32px; max-width: 1100px; margin: 0 auto; align-items: flex-start; }
+  .phone-wrap { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .phone-label { font-size: 11px; color: #94a3b8; font-weight: 500; text-align: center; }
+  .phone { width: 320px; height: 680px; background: #1a1a2e; border-radius: 50px; padding: 14px; box-shadow: 0 0 0 2px #2d2d44, 0 20px 60px rgba(0,0,0,0.35); position: relative; }
+  .phone-inner { width: 100%; height: 100%; background: #fff; border-radius: 38px; overflow: hidden; display: flex; flex-direction: column; }
+  .status-bar { background: #fff; height: 44px; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 20px 8px; flex-shrink: 0; }
+  .status-time { font-size: 13px; font-weight: 600; color: #0f172a; }
+  .notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 100px; height: 28px; background: #1a1a2e; border-radius: 0 0 18px 18px; z-index: 10; }
+  .screen { flex: 1; overflow-y: auto; scrollbar-width: none; }
+  .screen::-webkit-scrollbar { display: none; }
+  .home-bar { height: 28px; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .home-bar-line { width: 100px; height: 4px; background: #1a1a2e; border-radius: 2px; opacity: 0.25; }
+  .info-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .step-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .step-id { font-size: 11px; font-weight: 700; color: #64748b; background: #f1f5f9; padding: 3px 8px; border-radius: 4px; }
+  .step-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+  .step-desc { font-size: 13px; color: #475569; line-height: 1.6; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; }
+  .badge-ok { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; color: #16a34a; background: #dcfce7; padding: 3px 10px; border-radius: 20px; }
+  .badge-err { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; color: #dc2626; background: #fee2e2; padding: 3px 10px; border-radius: 20px; }
+  .badge-warn { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; color: #d97706; background: #fef3c7; padding: 3px 10px; border-radius: 20px; }
+  .category-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #f3e8ff; color: #7c3aed; }
+  .api-block { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+  .api-block-header { padding: 10px 14px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; color: #64748b; }
+  .method { padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+  .method.post { background: #bbf7d0; color: #166534; }
+  .method.get { background: #bfdbfe; color: #1d4ed8; }
+  .method.patch { background: #fed7aa; color: #c2410c; }
+  .method.ws { background: #f3e8ff; color: #7c3aed; }
+  .path { font-size: 12px; font-weight: 600; color: #0f172a; font-family: 'Courier New', monospace; }
+  .code-block { padding: 12px 14px; font-size: 11px; font-family: 'Courier New', monospace; line-height: 1.7; max-height: 220px; overflow-y: auto; }
+  .code-block.req { background: #1e293b; color: #94a3b8; }
+  .code-block.res { background: #0f172a; color: #94a3b8; }
+  .k { color: #7dd3fc; } .vs { color: #86efac; } .vn { color: #fbbf24; } .vb-t { color: #4ade80; } .vb-f { color: #f87171; } .err-val { color: #f87171; } .ok-val { color: #4ade80; }
+  .code-sep { height: 1px; background: #1e293b; }
+  .nav { display: flex; align-items: center; justify-content: space-between; padding-top: 8px; }
+  .nav-btn { padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #e2e8f0; background: #fff; color: #475569; transition: all 0.15s; }
+  .nav-btn:hover { background: #f1f5f9; }
+  .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .nav-btn.primary { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+  .nav-btn.primary:hover { background: #6d28d9; }
+  .nav-counter { font-size: 12px; color: #94a3b8; }
+
+  /* App components */
+  .app-bar { background: #7c3aed; color: #fff; padding: 10px 16px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
+  .app-bar.green { background: #16a34a; }
+  .app-bar.red { background: #dc2626; }
+  .app-bar.blue { background: #2563eb; }
+  .app-bar-sub { font-size: 10px; opacity: 0.8; }
+  .section-padding { padding: 12px 14px; }
+  .form-group { margin-bottom: 10px; }
+  .label { font-size: 10px; font-weight: 600; color: #64748b; margin-bottom: 3px; }
+  .field { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #0f172a; }
+  .field.ok { border-color: #16a34a; }
+  .field.err { border-color: #dc2626; }
+  .field.warn { border-color: #f59e0b; }
+  .divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+  .error-toast { background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 10px; padding: 12px 14px; }
+  .error-title { font-size: 12px; font-weight: 700; color: #dc2626; }
+  .error-msg { font-size: 11px; color: #ef4444; margin-top: 3px; line-height: 1.4; }
+  .error-code { font-size: 9px; font-family: monospace; background: #fee2e2; color: #dc2626; padding: 1px 5px; border-radius: 3px; margin-top: 4px; display: inline-block; }
+  .success-banner { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 10px 12px; }
+  .success-title { font-size: 12px; font-weight: 700; color: #166534; }
+  .success-msg { font-size: 11px; color: #16a34a; margin-top: 3px; line-height: 1.4; }
+  .warn-banner { background: #fff8ed; border: 1.5px solid #fde68a; border-radius: 10px; padding: 10px 12px; }
+  .warn-title { font-size: 12px; font-weight: 700; color: #d97706; }
+  .warn-msg { font-size: 11px; color: #d97706; margin-top: 3px; line-height: 1.4; }
+  .info-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 4px 0; }
+  .info-key { color: #64748b; }
+  .info-val { color: #0f172a; font-weight: 600; font-family: monospace; }
+  .info-val.green { color: #16a34a; }
+  .info-val.red { color: #dc2626; }
+  .info-val.orange { color: #d97706; }
+  .btn { width: 100%; padding: 11px; border-radius: 10px; font-size: 13px; font-weight: 600; text-align: center; cursor: pointer; border: none; }
+  .btn-purple { background: #7c3aed; color: #fff; }
+  .btn-green { background: #16a34a; color: #fff; }
+  .char-count { font-size: 10px; text-align: right; margin-top: 3px; }
+  .char-ok { color: #16a34a; }
+  .char-err { color: #dc2626; }
+  .msg-preview { font-size: 11px; font-family: monospace; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; line-height: 1.5; word-break: break-all; }
+  .tag { display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .tag-ok { background: #dcfce7; color: #16a34a; }
+  .tag-err { background: #fee2e2; color: #dc2626; }
+  .tag-warn { background: #fef3c7; color: #d97706; }
+  .http-status { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+  .http-200 { background: #dcfce7; color: #16a34a; }
+  .http-400 { background: #fee2e2; color: #dc2626; }
+  .http-401 { background: #fee2e2; color: #dc2626; }
+  .http-403 { background: #fef3c7; color: #d97706; }
+  .radius-viz { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+  .circle-big { width: 60px; height: 60px; border-radius: 50%; border: 2px dashed #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #d97706; text-align: center; }
+  .circle-small { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #16a34a; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #16a34a; text-align: center; }
+  .payment-row { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-badge">오류/경계값</span>
+  <span class="header-title">시나리오 4 — 오류 처리 및 경계값 테스트</span>
+  <span class="header-sub">단감(DAN-GAM) · 목업 데이터</span>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="phone-inner">
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <span style="font-size:11px;">📶 🔋</span>
+        </div>
+        <div class="screen" id="phone-screen"></div>
+        <div class="home-bar"><div class="home-bar-line"></div></div>
+      </div>
+    </div>
+    <div class="phone-label" id="phone-user-label"></div>
+  </div>
+
+  <div class="info-panel">
+    <div class="step-header">
+      <span class="step-id" id="step-id-badge"></span>
+      <span id="status-badge"></span>
+      <span id="category-badge"></span>
+      <span id="http-badge"></span>
+    </div>
+    <div class="step-title" id="step-title"></div>
+    <div class="step-desc" id="step-desc"></div>
+    <div class="api-block">
+      <div class="api-block-header">
+        <span class="method" id="api-method"></span>
+        <span class="path" id="api-path"></span>
+      </div>
+      <div class="code-block req" id="api-request"></div>
+      <div class="code-sep"></div>
+      <div class="code-block res" id="api-response"></div>
+    </div>
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" onclick="navigate(-1)">← 이전</button>
+      <span class="nav-counter" id="nav-counter"></span>
+      <button class="nav-btn primary" id="btn-next" onclick="navigate(1)">다음 →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STEPS = [
+  {
+    id:'S04-01', title:'1000자 메시지 전송 — 성공', ok:true, cat:'경계값', http:'200',
+    desc:'채팅 메시지의 최대 길이(MESSAGE_MAX_LENGTH=1000)에 정확히 맞는 메시지를 전송합니다. 정상적으로 브로드캐스트됩니다.',
+    method:'WS', path:'/api/v1/chat/ws/chat/{room_id}?token=...',
+    request:`{
+  <span class="k">"type"</span>: <span class="vs">"message"</span>,
+  <span class="k">"content"</span>: <span class="vs">"안녕하세요 이번 벼베기 작업은..."</span>
+  <span style="color:#4b5563">// 정확히 1000자</span>
+}`,
+    response:`{
+  <span class="k">"type"</span>: <span class="vs">"message"</span>,
+  <span class="k">"message_id"</span>: <span class="vs">"msg-uuid-..."</span>,
+  <span class="k">"sender_id"</span>: <span class="vs">"a-user-uuid"</span>,
+  <span class="k">"content"</span>: <span class="vs">"안녕하세요 이번 벼베기 작업은..."</span>,
+  <span class="k">"created_at"</span>: <span class="vs">"2026-09-10T10:00:00Z"</span>
+}`,
+    userLabel:'사용자 A — 김민준',
+    screen:`<div style="height:100%;display:flex;flex-direction:column;">
+      <div class="app-bar green" style="display:flex;gap:8px;align-items:center;font-size:13px;">
+        채팅방 — 이철수
+      </div>
+      <div style="flex:1;padding:10px 14px;background:#f8fafc;">
+        <div style="margin-bottom:8px;display:flex;flex-direction:column;align-items:flex-end;">
+          <div style="max-width:220px;padding:8px 12px;border-radius:18px 18px 4px 18px;background:#16a34a;color:#fff;font-size:11px;line-height:1.4;">
+            안녕하세요 이번 벼베기 작업은 정말 잘 해주셔서 감사합니다. 내년에도 꼭 연락드리겠습니다. 논산 지역에서 이렇게 빠른 분은 처음 봤어요... <span style="opacity:0.7;">[+870자]</span>
+          </div>
+          <div style="font-size:9px;color:#94a3b8;margin-top:2px;">✓✓ 전송됨</div>
+        </div>
+      </div>
+      <div style="background:#fff;border-top:1px solid #f1f5f9;padding:8px 12px;">
+        <div style="display:flex;gap:6px;align-items:center;">
+          <div style="flex:1;background:#f8fafc;border:1px solid #16a34a;border-radius:20px;padding:8px 12px;font-size:11px;color:#16a34a;font-weight:600;">
+            1000/1000자
+          </div>
+          <div style="width:32px;height:32px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">→</div>
+        </div>
+        <div class="success-banner" style="margin-top:6px;">
+          <div class="success-title">✓ 1000자 메시지 전송 성공</div>
+          <div class="success-msg">최대 길이(1,000자)에 정확히 맞는 메시지가 전송되었습니다.</div>
+        </div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S04-02', title:'1001자 메시지 전송 — 거부', ok:false, cat:'경계값', http:'WS ERR',
+    desc:'1,001자 메시지를 전송하면 WebSocket에서 오류 메시지로 응답합니다. 메시지는 DB에 저장되지 않습니다.',
+    method:'WS', path:'/api/v1/chat/ws/chat/{room_id}?token=...',
+    request:`{
+  <span class="k">"type"</span>: <span class="vs">"message"</span>,
+  <span class="k">"content"</span>: <span class="vs">"a" * 1001</span>  <span style="color:#f87171">// 1001자!</span>
+}`,
+    response:`<span style="color:#f87171">// WebSocket 오류 응답 (HTTP가 아님)</span>
+{
+  <span class="k">"type"</span>: <span class="vs">"error"</span>,
+  <span class="k">"error"</span>: <span class="err-val">"메시지는 1000자를 초과할 수 없습니다."</span>
+}`,
+    userLabel:'사용자 A — 김민준',
+    screen:`<div style="height:100%;display:flex;flex-direction:column;">
+      <div class="app-bar green" style="font-size:13px;">채팅방 — 이철수</div>
+      <div style="flex:1;padding:10px 14px;background:#f8fafc;">
+        <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;padding:10px 12px;font-size:11px;color:#dc2626;display:flex;align-items:flex-start;gap:6px;">
+          <span>⚠️</span>
+          <div>메시지는 1000자를 초과할 수 없습니다. (현재 1001자)</div>
+        </div>
+      </div>
+      <div style="background:#fff;border-top:1px solid #f1f5f9;padding:8px 12px;">
+        <div style="display:flex;gap:6px;align-items:center;">
+          <div style="flex:1;background:#fef2f2;border:1.5px solid #dc2626;border-radius:20px;padding:8px 12px;font-size:11px;color:#dc2626;font-weight:600;">
+            1001/1000자 ⚠️
+          </div>
+          <div style="width:32px;height:32px;background:#d1d5db;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">→</div>
+        </div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S04-03', title:'반경 100km 요청 → 30km clamping', ok:true, cat:'경계값', http:'200',
+    desc:'radius_km=100 요청 시 서버에서 MAX_RADIUS_KM=30km로 자동 clamping합니다. 오류 없이 30km 기준 결과를 반환합니다.',
+    method:'GET', path:'/api/v1/jobs?lat=36.19&lng=127.09&radius_km=100',
+    request:`<span style="color:#64748b">// radius_km=100 (MAX=30, 자동 clamping)</span>
+lat=<span class="vn">36.19</span>
+lng=<span class="vn">127.09</span>
+radius_km=<span class="vn">100</span>  <span style="color:#fbbf24">// → 30으로 clamped</span>`,
+    response:`{
+  <span class="k">"success"</span>: <span class="vb-t">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"items"</span>: [{
+      <span class="k">"title"</span>: <span class="ok-val">"논산 벼베기 작업 구합니다"</span>,
+      <span class="k">"distance_km"</span>: <span class="vn">0.0</span>
+    }],
+    <span class="k">"applied_radius_km"</span>: <span class="vn">30</span>  <span style="color:#4b5563">// clamped</span>
+  },
+  <span class="k">"error"</span>: <span class="vb-f">null</span>
+}`,
+    userLabel:'사용자 B — 이철수 (반경 테스트)',
+    screen:`<div>
+      <div class="app-bar" style="background:#f59e0b;font-size:13px;">주변 작업 <span style="font-size:10px;opacity:0.8;">100km 요청 → 30km 적용</span></div>
+      <div class="section-padding">
+        <div class="warn-banner" style="margin-bottom:10px;">
+          <div class="warn-title">⚠️ 반경 자동 조정됨</div>
+          <div class="warn-msg">요청 반경(100km)이 최대값을 초과하여 30km로 적용되었습니다.</div>
+        </div>
+        <div class="radius-viz">
+          <div>
+            <div class="circle-big">요청<br>100km</div>
+          </div>
+          <div style="font-size:14px;color:#94a3b8;">→</div>
+          <div>
+            <div class="circle-small" style="width:48px;height:48px;">적용<br>30km</div>
+          </div>
+          <div style="font-size:11px;color:#64748b;">clamping</div>
+        </div>
+        <div class="info-row"><span class="info-key">요청값</span><span class="info-val red">100km</span></div>
+        <div class="info-row"><span class="info-key">MAX 제한</span><span class="info-val">30km</span></div>
+        <div class="info-row"><span class="info-key">적용값</span><span class="info-val green">30km (clamped)</span></div>
+        <div class="divider"></div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px;">30km 내 결과 (1건)</div>
+        <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;">
+          <div style="font-size:12px;font-weight:700;color:#0f172a;">논산 벼베기 작업 구합니다</div>
+          <div style="font-size:10px;color:#64748b;margin-top:2px;">0.0km · OPEN</div>
+        </div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S04-04', title:'WORKER 역할로 작업 등록 시도 → 403', ok:false, cat:'권한', http:'403',
+    desc:'current_role=WORKER인 사용자가 작업 등록을 시도하면 권한 오류가 반환됩니다. 의뢰자 역할로 전환 후에만 등록 가능합니다.',
+    method:'POST', path:'/api/v1/jobs',
+    request:`{
+  <span class="k">"title"</span>: <span class="vs">"벼베기 작업 등록"</span>,
+  ...
+}
+<span style="color:#4b5563">// 사용자의 current_role = "WORKER"</span>`,
+    response:`<span style="color:#f87171">HTTP 403 Forbidden</span>
+
+{
+  <span class="k">"success"</span>: <span class="vb-f">false</span>,
+  <span class="k">"data"</span>: <span class="vb-f">null</span>,
+  <span class="k">"error"</span>: {
+    <span class="k">"code"</span>: <span class="err-val">"DNNG-MATCH-002"</span>,
+    <span class="k">"message"</span>: <span class="err-val">"의뢰자 역할에서만 작업을 등록할 수 있습니다."</span>
+  }
+}`,
+    userLabel:'사용자 B — 이철수 (WORKER 역할)',
+    screen:`<div>
+      <div class="app-bar red" style="font-size:13px;">작업 등록 — 권한 없음</div>
+      <div class="section-padding">
+        <div class="error-toast">
+          <div class="error-title">🔒 권한이 없습니다</div>
+          <div class="error-msg">의뢰자(REQUESTER) 역할에서만 작업을 등록할 수 있습니다. 현재 역할: WORKER</div>
+          <div class="error-code">DNNG-MATCH-002</div>
+        </div>
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px;margin-top:10px;">
+          <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:6px;">💡 역할 전환이 필요합니다</div>
+          <div style="font-size:10px;color:#2563eb;line-height:1.5;">
+            현재 역할: <strong>작업자(WORKER)</strong><br>
+            작업 등록은 <strong>의뢰자(REQUESTER)</strong> 역할로 전환 후 가능합니다.
+          </div>
+        </div>
+        <div class="btn btn-green" style="margin-top:10px;">의뢰자로 역할 전환</div>
+        <div style="font-size:10px;color:#64748b;text-align:center;margin-top:6px;">PATCH /api/v1/users/me/role-switch</div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S04-05', title:'타인 작업에 applicant select 시도 → 403', ok:false, cat:'권한', http:'403',
+    desc:'작업 소유자가 아닌 사용자가 select_applicant를 호출하면 DNNG-MATCH-005 오류가 반환됩니다.',
+    method:'POST', path:'/api/v1/jobs/{job_id}/applications/{user_id}/select',
+    request:`<span style="color:#4b5563">// job.requester_id = A의 UUID
+// 호출자 = B (작업자, 소유자 아님)</span>`,
+    response:`<span style="color:#f87171">HTTP 403 Forbidden</span>
+
+{
+  <span class="k">"success"</span>: <span class="vb-f">false</span>,
+  <span class="k">"data"</span>: <span class="vb-f">null</span>,
+  <span class="k">"error"</span>: {
+    <span class="k">"code"</span>: <span class="err-val">"DNNG-MATCH-005"</span>,
+    <span class="k">"message"</span>: <span class="err-val">"작업 의뢰자만 지원자를 선택할 수 있습니다."</span>
+  }
+}`,
+    userLabel:'사용자 B — 이철수 (작업자, 소유자 아님)',
+    screen:`<div>
+      <div class="app-bar red" style="font-size:13px;">지원자 선택 — 권한 없음</div>
+      <div class="section-padding">
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:10px;">
+          <div style="font-size:11px;color:#64748b;">시도한 작업</div>
+          <div style="font-size:12px;font-weight:700;color:#0f172a;margin-top:2px;">논산 벼베기 작업 구합니다</div>
+          <div style="font-size:10px;color:#dc2626;margin-top:2px;">의뢰자: 김민준 (타인)</div>
+        </div>
+        <div class="error-toast">
+          <div class="error-title">🔒 작업 의뢰자만 가능한 작업입니다</div>
+          <div class="error-msg">지원자 선택은 해당 작업을 등록한 의뢰자만 수행할 수 있습니다.</div>
+          <div class="error-code">DNNG-MATCH-005</div>
+        </div>
+        <div style="margin-top:10px;padding:10px 12px;background:#fff8f0;border:1px solid #fed7aa;border-radius:8px;font-size:10px;color:#c2410c;line-height:1.5;">
+          🔑 권한 체크: <code>job.requester_id == current_user.id</code>
+        </div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S04-06', title:'만료된 access_token 사용 → 401', ok:false, cat:'인증', http:'401',
+    desc:'1시간이 지난 access_token으로 보호된 엔드포인트에 접근 시 401 Unauthorized가 반환됩니다. 클라이언트는 refresh_token으로 갱신해야 합니다.',
+    method:'GET', path:'/api/v1/users/me',
+    request:`<span style="color:#f87171">Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...</span>
+<span style="color:#4b5563">// exp: 2026-09-10T09:30:00Z (1시간 초과)</span>`,
+    response:`<span style="color:#f87171">HTTP 401 Unauthorized</span>
+
+{
+  <span class="k">"success"</span>: <span class="vb-f">false</span>,
+  <span class="k">"data"</span>: <span class="vb-f">null</span>,
+  <span class="k">"error"</span>: {
+    <span class="k">"code"</span>: <span class="err-val">"DNNG-AUTH-002"</span>,
+    <span class="k">"message"</span>: <span class="err-val">"인증이 만료되었습니다. 다시 로그인해주세요."</span>
+  }
+}`,
+    userLabel:'사용자 A — 김민준 (토큰 만료)',
+    screen:`<div>
+      <div class="app-bar red" style="font-size:13px;">세션 만료</div>
+      <div class="section-padding">
+        <div style="text-align:center;padding:20px 0;">
+          <div style="font-size:48px;margin-bottom:10px;">⏰</div>
+          <div style="font-size:15px;font-weight:800;color:#dc2626;">세션이 만료되었습니다</div>
+          <div style="font-size:11px;color:#64748b;margin-top:4px;line-height:1.5;">access_token 유효 시간(1h)이 초과되었습니다.</div>
+        </div>
+        <div class="error-toast">
+          <div class="error-title">401 Unauthorized</div>
+          <div class="error-msg">인증이 만료되었습니다. 자동으로 갱신을 시도합니다.</div>
+          <div class="error-code">DNNG-AUTH-002</div>
+        </div>
+        <div class="success-banner" style="margin-top:8px;">
+          <div class="success-title">🔄 자동 갱신 시도 중...</div>
+          <div class="success-msg">refresh_token으로 새 access_token을 발급합니다. (S01-04)</div>
+        </div>
+        <div style="margin-top:10px;font-size:10px;color:#94a3b8;text-align:center;line-height:1.5;">
+          갱신 실패 시 로그인 화면으로 이동합니다
+        </div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S04-07', title:'정산 기록 → 확인 (M08 PAYMENT)', ok:true, cat:'정산', http:'200',
+    desc:'의뢰자가 협의 금액(150,000원)을 기록하고 최종 확인합니다. 정산 상태가 PENDING → CONFIRMED로 변경됩니다.',
+    method:'PATCH', path:'/api/v1/jobs/{job_id}/payment',
+    request:`{
+  <span class="k">"agreed_amount"</span>: <span class="vn">150000</span>,
+  <span class="k">"notes"</span>: <span class="vs">"3000평 × 50원"</span>
+}`,
+    response:`{
+  <span class="k">"success"</span>: <span class="vb-t">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"id"</span>: <span class="vs">"pay-uuid-..."</span>,
+    <span class="k">"agreed_amount"</span>: <span class="vn">150000</span>,
+    <span class="k">"status"</span>: <span class="vs">"PENDING"</span>
+  },
+  <span class="k">"error"</span>: <span class="vb-f">null</span>
+}`,
+    userLabel:'사용자 A — 김민준 (의뢰자)',
+    screen:`<div>
+      <div class="app-bar" style="background:#7c3aed;font-size:13px;">정산 관리</div>
+      <div class="section-padding">
+        <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:8px;">논산 벼베기 작업</div>
+        <div class="payment-row" style="margin-bottom:8px;">
+          <div class="info-row"><span class="info-key">협의 금액</span><span class="info-val green" style="font-size:16px;font-weight:800;">150,000원</span></div>
+          <div class="info-row"><span class="info-key">메모</span><span class="info-val">3000평 × 50원</span></div>
+          <div class="info-row"><span class="info-key">작업자</span><span class="info-val">이철수</span></div>
+          <div class="info-row"><span class="info-key">상태</span><span class="info-val orange">PENDING</span></div>
+        </div>
+        <div class="btn" style="background:#7c3aed;color:#fff;margin-bottom:6px;padding:10px;">정산 확인 완료</div>
+        <div class="success-banner">
+          <div class="success-title">✓ 정산 확인 완료 (CONFIRMED)</div>
+          <div class="success-msg">POST /api/v1/jobs/{id}/payment/confirm 처리됨. confirmed_at 기록.</div>
+        </div>
+        <div style="margin-top:8px;" class="info-row">
+          <span class="info-key">confirmed_at</span>
+          <span class="info-val green">2026-09-15T15:30:00Z</span>
+        </div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S04-08', title:'FCM 토큰 등록 (M06 NOTIFY)', ok:true, cat:'알림', http:'200',
+    desc:'FCM 푸시 알림을 위한 디바이스 토큰을 등록합니다. 실제 FCM 발송은 TODO:Lv2이며, 현재는 DB에 저장만 합니다.',
+    method:'POST', path:'/api/v1/notifications/fcm-token',
+    request:`{
+  <span class="k">"token"</span>: <span class="vs">"fXmA9b...FCM_DEVICE_TOKEN...xK2"</span>,
+  <span class="k">"device_type"</span>: <span class="vs">"android"</span>
+}`,
+    response:`{
+  <span class="k">"success"</span>: <span class="vb-t">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"message"</span>: <span class="ok-val">"FCM 토큰이 등록되었습니다."</span>
+  },
+  <span class="k">"error"</span>: <span class="vb-f">null</span>
+}`,
+    userLabel:'사용자 A — 김민준 (Android)',
+    screen:`<div>
+      <div class="app-bar" style="background:#16a34a;font-size:13px;">알림 설정</div>
+      <div class="section-padding">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f1f5f9;margin-bottom:10px;">
+          <div style="width:44px;height:44px;background:#f0fdf4;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;">🔔</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;">푸시 알림</div>
+            <div style="font-size:10px;color:#64748b;margin-top:1px;">새 작업, 매칭, 채팅 알림</div>
+          </div>
+          <div style="margin-left:auto;width:40px;height:22px;background:#16a34a;border-radius:11px;"></div>
+        </div>
+        <div class="success-banner">
+          <div class="success-title">✓ FCM 토큰 등록 완료</div>
+          <div class="success-msg">이 기기로 푸시 알림을 수신할 수 있습니다.</div>
+        </div>
+        <div style="margin-top:10px;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+          <div style="font-size:10px;color:#64748b;margin-bottom:4px;">디바이스</div>
+          <div class="info-row"><span class="info-key">타입</span><span class="info-val">Android</span></div>
+          <div class="info-row"><span class="info-key">토큰 저장</span><span class="info-val green">완료</span></div>
+          <div class="info-row"><span class="info-key">실제 FCM 발송</span><span class="info-val orange">TODO: Lv2</span></div>
+        </div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S04-09', title:'일반 사용자 admin 엔드포인트 접근 → 403', ok:false, cat:'권한', http:'403',
+    desc:'is_admin=false인 일반 사용자가 /admin/* 엔드포인트에 접근하면 DNNG-ADMIN-001 오류가 반환됩니다.',
+    method:'GET', path:'/api/v1/admin/stats',
+    request:`<span style="color:#4b5563">// Authorization: Bearer &lt;일반 사용자 token&gt;
+// is_admin = false</span>`,
+    response:`<span style="color:#f87171">HTTP 403 Forbidden</span>
+
+{
+  <span class="k">"success"</span>: <span class="vb-f">false</span>,
+  <span class="k">"data"</span>: <span class="vb-f">null</span>,
+  <span class="k">"error"</span>: {
+    <span class="k">"code"</span>: <span class="err-val">"DNNG-ADMIN-001"</span>,
+    <span class="k">"message"</span>: <span class="err-val">"관리자 권한이 필요합니다."</span>
+  }
+}`,
+    userLabel:'사용자 A — 김민준 (일반 사용자)',
+    screen:`<div>
+      <div class="app-bar red" style="font-size:13px;">관리자 페이지</div>
+      <div class="section-padding">
+        <div style="text-align:center;padding:20px 0;">
+          <div style="font-size:48px;margin-bottom:10px;">🔒</div>
+          <div style="font-size:15px;font-weight:800;color:#dc2626;">접근 권한 없음</div>
+          <div style="font-size:11px;color:#64748b;margin-top:4px;">관리자 계정으로만 접근 가능합니다.</div>
+        </div>
+        <div class="error-toast">
+          <div class="error-title">403 Forbidden</div>
+          <div class="error-msg">관리자 권한이 필요합니다. 현재 계정(김민준)은 일반 사용자입니다.</div>
+          <div class="error-code">DNNG-ADMIN-001</div>
+        </div>
+        <div style="margin-top:10px;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:10px;color:#64748b;line-height:1.5;">
+          🔑 권한 체크: <code>require_admin()</code> dependency<br>
+          조건: <code>User.is_admin == True</code>
+        </div>
+      </div>
+    </div>`
+  }
+];
+
+let current = 0;
+
+function renderTabs() {
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = STEPS.map((s, i) => {
+    let cls = s.ok ? 'ok' : 'err';
+    if (i === current) cls += ' active';
+    return `<div class="tab ${cls}" onclick="goTo(${i})">${s.id}</div>`;
+  }).join('');
+}
+
+function renderStep() {
+  const s = STEPS[current];
+  document.getElementById('phone-screen').innerHTML = s.screen;
+  document.getElementById('phone-user-label').textContent = s.userLabel;
+  document.getElementById('step-id-badge').textContent = s.id;
+  document.getElementById('status-badge').innerHTML = s.ok
+    ? '<span class="badge-ok">✓ 성공</span>'
+    : '<span class="badge-err">✕ 오류</span>';
+  document.getElementById('category-badge').innerHTML = `<span class="category-badge">${s.cat}</span>`;
+  const httpCls = {'200':'http-200','403':'http-403','401':'http-401','400':'http-400','WS ERR':'http-400'}[s.http] || '';
+  document.getElementById('http-badge').innerHTML = `<span class="http-status ${httpCls}">${s.http}</span>`;
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-desc').textContent = s.desc;
+  const m = document.getElementById('api-method');
+  m.textContent = s.method; m.className = 'method ' + s.method.toLowerCase();
+  document.getElementById('api-path').textContent = s.path;
+  document.getElementById('api-request').innerHTML = s.request;
+  const r = document.getElementById('api-response');
+  r.innerHTML = s.response; r.className = 'code-block res ' + (s.ok ? 'ok' : 'err');
+  document.getElementById('nav-counter').textContent = `${current + 1} / ${STEPS.length}`;
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').disabled = current === STEPS.length - 1;
+  renderTabs();
+}
+
+function goTo(i) { current = i; renderStep(); }
+function navigate(d) { if (current + d >= 0 && current + d < STEPS.length) goTo(current + d); }
+renderStep();
+</script>
+</body>
+</html>

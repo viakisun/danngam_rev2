@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>단감(DAN-GAM) 구현 현황 보고서</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #16a34a;
+    --green-light: #dcfce7;
+    --green-dark: #166534;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --yellow: #fbbf24;
+    --yellow-light: #fef9c3;
+    --red: #dc2626;
+    --red-light: #fee2e2;
+    --blue-light: #eff6ff;
+    --blue: #2563eb;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--gray-900);
+    background: white;
+    line-height: 1.6;
+  }
+
+  /* ── 표지 ── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 40px;
+    background: linear-gradient(160deg, #f0fdf4 0%, #fff 60%);
+    page-break-after: always;
+  }
+  .cover-badge {
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 99px;
+    margin-bottom: 24px;
+  }
+  .cover-title {
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+  .cover-sub {
+    font-size: 18px;
+    color: var(--gray-500);
+    margin-bottom: 4px;
+  }
+  .cover-desc {
+    font-size: 14px;
+    color: var(--gray-400);
+    margin-bottom: 48px;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 40px;
+    border-top: 1px solid var(--gray-200);
+    padding-top: 32px;
+    width: 100%;
+    max-width: 560px;
+  }
+  .cover-meta-item { text-align: center; }
+  .cover-meta-label { font-size: 11px; color: var(--gray-400); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .cover-meta-value { font-size: 14px; font-weight: 600; color: var(--gray-700); }
+
+  /* ── 공통 섹션 ── */
+  .section {
+    padding: 40px 48px;
+    border-bottom: 1px solid var(--gray-100);
+    page-break-inside: avoid;
+  }
+  .section:last-child { border-bottom: none; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .section-num {
+    width: 28px;
+    height: 28px;
+    background: var(--green);
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+  .section-sub {
+    font-size: 11px;
+    color: var(--gray-400);
+    margin-left: auto;
+  }
+
+  /* ── 뱃지 ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    white-space: nowrap;
+  }
+  .badge-done { background: var(--green-light); color: var(--green-dark); }
+  .badge-stub { background: var(--gray-100); color: var(--gray-500); }
+  .badge-partial { background: var(--yellow-light); color: #92400e; }
+
+  /* ── 테이블 ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  th {
+    background: var(--gray-50);
+    color: var(--gray-500);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--gray-50); }
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--green-dark); }
+  .muted { color: var(--gray-400); font-size: 11px; }
+
+  /* ── 진행률 바 ── */
+  .progress-bar {
+    height: 6px;
+    background: var(--gray-100);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 4px;
+    width: 80px;
+    display: inline-block;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 99px;
+  }
+
+  /* ── 스택 태그 ── */
+  .tag {
+    display: inline-block;
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin: 2px 2px 2px 0;
+  }
+  .tag-green { background: var(--green-light); color: var(--green-dark); }
+
+  /* ── 디렉토리 트리 ── */
+  .tree {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 20px 24px;
+    line-height: 1.8;
+    color: var(--gray-700);
+  }
+  .tree .dir { color: var(--green-dark); font-weight: 600; }
+  .tree .file { color: var(--gray-500); }
+  .tree .comment { color: var(--gray-400); font-style: italic; }
+
+  /* ── 코드 블록 ── */
+  .code-block {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .code-block .kw { color: #93c5fd; }
+  .code-block .fn { color: #86efac; }
+  .code-block .st { color: #fcd34d; }
+  .code-block .cm { color: #64748b; font-style: italic; }
+  .code-block .nu { color: #f9a8d4; }
+
+  /* ── 요약 카드 ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .summary-card {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .summary-card-num {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .summary-card-label {
+    font-size: 11px;
+    color: var(--gray-500);
+  }
+
+  /* ── 체크리스트 ── */
+  .checklist { list-style: none; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 12px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .check-label { color: var(--gray-700); }
+  .check-detail { color: var(--gray-400); font-size: 11px; margin-top: 1px; }
+
+  /* ── 2열 레이아웃 ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .card {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-700);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  /* ── 폰 프레임 ── */
+  .screen-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+  .screen-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .screen-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-700);
+    text-align: center;
+  }
+  .screen-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-top: 2px;
+    display: inline-block;
+  }
+  .screen-badge-done { background: var(--green-light); color: var(--green-dark); }
+  .screen-badge-stub { background: var(--gray-100); color: var(--gray-500); }
+
+  .phone-frame {
+    position: relative;
+    width: 180px;
+    background: #1f2937;
+    border-radius: 28px;
+    padding: 7px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    flex-shrink: 0;
+  }
+  .phone-notch {
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 56px;
+    height: 14px;
+    background: #1f2937;
+    border-radius: 0 0 10px 10px;
+    z-index: 10;
+  }
+  .phone-inner {
+    background: white;
+    border-radius: 21px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 360px;
+  }
+  .phone-statusbar {
+    height: 28px;
+    background: #f9fafb;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 14px 4px;
+    font-size: 8px;
+    color: var(--gray-500);
+    font-weight: 600;
+    flex-shrink: 0;
+    padding-top: 14px;
+  }
+  .phone-content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-appbar {
+    height: 40px;
+    background: white;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-900);
+    flex-shrink: 0;
+  }
+  .phone-body {
+    flex: 1;
+    background: #f9fafb;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .phone-home-bar {
+    height: 16px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .phone-home-indicator {
+    width: 60px;
+    height: 4px;
+    background: var(--gray-200);
+    border-radius: 99px;
+  }
+
+  /* 로그인 화면 컴포넌트 */
+  .mock-field {
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 10px;
+    color: var(--gray-700);
+    background: white;
+    margin-bottom: 7px;
+    position: relative;
+  }
+  .mock-field-label {
+    font-size: 8px;
+    color: var(--gray-400);
+    margin-bottom: 1px;
+  }
+  .mock-btn {
+    width: 100%;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+  .mock-btn-text {
+    width: 100%;
+    text-align: center;
+    font-size: 9px;
+    color: var(--green);
+    padding: 4px;
+  }
+  .mock-otp-field {
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 8px;
+    text-align: center;
+    background: white;
+    margin-bottom: 7px;
+    color: var(--gray-900);
+  }
+
+  /* 플레이스홀더 화면 */
+  .placeholder-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 12px;
+    text-align: center;
+  }
+  .placeholder-icon { font-size: 28px; }
+  .placeholder-title { font-size: 12px; font-weight: 600; color: var(--gray-900); }
+  .placeholder-id { font-size: 8px; color: var(--gray-400); }
+  .placeholder-todo {
+    font-size: 8px;
+    color: #d97706;
+    background: #fef9c3;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-top: 3px;
+  }
+
+  /* 브라우저 프레임 (React) */
+  .browser-frame {
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .browser-titlebar {
+    height: 30px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 5px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .browser-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .browser-urlbar {
+    flex: 1;
+    background: white;
+    border-radius: 4px;
+    height: 16px;
+    margin-left: 8px;
+    font-size: 8px;
+    color: var(--gray-400);
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    border: 1px solid var(--gray-200);
+  }
+  .browser-content {
+    background: #f9fafb;
+    height: 240px;
+    overflow: hidden;
+  }
+  .react-login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: #f9fafb;
+  }
+  .react-login-card {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--gray-200);
+    padding: 16px 20px;
+    width: 200px;
+  }
+  .react-sidebar-layout {
+    display: flex;
+    height: 100%;
+  }
+  .react-sidebar {
+    width: 60px;
+    background: white;
+    border-right: 1px solid var(--gray-100);
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .react-sidebar-item {
+    padding: 6px 8px;
+    font-size: 7px;
+    color: var(--gray-500);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    border-radius: 4px;
+    margin: 0 4px;
+  }
+  .react-sidebar-item.active { background: var(--green-light); color: var(--green-dark); }
+  .react-main { flex: 1; padding: 10px; background: var(--gray-50); }
+  .react-placeholder-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  /* 브라우저 그리드 */
+  .browser-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .browser-item { display: flex; flex-direction: column; gap: 8px; }
+  .browser-item-label { font-size: 11px; font-weight: 600; color: var(--gray-700); }
+
+  /* ── 인쇄 최적화 ── */
+  @media print {
+    body { font-size: 12px; }
+    .cover { min-height: auto; padding: 80px 60px; }
+    .section { padding: 32px 48px; }
+    .summary-grid { grid-template-columns: repeat(4, 1fr); }
+    .two-col { grid-template-columns: 1fr 1fr; }
+    @page { margin: 0; size: A4; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     표지
+════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-badge">Phase 1 MVP · Implementation Report</div>
+  <div class="cover-title">단감</div>
+  <div class="cover-sub">DAN-GAM — 농작업 O2O 플랫폼</div>
+  <div class="cover-desc">농작업 의뢰자와 작업자를 연결하는 양방향 매칭 서비스</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">작성일</div>
+      <div class="cover-meta-value">2026-03-08</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">버전</div>
+      <div class="cover-meta-value">Phase 1 Lv1</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">코드명</div>
+      <div class="cover-meta-value">DNNG</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">유형</div>
+      <div class="cover-meta-value">Type B (BE+FE+Mobile)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     섹션 1 — 전체 구현 현황 요약
+════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div class="section-title">전체 구현 현황 요약</div>
+    <div class="section-sub">as of 2026-03-08</div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-card-num">9<span style="font-size:14px;color:var(--gray-400)">/9</span></div>
+      <div class="summary-card-label">백엔드 모듈 완료</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-num" style="color:#2563eb">7</div>
+      <div class="summary-card-label">DB 마이그레이션 파일</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-num" style="color:#d97706">1<span style="font-size:14px;color:var(--gray-400)">/7</span></div>
+      <div class="summary-card-label">Flutter 화면 구현</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-card-num" style="color:#d97706">1<span style="font-size:14px;color:var(--gray-400)">/8</span></div>
+      <div class="summary-card-label">React 페이지 구현</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>영역</th>
+        <th>구현 상태</th>
+        <th>완성도</th>
+        <th>비고</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Backend (FastAPI)</strong></td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+            <span class="muted">9/9 모듈</span>
+          </div>
+        </td>
+        <td class="muted">M01~M09 전 모듈, 테스트 6개 파일</td>
+      </tr>
+      <tr>
+        <td><strong>DB 마이그레이션 (Alembic)</strong></td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+            <span class="muted">7파일 / 10개 테이블</span>
+          </div>
+        </td>
+        <td class="muted">PostgreSQL 대상, SQLite 테스트용</td>
+      </tr>
+      <tr>
+        <td><strong>Flutter 앱 (Mobile)</strong></td>
+        <td><span class="badge badge-partial">&#9711; 부분</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="progress-bar"><div class="progress-fill" style="width:14%"></div></div>
+            <span class="muted">1/7 화면</span>
+          </div>
+        </td>
+        <td class="muted">LoginScreen 구현, 나머지 PlaceholderScreen</td>
+      </tr>
+      <tr>
+        <td><strong>React Frontend</strong></td>
+        <td><span class="badge badge-partial">&#9711; 부분</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div>
+            <span class="muted">1/8 페이지</span>
+          </div>
+        </td>
+        <td class="muted">Login 구현, API 클라이언트 레이어 완료</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     섹션 2 — 프로젝트 구조
+════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div class="section-title">프로젝트 구조</div>
+  </div>
+
+  <div class="two-col" style="margin-bottom:24px;">
+    <div>
+      <div class="tree">
+<span class="dir">danngam/</span>
+├── <span class="dir">backend/</span>
+│   ├── <span class="dir">app/</span>
+│   │   ├── <span class="dir">models/</span>       <span class="comment"># SQLAlchemy ORM</span>
+│   │   ├── <span class="dir">schemas/</span>      <span class="comment"># Pydantic</span>
+│   │   ├── <span class="dir">routers/</span>      <span class="comment"># API 엔드포인트</span>
+│   │   ├── <span class="dir">services/</span>     <span class="comment"># 비즈니스 로직</span>
+│   │   └── <span class="dir">utils/</span>
+│   ├── <span class="dir">alembic/versions/</span>  <span class="comment"># DB 마이그레이션 7개</span>
+│   └── <span class="dir">tests/</span>           <span class="comment"># pytest 6개 파일</span>
+├── <span class="dir">frontend/</span>
+│   └── <span class="dir">src/</span>
+│       ├── <span class="dir">api/</span>          <span class="comment"># Axios 클라이언트+함수</span>
+│       ├── <span class="dir">pages/</span>        <span class="comment"># React 페이지</span>
+│       ├── <span class="dir">stores/</span>       <span class="comment"># Zustand</span>
+│       └── <span class="dir">components/</span>
+├── <span class="dir">mobile/</span>
+│   └── <span class="dir">lib/</span>
+│       ├── <span class="dir">screens/</span>      <span class="comment"># Flutter 화면 7개</span>
+│       ├── <span class="dir">providers/</span>    <span class="comment"># Riverpod</span>
+│       └── <span class="dir">services/</span>     <span class="comment"># Dio API</span>
+└── <span class="dir">docs/</span>
+    ├── <span class="dir">mockups/</span>      <span class="comment"># HTML 시나리오 목업 4개</span>
+    └── <span class="file">TEST_SCENARIOS.md</span>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-title">Backend 기술 스택</div>
+        <span class="tag tag-green">FastAPI</span>
+        <span class="tag tag-green">Python 3.11</span>
+        <span class="tag tag-green">SQLAlchemy 2.0</span>
+        <span class="tag tag-green">Alembic</span>
+        <span class="tag tag-green">PostgreSQL 16</span>
+        <span class="tag tag-green">Redis 7</span>
+        <span class="tag tag-green">JWT</span>
+        <span class="tag tag-green">WebSocket</span>
+      </div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-title">Frontend 기술 스택</div>
+        <span class="tag">React 18</span>
+        <span class="tag">TypeScript</span>
+        <span class="tag">Vite</span>
+        <span class="tag">Tailwind CSS</span>
+        <span class="tag">Zustand</span>
+        <span class="tag">React Query</span>
+        <span class="tag">Axios</span>
+      </div>
+      <div class="card">
+        <div class="card-title">Mobile 기술 스택</div>
+        <span class="tag" style="background:#e0f2fe;color:#0369a1;">Flutter 3.x</span>
+        <span class="tag" style="background:#e0f2fe;color:#0369a1;">Dart</span>
+        <span class="tag" style="background:#e0f2fe;color:#0369a1;">Riverpod</span>
+        <span class="tag" style="background:#e0f2fe;color:#0369a1;">Dio</span>
+        <span class="tag" style="background:#e0f2fe;color:#0369a1;">go_router</span>
+        <span class="tag" style="background:#e0f2fe;color:#0369a1;">SecureStorage</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     섹션 3 — 백엔드 모듈 구현 현황
+════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div class="section-title">백엔드 모듈 구현 현황 (M01~M09)</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:60px;">모듈</th>
+        <th style="width:90px;">상태</th>
+        <th>핵심 파일</th>
+        <th>주요 엔드포인트</th>
+        <th style="width:120px;">특이사항</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>M01 AUTH</strong></td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td>
+          <span class="mono">routers/auth.py</span><br>
+          <span class="mono">services/sms_service.py</span><br>
+          <span class="mono">utils/jwt.py</span>
+        </td>
+        <td class="muted">
+          POST /auth/sms/send<br>
+          POST /auth/sms/verify<br>
+          POST /auth/token/refresh
+        </td>
+        <td class="muted">MockSMSService (Redis OTP), 5회 실패 차단, 쿨다운 60s</td>
+      </tr>
+      <tr>
+        <td><strong>M02 USER</strong></td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td>
+          <span class="mono">routers/users.py</span><br>
+          <span class="mono">services/user_service.py</span><br>
+          <span class="mono">schemas/user.py</span>
+        </td>
+        <td class="muted">
+          GET /users/me<br>
+          PUT /users/me<br>
+          POST /users/me/role-switch
+        </td>
+        <td class="muted">역할: REQUESTER ↔ WORKER 자유 전환</td>
+      </tr>
+      <tr>
+        <td><strong>M03 MATCHING</strong></td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td>
+          <span class="mono">routers/jobs.py</span><br>
+          <span class="mono">services/matching_service.py</span><br>
+          <span class="mono">utils/geo.py</span>
+        </td>
+        <td class="muted">
+          POST /jobs<br>
+          GET /jobs (GPS 필터)<br>
+          POST /jobs/{id}/applications<br>
+          POST /jobs/{id}/applications/{uid}/select<br>
+          PATCH /jobs/{id}/status
+        </td>
+        <td class="muted">Haversine 거리 계산, 반경 max 30km clamping, cursor 페이지네이션</td>
+      </tr>
+      <tr>
+        <td><strong>M04 DRYING</strong></td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td>
+          <span class="mono">routers/drying.py</span><br>
+          <span class="mono">services/drying_service.py</span><br>
+          <span class="mono">models/drying.py</span>
+        </td>
+        <td class="muted">
+          POST /drying/facilities<br>
+          POST /drying/reservations<br>
+          PATCH /drying/reservations/{id}/approve<br>
+          POST /drying/reservations/{id}/complete
+        </td>
+        <td class="muted">수율 = (산출량/투입량)×100, output&gt;input 오류(DNNG-DRY-003)</td>
+      </tr>
+      <tr>
+        <td><strong>M05 CHAT</strong></td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td>
+          <span class="mono">routers/chat.py</span><br>
+          <span class="mono">models/chat.py</span>
+        </td>
+        <td class="muted">
+          GET /chat/rooms<br>
+          GET /chat/rooms/{id}/messages<br>
+          WS /chat/ws/chat/{roomId}
+        </td>
+        <td class="muted">메시지 1000자 제한, ConnectionManager 실시간 브로드캐스트</td>
+      </tr>
+      <tr>
+        <td><strong>M06 NOTIFY</strong></td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td>
+          <span class="mono">routers/notifications.py</span><br>
+          <span class="mono">services/notification_service.py</span><br>
+          <span class="mono">models/notification.py</span>
+        </td>
+        <td class="muted">
+          GET /notifications<br>
+          PATCH /notifications/{id}/read<br>
+          POST /notifications/fcm-tokens
+        </td>
+        <td class="muted">FCM 토큰 등록, device_type unique constraint</td>
+      </tr>
+      <tr>
+        <td><strong>M07 REVIEW</strong></td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td>
+          <span class="mono">routers/reviews.py</span><br>
+          <span class="mono">services/review_service.py</span><br>
+          <span class="mono">models/review.py</span>
+        </td>
+        <td class="muted">
+          POST /reviews<br>
+          GET /users/{id}/reviews
+        </td>
+        <td class="muted">별점 1~5 CheckConstraint, 작업 완료 후만 작성 가능, avg_rating 자동 갱신</td>
+      </tr>
+      <tr>
+        <td><strong>M08 PAYMENT</strong></td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td>
+          <span class="mono">routers/payments.py</span><br>
+          <span class="mono">schemas/payment.py</span><br>
+          <span class="mono">models/payment.py</span>
+        </td>
+        <td class="muted">
+          POST /payments<br>
+          GET /payments/{id}<br>
+          PATCH /payments/{id}/confirm
+        </td>
+        <td class="muted">금액 협의 기록 + 확인, job_id unique constraint</td>
+      </tr>
+      <tr>
+        <td><strong>M09 ADMIN</strong></td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td>
+          <span class="mono">routers/admin.py</span>
+        </td>
+        <td class="muted">
+          GET /admin/users<br>
+          PATCH /admin/users/{id}/deactivate<br>
+          GET /admin/jobs<br>
+          GET /admin/stats
+        </td>
+        <td class="muted">is_admin 권한 체크, 완료율/통계 계산</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     섹션 4 — DB 스키마 현황
+════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div class="section-title">DB 스키마 현황 (Alembic 마이그레이션)</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>파일</th>
+        <th>생성 테이블</th>
+        <th>주요 컬럼 / 제약조건</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="mono">0001_create_user_table.py</td>
+        <td><span class="tag tag-green">users</span></td>
+        <td class="muted">UUID PK, phone UNIQUE, current_role, refresh_token, is_admin, avg_rating</td>
+      </tr>
+      <tr>
+        <td class="mono">0002_create_job_tables.py</td>
+        <td>
+          <span class="tag tag-green">jobs</span>
+          <span class="tag tag-green">job_applications</span>
+        </td>
+        <td class="muted">jobs: requester_id FK, category, location_lat/lng, area_pyeong, ARRAY(equipment_tags), status, is_urgent<br>job_applications: UNIQUE(job_id, applicant_id)</td>
+      </tr>
+      <tr>
+        <td class="mono">0003_create_drying_tables.py</td>
+        <td>
+          <span class="tag tag-green">drying_facilities</span>
+          <span class="tag tag-green">drying_reservations</span>
+        </td>
+        <td class="muted">reservations: input_kg, output_kg, yield_pct, moisture_pct, color_grade, quality_grade, status(PENDING/APPROVED/COMPLETED)</td>
+      </tr>
+      <tr>
+        <td class="mono">0003b_create_chat_tables.py</td>
+        <td>
+          <span class="tag tag-green">chat_rooms</span>
+          <span class="tag tag-green">chat_messages</span>
+        </td>
+        <td class="muted">chat_rooms: UNIQUE(job_id)<br>chat_messages: content String(1000), is_read</td>
+      </tr>
+      <tr>
+        <td class="mono">0004_create_notifications_table.py</td>
+        <td>
+          <span class="tag tag-green">notifications</span>
+          <span class="tag tag-green">fcm_tokens</span>
+        </td>
+        <td class="muted">fcm_tokens: UNIQUE(user_id, device_type)</td>
+      </tr>
+      <tr>
+        <td class="mono">0005_create_reviews_table.py</td>
+        <td><span class="tag tag-green">reviews</span></td>
+        <td class="muted">CheckConstraint(rating BETWEEN 1 AND 5), UNIQUE(job_id, reviewer_id)<br>+ users 테이블에 avg_rating, is_admin 컬럼 추가</td>
+      </tr>
+      <tr>
+        <td class="mono">0006_create_payments_table.py</td>
+        <td><span class="tag tag-green">payments</span></td>
+        <td class="muted">UNIQUE(job_id), amount, status(PENDING/CONFIRMED)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:16px;padding:12px 16px;background:var(--yellow-light);border-radius:8px;font-size:11px;color:#92400e;">
+    <strong>주의:</strong> ARRAY 타입(equipment_tags, available_crops)은 PostgreSQL 전용. 테스트는 <span style="font-family:monospace;">sqlite+aiosqlite:///:memory:</span> 사용 (ARRAY 컬럼 nullable 처리).
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     섹션 5 — Flutter 앱 구현 현황
+════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div class="section-title">Flutter 앱 구현 현황</div>
+  </div>
+
+  <table style="margin-bottom:24px;">
+    <thead>
+      <tr>
+        <th>화면 (Screen ID)</th>
+        <th>파일</th>
+        <th style="width:100px;">상태</th>
+        <th>구현 내용</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>LoginScreen</strong> <span class="muted">DG-login</span></td>
+        <td class="mono">screens/login_screen.dart</td>
+        <td><span class="badge badge-done">&#10003; 구현됨</span></td>
+        <td class="muted">SMS 발송 → OTP 입력 2-step, 에러 메시지 표시, CircularProgressIndicator 로딩</td>
+      </tr>
+      <tr>
+        <td><strong>HomeScreen</strong> <span class="muted">DG-main-dashboard</span></td>
+        <td class="mono">screens/home_screen.dart</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderScreen — TODO: Lv1 구현 예정</td>
+      </tr>
+      <tr>
+        <td><strong>JobListScreen</strong> <span class="muted">DG-work-list</span></td>
+        <td class="mono">screens/job_list_screen.dart</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderScreen — TODO: Lv1 구현 예정</td>
+      </tr>
+      <tr>
+        <td><strong>JobDetailScreen</strong> <span class="muted">DG-work-detail</span></td>
+        <td class="mono">screens/job_detail_screen.dart</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderScreen (jobId 파라미터 수신)</td>
+      </tr>
+      <tr>
+        <td><strong>JobCreateScreen</strong> <span class="muted">DG-work-create</span></td>
+        <td class="mono">screens/job_create_screen.dart</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderScreen — TODO: Lv1 구현 예정</td>
+      </tr>
+      <tr>
+        <td><strong>ChatScreen</strong> <span class="muted">DG-chat-room</span></td>
+        <td class="mono">screens/chat_screen.dart</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderScreen (roomId 파라미터 수신)</td>
+      </tr>
+      <tr>
+        <td><strong>MyAppsScreen</strong> <span class="muted">DG-my-applications</span></td>
+        <td class="mono">screens/my_apps_screen.dart</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderScreen — TODO: Lv1 구현 예정</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">구현된 서비스 / 프로바이더</div>
+      <ul class="checklist">
+        <li>
+          <span class="check-icon">&#10003;</span>
+          <div>
+            <div class="check-label"><strong>api_service.dart</strong> — ApiService 싱글톤</div>
+            <div class="check-detail">Dio + Bearer 토큰 자동 주입, 401 시 refresh 후 재시도, SecureStorage 연동</div>
+          </div>
+        </li>
+        <li>
+          <span class="check-icon">&#10003;</span>
+          <div>
+            <div class="check-label"><strong>auth_provider.dart</strong> — AuthState Notifier</div>
+            <div class="check-detail">StateNotifier&lt;AuthState&gt;, login/logout, 앱 시작 시 SecureStorage에서 복원</div>
+          </div>
+        </li>
+        <li>
+          <span class="check-icon">&#10003;</span>
+          <div>
+            <div class="check-label"><strong>main.dart</strong> — GoRouter 라우팅</div>
+            <div class="check-detail">AuthStatus 기반 redirect, ProviderScope, 7개 라우트 등록</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">LoginScreen 핵심 코드 구조</div>
+      <div class="code-block"><span class="kw">enum</span> _LoginStep { phone, otp }
+
+<span class="kw">class</span> <span class="fn">_LoginScreenState</span>
+    <span class="kw">extends</span> ConsumerState {
+
+  <span class="cm">// SMS 발송</span>
+  <span class="kw">Future</span>&lt;<span class="kw">void</span>&gt; <span class="fn">_sendSms</span>() <span class="kw">async</span> {
+    <span class="kw">await</span> apiService.dio.<span class="fn">post</span>(
+      <span class="st">'/auth/sms/send'</span>,
+      data: {<span class="st">'phone'</span>: _phoneCtrl.text}
+    );
+    setState(() =&gt; _step = _LoginStep.otp);
+  }
+
+  <span class="cm">// OTP 검증 → 로그인</span>
+  <span class="kw">Future</span>&lt;<span class="kw">void</span>&gt; <span class="fn">_verifyOtp</span>() <span class="kw">async</span> {
+    <span class="kw">final</span> res = <span class="kw">await</span> apiService.dio
+      .<span class="fn">post</span>(<span class="st">'/auth/sms/verify'</span>, ...);
+    <span class="kw">await</span> ref.read(authProvider.notifier)
+      .<span class="fn">login</span>(accessToken, refreshToken);
+    context.<span class="fn">go</span>(<span class="st">'/'</span>);
+  }
+}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     섹션 5-A — Flutter 화면 렌더링
+════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num" style="background:#0369a1;">5A</div>
+    <div class="section-title">Flutter 화면 렌더링</div>
+    <div class="section-sub">실제 코드 기반 재현 · 앱 실행 없이 HTML로 렌더링</div>
+  </div>
+
+  <div class="screen-grid">
+
+    <!-- LoginScreen — phone step -->
+    <div class="screen-item">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="phone-statusbar">
+            <span>9:41</span><span>▲▲▲ 100%</span>
+          </div>
+          <div class="phone-content">
+            <div class="phone-body" style="align-items:stretch;justify-content:center;gap:6px;background:white;">
+              <div style="text-align:center;margin-bottom:8px;">
+                <div style="font-size:22px;font-weight:700;color:var(--green);">단감</div>
+                <div style="font-size:8px;color:var(--gray-400);">농작업 O2O 플랫폼</div>
+              </div>
+              <div class="mock-field">
+                <div class="mock-field-label">휴대폰 번호</div>
+                <div style="font-size:10px;color:var(--gray-400);">01012345678</div>
+              </div>
+              <div class="mock-btn">인증번호 받기</div>
+            </div>
+          </div>
+          <div class="phone-home-bar"><div class="phone-home-indicator"></div></div>
+        </div>
+      </div>
+      <div class="screen-label">LoginScreen<br><span style="font-size:9px;color:var(--gray-400);">전화번호 입력</span></div>
+      <span class="screen-badge screen-badge-done">구현됨</span>
+    </div>
+
+    <!-- LoginScreen — OTP step -->
+    <div class="screen-item">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="phone-statusbar">
+            <span>9:41</span><span>▲▲▲ 100%</span>
+          </div>
+          <div class="phone-content">
+            <div class="phone-body" style="align-items:stretch;justify-content:center;gap:6px;background:white;">
+              <div style="text-align:center;margin-bottom:6px;">
+                <div style="font-size:22px;font-weight:700;color:var(--green);">단감</div>
+              </div>
+              <div style="font-size:8px;color:var(--gray-500);text-align:center;margin-bottom:4px;">01033334444으로<br>인증번호가 발송되었습니다.</div>
+              <div class="mock-field">
+                <div class="mock-field-label">인증번호 6자리</div>
+                <div class="mock-otp-field" style="font-size:13px;letter-spacing:4px;padding:6px;margin:0;">· · · · · ·</div>
+              </div>
+              <div class="mock-btn">로그인</div>
+              <div class="mock-btn-text">번호 다시 입력</div>
+            </div>
+          </div>
+          <div class="phone-home-bar"><div class="phone-home-indicator"></div></div>
+        </div>
+      </div>
+      <div class="screen-label">LoginScreen<br><span style="font-size:9px;color:var(--gray-400);">OTP 입력</span></div>
+      <span class="screen-badge screen-badge-done">구현됨</span>
+    </div>
+
+    <!-- HomeScreen — stub -->
+    <div class="screen-item">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="phone-statusbar"><span>9:41</span><span>▲▲▲ 100%</span></div>
+          <div class="phone-content">
+            <div class="phone-appbar">홈</div>
+            <div class="placeholder-body">
+              <div class="placeholder-icon">🌿</div>
+              <div class="placeholder-title">홈</div>
+              <div class="placeholder-id">DG-main-dashboard</div>
+              <div style="font-size:8px;color:var(--gray-400);">이 화면은 현재 개발 중입니다.</div>
+              <div class="placeholder-todo">TODO: Lv1 구현 예정</div>
+            </div>
+          </div>
+          <div class="phone-home-bar"><div class="phone-home-indicator"></div></div>
+        </div>
+      </div>
+      <div class="screen-label">HomeScreen</div>
+      <span class="screen-badge screen-badge-stub">스텁</span>
+    </div>
+
+    <!-- JobListScreen — stub -->
+    <div class="screen-item">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="phone-statusbar"><span>9:41</span><span>▲▲▲ 100%</span></div>
+          <div class="phone-content">
+            <div class="phone-appbar">작업 목록</div>
+            <div class="placeholder-body">
+              <div class="placeholder-icon">🌿</div>
+              <div class="placeholder-title">작업 목록</div>
+              <div class="placeholder-id">DG-work-list</div>
+              <div style="font-size:8px;color:var(--gray-400);">이 화면은 현재 개발 중입니다.</div>
+              <div class="placeholder-todo">TODO: Lv1 구현 예정</div>
+            </div>
+          </div>
+          <div class="phone-home-bar"><div class="phone-home-indicator"></div></div>
+        </div>
+      </div>
+      <div class="screen-label">JobListScreen</div>
+      <span class="screen-badge screen-badge-stub">스텁</span>
+    </div>
+
+    <!-- JobDetailScreen — stub -->
+    <div class="screen-item">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="phone-statusbar"><span>9:41</span><span>▲▲▲ 100%</span></div>
+          <div class="phone-content">
+            <div class="phone-appbar">작업 상세</div>
+            <div class="placeholder-body">
+              <div class="placeholder-icon">🌿</div>
+              <div class="placeholder-title">작업 상세</div>
+              <div class="placeholder-id">DG-work-detail</div>
+              <div style="font-size:8px;color:var(--gray-400);">이 화면은 현재 개발 중입니다.</div>
+              <div class="placeholder-todo">TODO: Lv1 구현 예정</div>
+            </div>
+          </div>
+          <div class="phone-home-bar"><div class="phone-home-indicator"></div></div>
+        </div>
+      </div>
+      <div class="screen-label">JobDetailScreen</div>
+      <span class="screen-badge screen-badge-stub">스텁</span>
+    </div>
+
+    <!-- JobCreateScreen — stub -->
+    <div class="screen-item">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="phone-statusbar"><span>9:41</span><span>▲▲▲ 100%</span></div>
+          <div class="phone-content">
+            <div class="phone-appbar">작업 등록</div>
+            <div class="placeholder-body">
+              <div class="placeholder-icon">🌿</div>
+              <div class="placeholder-title">작업 등록</div>
+              <div class="placeholder-id">DG-work-create</div>
+              <div style="font-size:8px;color:var(--gray-400);">이 화면은 현재 개발 중입니다.</div>
+              <div class="placeholder-todo">TODO: Lv1 구현 예정</div>
+            </div>
+          </div>
+          <div class="phone-home-bar"><div class="phone-home-indicator"></div></div>
+        </div>
+      </div>
+      <div class="screen-label">JobCreateScreen</div>
+      <span class="screen-badge screen-badge-stub">스텁</span>
+    </div>
+
+    <!-- ChatScreen — stub -->
+    <div class="screen-item">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="phone-statusbar"><span>9:41</span><span>▲▲▲ 100%</span></div>
+          <div class="phone-content">
+            <div class="phone-appbar">채팅</div>
+            <div class="placeholder-body">
+              <div class="placeholder-icon">🌿</div>
+              <div class="placeholder-title">채팅</div>
+              <div class="placeholder-id">DG-chat-room</div>
+              <div style="font-size:8px;color:var(--gray-400);">이 화면은 현재 개발 중입니다.</div>
+              <div class="placeholder-todo">TODO: Lv1 구현 예정</div>
+            </div>
+          </div>
+          <div class="phone-home-bar"><div class="phone-home-indicator"></div></div>
+        </div>
+      </div>
+      <div class="screen-label">ChatScreen</div>
+      <span class="screen-badge screen-badge-stub">스텁</span>
+    </div>
+
+    <!-- MyAppsScreen — stub -->
+    <div class="screen-item">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="phone-statusbar"><span>9:41</span><span>▲▲▲ 100%</span></div>
+          <div class="phone-content">
+            <div class="phone-appbar">지원 현황</div>
+            <div class="placeholder-body">
+              <div class="placeholder-icon">🌿</div>
+              <div class="placeholder-title">지원 현황</div>
+              <div class="placeholder-id">DG-my-applications</div>
+              <div style="font-size:8px;color:var(--gray-400);">이 화면은 현재 개발 중입니다.</div>
+              <div class="placeholder-todo">TODO: Lv1 구현 예정</div>
+            </div>
+          </div>
+          <div class="phone-home-bar"><div class="phone-home-indicator"></div></div>
+        </div>
+      </div>
+      <div class="screen-label">MyAppsScreen</div>
+      <span class="screen-badge screen-badge-stub">스텁</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     섹션 6 — React Frontend 구현 현황
+════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div class="section-title">React Frontend 구현 현황</div>
+  </div>
+
+  <table style="margin-bottom:24px;">
+    <thead>
+      <tr>
+        <th>파일</th>
+        <th style="width:100px;">상태</th>
+        <th>구현 내용</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="mono">api/client.ts</td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td class="muted">Axios 인스턴스, 요청 인터셉터(Bearer 자동 주입), 응답 인터셉터(401 → refresh → 재시도 → /login 리다이렉트)</td>
+      </tr>
+      <tr>
+        <td class="mono">api/auth.ts</td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td class="muted">sendSms(), verifyOtp(), refreshToken() 함수</td>
+      </tr>
+      <tr>
+        <td class="mono">api/jobs.ts</td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td class="muted">list(GPS params), get(id), create(), updateStatus(), apply(), selectApplicant()</td>
+      </tr>
+      <tr>
+        <td class="mono">api/drying.ts</td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td class="muted">시설 CRUD, 예약 생성/승인/완료 API 함수</td>
+      </tr>
+      <tr>
+        <td class="mono">api/chat.ts</td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td class="muted">채팅방 목록, 메시지 조회 API 함수</td>
+      </tr>
+      <tr>
+        <td class="mono">stores/authStore.ts</td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td class="muted">Zustand store — setTokens, setUser, logout, initFromStorage</td>
+      </tr>
+      <tr>
+        <td class="mono">components/Layout.tsx</td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td class="muted">사이드바 네비게이션 + &lt;Outlet /&gt; (React Router v6)</td>
+      </tr>
+      <tr>
+        <td class="mono">pages/Login.tsx</td>
+        <td><span class="badge badge-done">&#10003; 완료</span></td>
+        <td class="muted">SMS 2-step UI, React Query mutation, 에러 처리</td>
+      </tr>
+      <tr>
+        <td class="mono">pages/Dashboard.tsx</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderPage — TODO: Lv1 구현 예정</td>
+      </tr>
+      <tr>
+        <td class="mono">pages/JobList.tsx</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderPage</td>
+      </tr>
+      <tr>
+        <td class="mono">pages/JobDetail.tsx</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderPage</td>
+      </tr>
+      <tr>
+        <td class="mono">pages/JobCreate.tsx</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderPage</td>
+      </tr>
+      <tr>
+        <td class="mono">pages/ChatRoom.tsx</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderPage</td>
+      </tr>
+      <tr>
+        <td class="mono">pages/JobMap.tsx</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderPage (카카오맵 예정)</td>
+      </tr>
+      <tr>
+        <td class="mono">pages/MyApps.tsx</td>
+        <td><span class="badge badge-stub">스텁</span></td>
+        <td class="muted">PlaceholderPage</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     섹션 6-A — React 화면 렌더링
+════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num" style="background:#1d4ed8;">6A</div>
+    <div class="section-title">React 화면 렌더링</div>
+    <div class="section-sub">실제 코드 기반 재현 · 브라우저 프레임</div>
+  </div>
+
+  <div class="browser-grid">
+
+    <!-- React Login — phone step -->
+    <div class="browser-item">
+      <div class="browser-label">Login — 전화번호 입력 <span class="screen-badge screen-badge-done" style="vertical-align:middle;">구현됨</span></div>
+      <div class="browser-frame">
+        <div class="browser-titlebar">
+          <div class="browser-dot" style="background:#ef4444;"></div>
+          <div class="browser-dot" style="background:#f59e0b;"></div>
+          <div class="browser-dot" style="background:#22c55e;"></div>
+          <div class="browser-urlbar">localhost:5173/login</div>
+        </div>
+        <div class="browser-content">
+          <div class="react-login-page">
+            <div class="react-login-card">
+              <div style="text-align:center;margin-bottom:12px;">
+                <div style="font-size:18px;font-weight:700;color:var(--green);">단감</div>
+                <div style="font-size:8px;color:var(--gray-400);">농작업 O2O 플랫폼</div>
+              </div>
+              <div class="mock-field">
+                <div class="mock-field-label">휴대폰 번호</div>
+                <div style="font-size:9px;color:var(--gray-400);">01012345678</div>
+              </div>
+              <div class="mock-btn" style="font-size:9px;padding:6px;">인증번호 받기</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- React Login — OTP step -->
+    <div class="browser-item">
+      <div class="browser-label">Login — OTP 입력 <span class="screen-badge screen-badge-done" style="vertical-align:middle;">구현됨</span></div>
+      <div class="browser-frame">
+        <div class="browser-titlebar">
+          <div class="browser-dot" style="background:#ef4444;"></div>
+          <div class="browser-dot" style="background:#f59e0b;"></div>
+          <div class="browser-dot" style="background:#22c55e;"></div>
+          <div class="browser-urlbar">localhost:5173/login</div>
+        </div>
+        <div class="browser-content">
+          <div class="react-login-page">
+            <div class="react-login-card">
+              <div style="text-align:center;margin-bottom:8px;">
+                <div style="font-size:18px;font-weight:700;color:var(--green);">단감</div>
+              </div>
+              <div style="font-size:8px;color:var(--gray-500);text-align:center;margin-bottom:8px;">01033334444으로<br>인증번호가 발송되었습니다.</div>
+              <div class="mock-field">
+                <div class="mock-field-label">인증번호 6자리</div>
+                <div style="font-size:12px;letter-spacing:4px;text-align:center;color:var(--gray-900);padding:2px 0;">· · · · · ·</div>
+              </div>
+              <div class="mock-btn" style="font-size:9px;padding:6px;">로그인</div>
+              <div class="mock-btn-text" style="font-size:8px;">번호 다시 입력</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- React Dashboard — stub with sidebar -->
+    <div class="browser-item">
+      <div class="browser-label">Dashboard <span class="screen-badge screen-badge-stub" style="vertical-align:middle;">스텁</span></div>
+      <div class="browser-frame">
+        <div class="browser-titlebar">
+          <div class="browser-dot" style="background:#ef4444;"></div>
+          <div class="browser-dot" style="background:#f59e0b;"></div>
+          <div class="browser-dot" style="background:#22c55e;"></div>
+          <div class="browser-urlbar">localhost:5173/</div>
+        </div>
+        <div class="browser-content">
+          <div class="react-sidebar-layout">
+            <div class="react-sidebar">
+              <div class="react-sidebar-item active">
+                <span>&#8962;</span><span>홈</span>
+              </div>
+              <div class="react-sidebar-item">
+                <span>&#128205;</span><span>작업</span>
+              </div>
+              <div class="react-sidebar-item">
+                <span>&#128172;</span><span>채팅</span>
+              </div>
+              <div class="react-sidebar-item">
+                <span>&#128203;</span><span>지원</span>
+              </div>
+            </div>
+            <div class="react-main">
+              <div class="react-placeholder-main">
+                <div style="font-size:20px;">🌿</div>
+                <div style="font-size:9px;font-weight:600;color:var(--gray-700);">대시보드</div>
+                <div style="font-size:7px;color:var(--gray-400);">DG-main-dashboard</div>
+                <div style="font-size:7px;color:#d97706;background:#fef9c3;padding:2px 6px;border-radius:99px;margin-top:3px;">TODO: Lv1 구현 예정</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     섹션 7 — 테스트 현황
+════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div class="section-title">테스트 현황</div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>파일</th>
+            <th>대상 모듈</th>
+            <th>상태</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">tests/test_auth.py</td>
+            <td>M01 AUTH</td>
+            <td><span class="badge badge-done">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td class="mono">tests/test_users.py</td>
+            <td>M02 USER</td>
+            <td><span class="badge badge-done">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td class="mono">tests/test_jobs.py</td>
+            <td>M03 MATCHING</td>
+            <td><span class="badge badge-done">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td class="mono">tests/test_drying.py</td>
+            <td>M04 DRYING</td>
+            <td><span class="badge badge-done">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td class="mono">tests/test_chat.py</td>
+            <td>M05 CHAT</td>
+            <td><span class="badge badge-done">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td class="mono">tests/test_reviews.py</td>
+            <td>M07 REVIEW</td>
+            <td><span class="badge badge-done">&#10003;</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px;padding:10px 14px;background:var(--gray-50);border-radius:8px;font-size:11px;color:var(--gray-500);">
+        테스트 환경: <span style="font-family:monospace;">sqlite+aiosqlite:///:memory:</span> + fakeredis.aioredis.FakeRedis<br>
+        실행: <span style="font-family:monospace;">pytest backend/tests/ -v</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">시나리오 문서 (docs/TEST_SCENARIOS.md)</div>
+      <ul class="checklist">
+        <li>
+          <span class="check-icon">&#10003;</span>
+          <div>
+            <div class="check-label"><strong>S01 인증 플로우</strong> — 7 케이스</div>
+            <div class="check-detail">SMS 발송, OTP 검증(신규/기존), 토큰 갱신, 차단/만료 오류</div>
+          </div>
+        </li>
+        <li>
+          <span class="check-icon">&#10003;</span>
+          <div>
+            <div class="check-label"><strong>S02 매칭 완전 플로우</strong> — 10 케이스</div>
+            <div class="check-detail">작업등록→지원→선택→채팅→완료→후기→정산, GPS 0건, 본인지원 오류</div>
+          </div>
+        </li>
+        <li>
+          <span class="check-icon">&#10003;</span>
+          <div>
+            <div class="check-label"><strong>S03 건조시설 플로우</strong> — 6 케이스</div>
+            <div class="check-detail">등록→예약→승인→완료기록→수율, output&gt;input 오류</div>
+          </div>
+        </li>
+        <li>
+          <span class="check-icon">&#10003;</span>
+          <div>
+            <div class="check-label"><strong>S04 오류 및 경계값</strong> — 9 케이스</div>
+            <div class="check-detail">1000/1001자, 반경 clamping, 권한 오류(403), 토큰 만료(401)</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     섹션 8 — API 에러 코드 체계
+════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div class="section-title">API 에러 코드 체계</div>
+  </div>
+
+  <div class="two-col">
+    <table>
+      <thead>
+        <tr>
+          <th>에러 코드</th>
+          <th>설명</th>
+          <th>HTTP</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono" style="color:var(--red);">DNNG-AUTH-001</td><td class="muted">이미 발송된 OTP (쿨다운)</td><td class="muted">429</td></tr>
+        <tr><td class="mono" style="color:var(--red);">DNNG-AUTH-002</td><td class="muted">만료된 토큰</td><td class="muted">401</td></tr>
+        <tr><td class="mono" style="color:var(--red);">DNNG-AUTH-003</td><td class="muted">만료된 OTP</td><td class="muted">400</td></tr>
+        <tr><td class="mono" style="color:var(--red);">DNNG-AUTH-004</td><td class="muted">잘못된 OTP</td><td class="muted">400</td></tr>
+        <tr><td class="mono" style="color:var(--red);">DNNG-AUTH-005</td><td class="muted">5회 실패 차단</td><td class="muted">429</td></tr>
+        <tr><td class="mono" style="color:var(--red);">DNNG-MATCH-001</td><td class="muted">작업 없음</td><td class="muted">404</td></tr>
+        <tr><td class="mono" style="color:var(--red);">DNNG-MATCH-002</td><td class="muted">작업 등록 권한 없음 (WORKER)</td><td class="muted">403</td></tr>
+        <tr><td class="mono" style="color:var(--red);">DNNG-MATCH-003</td><td class="muted">본인 작업 지원 불가</td><td class="muted">400</td></tr>
+        <tr><td class="mono" style="color:var(--red);">DNNG-MATCH-005</td><td class="muted">지원자 선택 권한 없음</td><td class="muted">403</td></tr>
+        <tr><td class="mono" style="color:var(--red);">DNNG-DRY-003</td><td class="muted">산출량 > 투입량 불가</td><td class="muted">400</td></tr>
+        <tr><td class="mono" style="color:var(--red);">DNNG-ADMIN-001</td><td class="muted">관리자 권한 필요</td><td class="muted">403</td></tr>
+      </tbody>
+    </table>
+    <div class="card">
+      <div class="card-title">표준 응답 포맷</div>
+      <div class="code-block"><span class="cm">// 성공</span>
+{
+  <span class="st">"success"</span>: <span class="kw">true</span>,
+  <span class="st">"data"</span>: { ... },
+  <span class="st">"error"</span>: <span class="kw">null</span>
+}
+
+<span class="cm">// 오류</span>
+{
+  <span class="st">"success"</span>: <span class="kw">false</span>,
+  <span class="st">"data"</span>: <span class="kw">null</span>,
+  <span class="st">"error"</span>: {
+    <span class="st">"code"</span>: <span class="st">"DNNG-AUTH-005"</span>,
+    <span class="st">"message"</span>: <span class="st">"Too many attempts"</span>
+  }
+}</div>
+      <div style="margin-top:12px;">
+        <div class="card-title">페이지네이션</div>
+        <div class="code-block">GET /jobs?lat=<span class="nu">36.18</span>&lng=<span class="nu">127.08</span>
+       &radius_km=<span class="nu">5</span>&cursor=<span class="st">xxx</span>&limit=<span class="nu">20</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     섹션 9 — 다음 단계
+════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">9</div>
+    <div class="section-title">다음 단계 (Next Steps)</div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="card">
+        <div class="card-title">우선순위 높음</div>
+        <ul class="checklist">
+          <li>
+            <span class="check-icon" style="color:var(--yellow);">&#9675;</span>
+            <div>
+              <div class="check-label">Flutter 화면 구현 (M10 MOBILE)</div>
+              <div class="check-detail">HomeScreen, JobListScreen, JobDetailScreen, JobCreateScreen, ChatScreen, MyAppsScreen</div>
+            </div>
+          </li>
+          <li>
+            <span class="check-icon" style="color:var(--yellow);">&#9675;</span>
+            <div>
+              <div class="check-label">React 페이지 구현</div>
+              <div class="check-detail">Dashboard, JobList, JobDetail, JobCreate, ChatRoom, MyApps</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">인프라 / 검증</div>
+        <ul class="checklist">
+          <li>
+            <span class="check-icon" style="color:var(--yellow);">&#9675;</span>
+            <div>
+              <div class="check-label">Docker Compose 통합 테스트</div>
+              <div class="check-detail">PostgreSQL + Redis + FastAPI + Traefik</div>
+            </div>
+          </li>
+          <li>
+            <span class="check-icon" style="color:var(--yellow);">&#9675;</span>
+            <div>
+              <div class="check-label">GitHub Actions CI 설정</div>
+              <div class="check-detail">.github/workflows/ci.yml — lint + test + build</div>
+            </div>
+          </li>
+          <li>
+            <span class="check-icon" style="color:var(--yellow);">&#9675;</span>
+            <div>
+              <div class="check-label">M06~M08 테스트 파일 추가</div>
+              <div class="check-detail">test_notifications.py, test_payments.py, test_admin.py</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;padding:14px 18px;background:var(--green-light);border-radius:8px;font-size:12px;color:var(--green-dark);">
+    <strong>HTML 목업 문서:</strong> &nbsp;
+    <code>docs/mockups/S01_auth_flow.html</code> &nbsp;·&nbsp;
+    <code>S02_matching_flow.html</code> &nbsp;·&nbsp;
+    <code>S03_drying_flow.html</code> &nbsp;·&nbsp;
+    <code>S04_errors.html</code>
+    — 각 시나리오별 앱 화면 + API 시뮬레이션 (브라우저에서 직접 열기)
+  </div>
+</div>
+
+<!-- 푸터 -->
+<div style="padding:20px 48px;text-align:center;font-size:11px;color:var(--gray-400);border-top:1px solid var(--gray-100);">
+  단감(DAN-GAM) · Phase 1 MVP Implementation Report · 2026-03-08 · DNNG
+</div>
+
+</body>
+</html>

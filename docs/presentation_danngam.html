@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>단감(DANNGAM) — 농기계·농작업 매칭 O2O 플랫폼 프리젠테이션</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root {
+    --bg-primary: #0a0a0f; --bg-secondary: #111119; --bg-card: #16161f; --bg-elevated: #1c1c28;
+    --border: #2a2a3a; --border-light: #33334a;
+    --text-primary: #e8e8ef; --text-secondary: #8888a0; --text-muted: #55556a;
+    --accent: #4a9eff; --accent-dim: #2a5a9a; --accent-glow: rgba(74,158,255,0.08);
+    --green: #34d399; --orange: #f59e0b; --red: #ef4444; --purple: #a78bfa; --cyan: #22d3ee;
+    --pink: #f472b6; --yellow: #fbbf24;
+    --mono: 'JetBrains Mono','Consolas',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);overflow:hidden;height:100vh;width:100vw}
+  .slide{display:none;width:100vw;height:100vh;padding:44px 64px 64px;flex-direction:column;justify-content:center;position:relative;overflow-y:auto}
+  .slide.active{display:flex}
+  .nav{position:fixed;bottom:0;left:0;right:0;height:40px;background:var(--bg-secondary);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:100;font-size:12px}
+  .nav-left{display:flex;align-items:center;gap:16px;color:var(--text-muted)}
+  .nav-center{display:flex;align-items:center;gap:8px}
+  .nav-right{display:flex;align-items:center;gap:12px}
+  .nav-btn{background:none;border:1px solid var(--border);color:var(--text-secondary);padding:4px 12px;font-size:10px;font-family:var(--mono);cursor:pointer;letter-spacing:.5px;transition:all .15s}
+  .nav-btn:hover{border-color:var(--accent-dim);color:var(--accent)}
+  .progress-track{width:200px;height:2px;background:var(--border)}
+  .progress-fill{height:2px;background:var(--accent);transition:width .3s ease}
+  .slide-counter{font-family:var(--mono);font-size:10px;color:var(--text-muted);letter-spacing:1px}
+  .slide-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+  h1{font-size:44px;font-weight:800;line-height:1.1;letter-spacing:-1.5px}
+  h1 .thin{font-weight:300;color:var(--text-secondary)}
+  h2{font-size:24px;font-weight:700;line-height:1.2;letter-spacing:-.5px;margin-bottom:14px}
+  h3{font-size:13px;font-weight:700;letter-spacing:-.2px;margin-bottom:5px}
+  .subtitle{font-size:15px;font-weight:400;color:var(--text-secondary);line-height:1.6;margin-top:12px;max-width:750px}
+  p{font-size:12px;line-height:1.7;color:var(--text-secondary)}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+  .card{background:var(--bg-card);border:1px solid var(--border);padding:14px;position:relative}
+  .card-accent{border-left:2px solid var(--accent)} .card-green{border-left:2px solid var(--green)}
+  .card-orange{border-left:2px solid var(--orange)} .card-red{border-left:2px solid var(--red)}
+  .card-purple{border-left:2px solid var(--purple)} .card-cyan{border-left:2px solid var(--cyan)}
+  .card-pink{border-left:2px solid var(--pink)} .card-yellow{border-left:2px solid var(--yellow)}
+  .card .num{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--text-muted);margin-bottom:5px;letter-spacing:1px}
+  .card h3{font-size:13px;margin-bottom:4px} .card p{font-size:11px;line-height:1.6}
+  .code-block{background:var(--bg-secondary);border:1px solid var(--border);padding:10px 14px;font-family:var(--mono);font-size:10px;line-height:1.8;color:var(--text-secondary);overflow-x:auto;white-space:pre}
+  .code-block .hl{color:var(--accent)} .code-block .gr{color:var(--green)} .code-block .or{color:var(--orange)}
+  .code-block .pu{color:var(--purple)} .code-block .cy{color:var(--cyan)} .code-block .dim{color:var(--text-muted)}
+  .code-block .rd{color:var(--red)} .code-block .pk{color:var(--pink)} .code-block .yw{color:var(--yellow)}
+  .tbl{width:100%;border-collapse:collapse;font-size:10px}
+  .tbl th{text-align:left;padding:6px 8px;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1.5px;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--bg-secondary)}
+  .tbl td{padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
+  .tbl tr:hover td{background:var(--accent-glow)}
+  .badge{display:inline-block;font-family:var(--mono);font-size:8px;font-weight:600;padding:2px 5px;letter-spacing:.5px}
+  .badge-blue{background:rgba(74,158,255,.12);color:var(--accent)} .badge-green{background:rgba(52,211,153,.12);color:var(--green)}
+  .badge-orange{background:rgba(245,158,11,.12);color:var(--orange)} .badge-red{background:rgba(239,68,68,.12);color:var(--red)}
+  .badge-purple{background:rgba(167,139,250,.12);color:var(--purple)} .badge-cyan{background:rgba(34,211,238,.12);color:var(--cyan)}
+  .badge-pink{background:rgba(244,114,182,.12);color:var(--pink)} .badge-yellow{background:rgba(251,191,36,.12);color:var(--yellow)}
+  .grid-bg{position:absolute;top:0;left:0;right:0;bottom:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:.06;pointer-events:none}
+  .glow-tl{position:absolute;top:-200px;left:-200px;width:500px;height:500px;background:radial-gradient(circle,rgba(74,158,255,.06) 0%,transparent 70%);pointer-events:none}
+  .glow-br{position:absolute;bottom:-200px;right:-200px;width:500px;height:500px;background:radial-gradient(circle,rgba(74,158,255,.04) 0%,transparent 70%);pointer-events:none}
+  .divider{width:60px;height:1px;background:var(--border-light);margin:14px 0}
+  .title-slide{justify-content:flex-end;padding-bottom:90px}
+  .title-slide .meta{font-family:var(--mono);font-size:11px;color:var(--text-muted);margin-top:28px;letter-spacing:1px}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+  .section-num{font-family:var(--mono);font-size:52px;font-weight:900;color:var(--bg-elevated);position:absolute;top:28px;right:64px;letter-spacing:-3px;line-height:1}
+  .kbd{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 6px;border:1px solid var(--border);color:var(--text-muted)}
+  .callout{padding:10px 14px;border-left:2px solid var(--accent);background:var(--accent-glow);margin-top:10px}
+  .callout p{font-size:11px;color:var(--text-primary)}
+  .warn{border-left-color:var(--orange);background:rgba(245,158,11,.05)} .warn p{color:var(--orange)}
+  .stat-big{font-family:var(--mono);font-size:28px;font-weight:800;line-height:1}
+  .stat-label{font-size:10px;color:var(--text-muted);margin-top:2px}
+  .flow-arrow{text-align:center;padding:2px;font-size:12px;color:var(--accent)}
+  .flow-box{padding:8px 12px;border:1px solid var(--border);background:var(--bg-card);font-size:11px}
+  .tag-ep{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:700;padding:1px 4px;background:rgba(52,211,153,.2);color:var(--green);letter-spacing:.5px;vertical-align:middle;margin-left:4px}
+  .tag-gate{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:700;padding:1px 4px;background:rgba(239,68,68,.2);color:var(--red);letter-spacing:.5px;vertical-align:middle;margin-left:4px}
+  /* Micro Step badges */
+  .ms{font-family:var(--mono);font-size:8px;font-weight:700;padding:1px 4px;display:inline-block;margin-right:2px;vertical-align:middle}
+  .ms-click{background:rgba(74,158,255,.15);color:var(--accent)}
+  .ms-auto{background:rgba(52,211,153,.15);color:var(--green)}
+  .ms-input{background:rgba(245,158,11,.15);color:var(--orange)}
+  .ms-state{background:rgba(167,139,250,.15);color:var(--purple)}
+  .ms-toast{background:rgba(34,211,238,.15);color:var(--cyan)}
+  .ms-modal{background:rgba(244,114,182,.15);color:var(--pink)}
+  .ms-select{background:rgba(251,191,36,.15);color:var(--yellow)}
+  .ms-upload{background:rgba(239,68,68,.15);color:var(--red)}
+  .ms-panel{background:rgba(74,158,255,.1);color:var(--accent)}
+  .ms-ack{background:rgba(52,211,153,.1);color:var(--green)}
+  /* Step list */
+  .step-list{list-style:none;padding:0;margin:0}
+  .step-list li{font-size:10px;line-height:1.7;color:var(--text-secondary);padding:3px 0;border-bottom:1px solid rgba(42,42,58,.5)}
+  .step-list li:last-child{border-bottom:none}
+  .step-num{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--accent);margin-right:6px;display:inline-block;width:16px}
+  /* Narrative text */
+  .narrative{font-size:13px;line-height:2;color:var(--text-secondary);max-width:900px}
+  .narrative strong{color:var(--text-primary);font-weight:600}
+  .narrative em{color:var(--accent);font-style:normal;font-weight:500}
+  .narrative .person{color:var(--green);font-weight:600}
+  .narrative .place{color:var(--orange);font-weight:500}
+  .narrative .action{color:var(--cyan);font-weight:500}
+  /* Phone frame */
+  .phone-frame{width:180px;height:360px;background:var(--bg-card);border:2px solid var(--border-light);border-radius:22px;position:relative;overflow:hidden;flex-shrink:0}
+  .phone-notch{width:60px;height:14px;background:var(--bg-primary);border-radius:0 0 10px 10px;position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:2}
+  .phone-inner{width:100%;height:100%;display:flex;flex-direction:column}
+  .phone-statusbar{height:22px;background:var(--bg-secondary);display:flex;align-items:center;justify-content:flex-end;padding:0 10px;font-size:7px;color:var(--text-muted);font-family:var(--mono)}
+  .phone-appbar{height:28px;background:var(--bg-secondary);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 10px;font-size:9px;font-weight:600;color:var(--text-primary)}
+  .phone-body{flex:1;padding:8px;overflow:hidden;font-size:8px;color:var(--text-secondary);line-height:1.5}
+  .phone-home-bar{height:4px;width:40px;background:var(--text-muted);border-radius:2px;margin:4px auto}
+  .phone-label{font-family:var(--mono);font-size:8px;color:var(--text-muted);text-align:center;margin-top:6px;letter-spacing:.5px}
+  .mock-btn{display:block;padding:4px 6px;background:var(--green);color:#fff;font-size:7px;font-weight:700;text-align:center;border-radius:3px;margin:3px 0}
+  .mock-btn-kakao{background:#FEE500;color:#3C1E1E}
+  .mock-btn-accent{background:var(--accent)}
+  .mock-field{display:block;padding:3px 6px;background:var(--bg-secondary);border:1px solid var(--border);font-size:7px;color:var(--text-muted);margin:3px 0;border-radius:2px}
+  .mock-card{background:var(--bg-elevated);border:1px solid var(--border);padding:5px;margin:3px 0;border-radius:3px}
+  .mock-card-title{font-size:8px;font-weight:600;color:var(--text-primary)}
+  .mock-card-sub{font-size:7px;color:var(--text-muted)}
+  .mock-badge{display:inline-block;font-size:6px;padding:1px 3px;border-radius:2px;font-weight:600}
+  .mock-badge-green{background:rgba(52,211,153,.2);color:var(--green)}
+  .mock-badge-orange{background:rgba(245,158,11,.2);color:var(--orange)}
+  .mock-badge-blue{background:rgba(74,158,255,.2);color:var(--accent)}
+  .mock-chat-bubble{padding:4px 6px;border-radius:6px;font-size:7px;margin:2px 0;max-width:85%}
+  .mock-chat-me{background:var(--accent);color:#fff;margin-left:auto;border-bottom-right-radius:2px}
+  .mock-chat-other{background:var(--bg-elevated);color:var(--text-secondary);border-bottom-left-radius:2px}
+  /* Browser frame */
+  .browser-frame{width:100%;max-width:420px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;overflow:hidden;flex-shrink:0}
+  .browser-titlebar{height:22px;background:var(--bg-secondary);display:flex;align-items:center;padding:0 10px;gap:4px}
+  .browser-dot{width:6px;height:6px;border-radius:50%;background:var(--border-light)}
+  .browser-urlbar{flex:1;margin-left:8px;padding:2px 6px;background:var(--bg-card);border-radius:2px;font-size:7px;color:var(--text-muted);font-family:var(--mono)}
+  .browser-body{padding:10px;min-height:180px;font-size:9px;color:var(--text-secondary)}
+  .browser-label{font-family:var(--mono);font-size:8px;color:var(--text-muted);text-align:center;margin-top:6px;letter-spacing:.5px}
+  /* Screen grid for mockups */
+  .screen-grid{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+  /* Scrollable slide */
+  .slide-scroll{overflow-y:auto;padding-bottom:60px}
+</style>
+</head>
+<body>
+
+<!-- ==================== S01: Title ==================== -->
+<div class="slide title-slide active" id="s1">
+  <div class="grid-bg"></div><div class="glow-tl"></div>
+  <div class="slide-label">DANNGAM / O2O PLATFORM / 2026&ndash;2027</div>
+  <h1>단감<br>DANNGAM<br><span class="thin">농기계 &middot; 농작업 매칭 O2O 플랫폼</span></h1>
+  <div class="subtitle"><strong style="color:var(--text-primary)">EP1</strong> 초기 데이터 + 작업자 온보딩 &rarr; <strong style="color:var(--text-primary)">EP2</strong> 의뢰자 + 매칭/거래 &rarr; <strong style="color:var(--text-primary)">EP3</strong> 지자체 보조금 &rarr; <strong style="color:var(--text-primary)">EP4</strong> 제조사/R&D &rarr; <strong style="color:var(--text-primary)">EP5</strong> 데이터 플랫폼 + AI</div>
+  <div class="meta">2026.03 &mdash; 2027.06 &middot; Team GRIT &middot; PM 장한진 &middot; 5 Episodes &middot; 98 Tasks &middot; 대행단 120개</div>
+</div>
+
+<!-- ==================== S02: Overview + Roadmap ==================== -->
+<div class="slide" id="s2">
+  <div class="grid-bg"></div>
+  <div class="section-num">00</div>
+  <div class="slide-label">PROJECT OVERVIEW &mdash; Roadmap &amp; Tech Stack</div>
+  <h2>프로젝트 개요 &amp; 로드맵</h2>
+
+  <div class="code-block" style="margin-bottom:14px"><span class="yw">단감(DANNGAM) 전체 로드맵 (16개월, 5 Episode)</span>
+
+<span class="dim">EPISODE          2026.03    06    09    12    2027.03    06</span>
+<span class="gr">EP1 초기데이터</span>   <span class="gr">████████████</span>
+<span class="hl">EP2 매칭/거래</span>              <span class="hl">████████████</span>
+<span class="or">EP3 보조금</span>                        <span class="or">████████████</span>
+<span class="rd">EP4 제조사/R&D</span>                               <span class="rd">████████████</span>
+<span class="pu">EP5 데이터AI</span>                                          <span class="pu">████████████</span></div>
+
+  <div class="grid-4" style="margin-bottom:12px">
+    <div class="card" style="text-align:center;padding:12px">
+      <div class="stat-big" style="color:var(--accent)">5</div>
+      <div class="stat-label">EPISODES</div>
+    </div>
+    <div class="card" style="text-align:center;padding:12px">
+      <div class="stat-big" style="color:var(--green)">98</div>
+      <div class="stat-label">WBS TASKS</div>
+    </div>
+    <div class="card" style="text-align:center;padding:12px">
+      <div class="stat-big" style="color:var(--orange)">16</div>
+      <div class="stat-label">MONTHS</div>
+    </div>
+    <div class="card" style="text-align:center;padding:12px">
+      <div class="stat-big" style="color:var(--purple)">49</div>
+      <div class="stat-label">MICRO STEPS</div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card card-accent" style="padding:10px">
+      <h3 style="color:var(--accent)">Backend</h3>
+      <p>FastAPI + SQLAlchemy 2.0 + PostgreSQL 16 + Redis 7 + Alembic</p>
+      <div style="margin-top:4px"><span class="badge badge-blue">Python 3.11</span> <span class="badge badge-blue">JWT</span> <span class="badge badge-blue">WebSocket</span></div>
+    </div>
+    <div class="card card-green" style="padding:10px">
+      <h3 style="color:var(--green)">Mobile</h3>
+      <p>Flutter 3.x + Riverpod + Dio + go_router + 카카오맵 SDK</p>
+      <div style="margin-top:4px"><span class="badge badge-green">Dart</span> <span class="badge badge-green">iOS/Android</span></div>
+    </div>
+    <div class="card card-orange" style="padding:10px">
+      <h3 style="color:var(--orange)">Web Admin</h3>
+      <p>React 18 + TypeScript + Vite + Tailwind CSS + Zustand + React Query</p>
+      <div style="margin-top:4px"><span class="badge badge-orange">SPA</span> <span class="badge badge-orange">Dashboard</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S02a: Structure Mapping ==================== -->
+<div class="slide" id="s2a">
+  <div class="grid-bg"></div>
+  <div class="section-num">00</div>
+  <div class="slide-label">STRUCTURE MAPPING &mdash; EP ↔ Module 맵핑</div>
+  <h2>EP와 Module의 구조 맵핑</h2>
+
+  <div class="code-block" style="margin-bottom:14px"><span class="yw">DANNGAM 모듈 구조 (9개 Module + 초기데이터)</span>
+
+<span class="gr">EP1 (2026.03~05)</span>
+  → M01(AUTH): 소셜/SMS/이메일 인증, JWT 토큰
+  → M09-init(ADMIN): 백오피스 초기화면, 관리자 권한
+  → 초기데이터: 농작업DB, 농기계 카테고리, 작업자 50건
+
+<span class="hl">EP2 (2026.06~09)</span>
+  → M02(USER): 프로필, 의뢰자/작업자 구분
+  → M03(MATCHING): 자동 추천, 지원/선택, 스코어링
+  → M04(DRYING): 건조시설 검색, 위탁, 수율/품질 기록
+  → M05(CHAT): 1:1 채팅, 계약서, 파일 공유
+  → M06(PAYMENT): 에스크로, PG 연동, 정산 자동화
+  → M10(MOBILE): 모바일 전용 UI, 위치 기반
+
+<span class="or">EP3 (2026.10~12)</span>
+  → M07(SUBSIDY): 보조금 사업 관리, 신청, PDF 리포트
+
+<span class="rd">EP4 (2027.01~03)</span>
+  → M08(MFG-RND): 제조사 포털, R&D 데이터
+
+<span class="pu">EP5 (2027.04~06)</span>
+  → M09(ANALYTICS): 데이터 분석, AI 예측, 대시보드</div>
+
+  <div class="grid-3" style="margin-bottom:12px">
+    <div class="card card-accent" style="padding:10px">
+      <h3 style="color:var(--accent)">M01-02: 핵심 인증 + 사용자</h3>
+      <p>소셜/SMS/이메일 + 프로필 관리 + 의뢰자/작업자 구분</p>
+    </div>
+    <div class="card card-green" style="padding:10px">
+      <h3 style="color:var(--green)">M03-06: 매칭 & 거래</h3>
+      <p>자동 매칭 + 채팅 + 계약 + 건조 + 결제 + 정산</p>
+    </div>
+    <div class="card card-orange" style="padding:10px">
+      <h3 style="color:var(--orange)">M07-09: 확장 기능</h3>
+      <p>보조금 연계 + 제조사 R&D + 데이터 AI</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>설계 원칙:</strong> 각 Module은 독립적인 마이크로서비스로 구현. M06(결제)과 M04(건조)는 EP2에서 핵심 완성도를 위해 필수. 모든 Module은 M01(인증)과 M02(사용자)에 의존.</p>
+  </div>
+</div>
+
+<!-- ==================== S03: EP1 Overview ==================== -->
+<div class="slide" id="s3">
+  <div class="grid-bg"></div><div class="glow-br"></div>
+  <div class="section-num">EP1</div>
+  <div class="slide-label">EP1 GATE &mdash; 시스템 초기 데이터 + 작업자 온보딩</div>
+  <h2>EP1 — 시스템 초기 데이터 구축 + 작업자 온보딩 <span class="tag-gate">GATE 2026-05-30</span></h2>
+
+  <div class="grid-3" style="margin-bottom:10px">
+    <div class="card card-green" style="padding:10px">
+      <div class="num">산출물 01</div>
+      <h3>농기계-농작업 매칭 DB</h3>
+      <p>시기별 농작업 x 필요 농기계 x 스펙 범위 기초 데이터베이스</p>
+    </div>
+    <div class="card card-green" style="padding:10px">
+      <div class="num">산출물 02</div>
+      <h3>농기계 등록 시스템</h3>
+      <p>카테고리 검색 + 직접 입력 + 사진 업로드</p>
+    </div>
+    <div class="card card-green" style="padding:10px">
+      <div class="num">산출물 03</div>
+      <h3>농기계 조회 화면</h3>
+      <p>위치 기반 반경 검색, 시기별 추천 작업 연동</p>
+    </div>
+    <div class="card card-accent" style="padding:10px">
+      <div class="num">산출물 04</div>
+      <h3>작업자 프로필 + 장비 카드</h3>
+      <p>사진, 스펙, 가격, 평판 정보</p>
+    </div>
+    <div class="card card-accent" style="padding:10px">
+      <div class="num">산출물 05</div>
+      <h3>소셜로그인 + 위치 권한 + 홈</h3>
+      <p>카카오/네이버 인증, GPS 수집, 홈 화면</p>
+    </div>
+    <div class="card card-accent" style="padding:10px">
+      <div class="num">산출물 06</div>
+      <h3>백오피스 초기 데이터 도구</h3>
+      <p>엑셀 업로드 + 수동 입력 폼</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>게이트 조건:</strong> 소셜로그인 &rarr; 위치 확인 &rarr; 주변 장비 조회 &rarr; 장비 상세 &rarr; 시기별 추천 작업 확인까지 전 과정 오류 없이 완료. 초기 데이터 50건 이상 등록 확인.</p>
+  </div>
+</div>
+
+<!-- ==================== S04: EP1 Narrative ==================== -->
+<div class="slide" id="s4">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP1</div>
+  <div class="slide-label">EP1 DEMO NARRATIVE &mdash; 이야기로 보는 데모 시나리오</div>
+  <h2>EP1 데모 — 초기 데이터 구축부터 장비 등록까지</h2>
+
+  <div class="narrative" style="margin-top:8px">
+    <p>3월의 <span class="place">김제시</span>. 봄 농사 준비가 한창입니다.</p>
+    <p style="margin-top:8px">먼저 <span class="person">관리자 박소연</span>이 백오피스에 로그인합니다. <em>"농작업-농기계 매칭 DB 관리"</em> 메뉴에서 시기별 농작업 데이터를 입력합니다 &mdash; <strong>"3월 / 벼 / 로터리 작업 / 트랙터(30마력 이상) + 로터리 / 평당 3,000~5,000원"</strong>. 이어서 농기계 카테고리에 <strong>"트랙터 > 대동 RX7630 > 76마력/4WD"</strong>를 등록하고 제품 이미지를 올립니다. 마지막으로 엑셀 파일 하나로 50건의 초기 데이터를 일괄 업로드합니다. 48건 성공, 2건은 중복 모델명과 누락 필드로 오류 &mdash; 바로 수정합니다.</p>
+    <p style="margin-top:8px">한편, <span class="place">부량면</span>에서 트랙터를 보유한 <span class="person">작업자 이철수</span>씨가 앱을 켭니다. <em>"카카오로 시작하기"</em>를 누르고, 위치 권한을 허용합니다. 홈 화면에 <strong>"주변 5km 장비 3건"</strong> 배너와 <strong>"3월 추천 작업: 로터리 작업"</strong> 카드가 보입니다.</p>
+    <p style="margin-top:8px"><span class="person">이철수</span>씨는 <em>"주변 장비 보기"</em>를 눌러 근처 장비 3건을 확인하고, 첫 번째 장비 카드를 탭해 상세 정보 &mdash; 대동 RX7630 76마력, 부착 장비(로터리/쟁기/배토기), 보유자 정보, 시간당 가격 &mdash; 를 살펴봅니다.</p>
+    <p style="margin-top:8px">그리고 직접 <em>"내 장비 등록"</em>을 시작합니다. 카테고리에서 트랙터를 선택하면 스펙이 자동 입력됩니다. 장비 사진 3장을 올리고, 부착 장비(로터리, 쟁기)를 체크하고, 작업 가능 지역을 <strong>"김제시 전체(반경 20km)"</strong>, 희망 가격을 <strong>"평당 4,000원"</strong>으로 설정합니다. 등록 완료!</p>
+    <p style="margin-top:8px">홈으로 돌아오면 <strong>"이번 달 추천 작업"</strong> 섹션이 보입니다 &mdash; 3월 로터리 의뢰 12건, 4월 모내기 8건, 9월 벼베기 예정 23건. <span class="person">이철수</span>씨는 "9월 벼베기"를 눌러 알림을 설정합니다. <em>"9월 벼베기 의뢰 알림이 설정되었습니다."</em></p>
+  </div>
+</div>
+
+<!-- ==================== S05: EP1 Demo Steps 1-5 ==================== -->
+<div class="slide slide-scroll" id="s5">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP1</div>
+  <div class="slide-label">EP1 DEMO &mdash; Micro Steps 1~5 (백오피스 + 앱 진입)</div>
+  <h2>EP1 Micro Steps 1~5</h2>
+
+  <div class="two-col">
+    <div>
+      <ul class="step-list">
+        <li><span class="step-num">01</span><span class="ms ms-click">Click</span> 백오피스 로그인 &rarr; <span class="ms ms-state">State</span> 관리자 대시보드 진입 &rarr; <span class="ms ms-auto">Auto</span> "초기 데이터 구축" 배너 표시</li>
+        <li><span class="step-num">02</span><span class="ms ms-click">Click</span> "농작업-농기계 매칭 DB 관리" &rarr; <span class="ms ms-panel">Panel</span> 시기별 농작업 테이블 &rarr; <span class="ms ms-input">Input</span> 3월/벼/로터리작업/트랙터(30마력+)+로터리/평당 3,000~5,000원 &rarr; <span class="ms ms-click">Click</span> 저장 &rarr; <span class="ms ms-toast">Toast</span> 등록 완료</li>
+        <li><span class="step-num">03</span><span class="ms ms-click">Click</span> "농기계 카테고리 관리" &rarr; <span class="ms ms-input">Input</span> 트랙터 > 대동 RX7630 > 76마력/4WD/로터리 호환 &rarr; <span class="ms ms-upload">Upload</span> 제품 이미지 2장 &rarr; <span class="ms ms-click">Click</span> 저장 &rarr; <span class="ms ms-toast">Toast</span> 카테고리 추가</li>
+        <li><span class="step-num">04</span><span class="ms ms-click">Click</span> "데이터 일괄 업로드" &rarr; <span class="ms ms-upload">Upload</span> 초기데이터_농기계_v1.xlsx (50건) &rarr; <span class="ms ms-auto">Auto</span> 유효성 검사 &rarr; <span class="ms ms-toast">Toast</span> "48건 성공, 2건 오류" &rarr; <span class="ms ms-modal">Modal</span> 오류 상세</li>
+        <li><span class="step-num">05</span><span class="ms ms-click">Click</span> 앱 실행 &rarr; <span class="ms ms-click">Click</span> "카카오로 시작하기" &rarr; <span class="ms ms-auto">Auto</span> 소셜로그인 완료 &rarr; <span class="ms ms-modal">Modal</span> 위치 권한 요청 &rarr; <span class="ms ms-click">Click</span> 허용 &rarr; <span class="ms ms-state">State</span> 홈 화면 진입 (현재 위치: 김제시 부량면)</li>
+      </ul>
+    </div>
+    <div class="screen-grid" style="justify-content:center">
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-body" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+              <div style="font-size:18px;font-weight:800;color:var(--green);margin-bottom:12px">단감</div>
+              <div style="font-size:7px;color:var(--text-muted);margin-bottom:16px">농기계 &middot; 농작업 매칭</div>
+              <div style="font-size:7px;color:var(--text-muted);margin-bottom:6px;font-weight:600">소셜 로그인</div>
+              <div class="mock-btn mock-btn-kakao" style="width:85%;font-size:7px;padding:4px">카카오로 시작</div>
+              <div class="mock-btn" style="width:85%;font-size:7px;padding:4px;background:#03C75A">네이버로 시작</div>
+              <div style="font-size:7px;color:var(--text-muted);margin:6px 0 4px;font-weight:600">또는</div>
+              <div class="mock-btn" style="width:85%;font-size:7px;padding:4px;background:var(--accent);margin-bottom:3px">SMS 인증</div>
+              <div class="mock-btn" style="width:85%;font-size:7px;padding:4px;background:var(--cyan);color:#000">이메일 로그인</div>
+              <div style="font-size:6px;color:var(--text-muted);margin-top:8px">로그인 시 이용약관에 동의합니다</div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">소셜 로그인</div>
+      </div>
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar"><span style="color:var(--green)">단감</span>&nbsp;&nbsp;김제시 부량면</div>
+            <div class="phone-body">
+              <div style="background:var(--accent);color:#fff;padding:5px 8px;border-radius:4px;font-size:7px;font-weight:600;margin-bottom:6px">주변 5km 장비 3건</div>
+              <div style="font-size:8px;font-weight:600;color:var(--text-primary);margin:6px 0 3px">3월 추천 작업</div>
+              <div class="mock-card">
+                <div class="mock-card-title">로터리 작업</div>
+                <div class="mock-card-sub">의뢰 12건 &middot; 평당 3,000~5,000원</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-title">4월: 모내기 준비</div>
+                <div class="mock-card-sub">의뢰 8건</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-title">9월: 벼베기</div>
+                <div class="mock-card-sub">예정 23건 <span class="mock-badge mock-badge-orange">알림 설정</span></div>
+              </div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">홈 화면</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S06: EP1 Demo Steps 6-10 ==================== -->
+<div class="slide slide-scroll" id="s6">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP1</div>
+  <div class="slide-label">EP1 DEMO &mdash; Micro Steps 6~10 (장비 조회 + 등록 + 추천)</div>
+  <h2>EP1 Micro Steps 6~10</h2>
+
+  <div class="two-col">
+    <div>
+      <ul class="step-list">
+        <li><span class="step-num">06</span><span class="ms ms-auto">Auto</span> 홈 화면 &mdash; "주변 5km 장비 3건" 배너 + "3월 추천 작업: 로터리 작업" 카드 표시</li>
+        <li><span class="step-num">07</span><span class="ms ms-click">Click</span> "주변 장비 보기" &rarr; <span class="ms ms-state">State</span> 장비 리스트 (반경 5km) &rarr; 장비 카드 3건 (사진 + 모델명 + 보유자 + 거리 + 평점)</li>
+        <li><span class="step-num">08</span><span class="ms ms-click">Click</span> 첫 번째 장비 카드 &rarr; <span class="ms ms-panel">Panel</span> 장비 상세 &mdash; 대동 RX7630 76마력, 부착 장비(로터리/쟁기/배토기), 보유자: 이철수, 경력 15년, 평점 4.8</li>
+        <li><span class="step-num">09</span><span class="ms ms-click">Click</span> "내 장비 등록" &rarr; <span class="ms ms-select">Select</span> 카테고리: 트랙터 &rarr; <span class="ms ms-select">Select</span> 모델: 대동 RX7630 &rarr; <span class="ms ms-auto">Auto</span> 스펙 자동 입력 &rarr; <span class="ms ms-upload">Upload</span> 장비 사진 3장 &rarr; <span class="ms ms-input">Input</span> 부착 장비, 지역(김제시 20km), 가격(평당 4,000원) &rarr; <span class="ms ms-click">Click</span> 등록 &rarr; <span class="ms ms-toast">Toast</span> "장비가 등록되었습니다!"</li>
+        <li><span class="step-num">10</span><span class="ms ms-click">Click</span> 홈 &rarr; <span class="ms ms-auto">Auto</span> "이번 달 추천 작업" 섹션 &rarr; <span class="ms ms-click">Click</span> "9월 벼베기" &rarr; <span class="ms ms-click">Click</span> 알림 설정 &rarr; <span class="ms ms-toast">Toast</span> "9월 벼베기 의뢰 알림이 설정되었습니다."</li>
+      </ul>
+    </div>
+    <div class="screen-grid" style="justify-content:center">
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 주변 장비</div>
+            <div class="phone-body">
+              <div class="mock-card">
+                <div style="display:flex;gap:4px">
+                  <div style="width:28px;height:28px;background:var(--border);border-radius:3px;flex-shrink:0"></div>
+                  <div>
+                    <div class="mock-card-title">대동 RX7630 <span class="mock-badge mock-badge-green">76마력</span></div>
+                    <div class="mock-card-sub">이철수 &middot; 2km &middot; ★4.8</div>
+                  </div>
+                </div>
+              </div>
+              <div class="mock-card">
+                <div style="display:flex;gap:4px">
+                  <div style="width:28px;height:28px;background:var(--border);border-radius:3px;flex-shrink:0"></div>
+                  <div>
+                    <div class="mock-card-title">LS MT545 <span class="mock-badge mock-badge-green">55마력</span></div>
+                    <div class="mock-card-sub">박영호 &middot; 4km &middot; ★4.5</div>
+                  </div>
+                </div>
+              </div>
+              <div class="mock-card">
+                <div style="display:flex;gap:4px">
+                  <div style="width:28px;height:28px;background:var(--border);border-radius:3px;flex-shrink:0"></div>
+                  <div>
+                    <div class="mock-card-title">국제 MX5800 <span class="mock-badge mock-badge-green">58마력</span></div>
+                    <div class="mock-card-sub">김수현 &middot; 5km &middot; ★4.2</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">장비 리스트</div>
+      </div>
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 내 장비 등록</div>
+            <div class="phone-body">
+              <div class="mock-field">카테고리: 트랙터</div>
+              <div class="mock-field">모델: 대동 RX7630</div>
+              <div class="mock-field" style="color:var(--green)">76마력 / 4WD (자동입력)</div>
+              <div style="display:flex;gap:2px;margin:3px 0">
+                <div style="width:24px;height:24px;background:var(--border);border-radius:2px;font-size:12px;text-align:center;line-height:24px">+</div>
+                <div style="width:24px;height:24px;background:var(--border);border-radius:2px"></div>
+                <div style="width:24px;height:24px;background:var(--border);border-radius:2px"></div>
+              </div>
+              <div style="font-size:6px;color:var(--text-muted)">부착 장비</div>
+              <div style="display:flex;gap:3px;margin:2px 0">
+                <span class="mock-badge mock-badge-green" style="font-size:6px">V 로터리</span>
+                <span class="mock-badge mock-badge-green" style="font-size:6px">V 쟁기</span>
+                <span class="mock-badge mock-badge-blue" style="font-size:6px">배토기</span>
+              </div>
+              <div class="mock-field">작업 가능 지역: 김제시 (20km)</div>
+              <div class="mock-field">희망 가격: 평당 4,000원</div>
+              <div class="mock-btn" style="margin-top:6px">등록 완료</div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">장비 등록</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S07: EP1 WBS ==================== -->
+<div class="slide slide-scroll" id="s7">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP1</div>
+  <div class="slide-label">EP1 WBS &mdash; 24 Tasks / AP-01 ~ AP-07</div>
+  <h2>EP1 WBS</h2>
+
+  <table class="tbl">
+    <thead><tr><th>MODULE</th><th>TASK</th><th>AP</th><th>SIZE</th><th>START</th><th>END</th><th>STATUS</th></tr></thead>
+    <tbody>
+      <tr><td>인증-소셜로그인</td><td>카카오/네이버 소셜로그인 연동</td><td>AP-01</td><td><span class="badge badge-red">L</span></td><td>03-01</td><td>03-07</td><td><span class="badge badge-blue">IP 30%</span></td></tr>
+      <tr><td>인증-소셜로그인</td><td>위치 권한 요청 + GPS 수집</td><td>AP-01</td><td><span class="badge badge-orange">M</span></td><td>03-07</td><td>03-10</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>인증-소셜로그인</td><td>JWT 토큰 발급 + 리프레시</td><td>AP-01</td><td><span class="badge badge-orange">M</span></td><td>03-10</td><td>03-12</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>초기데이터-DB설계</td><td>농작업-농기계 매칭 DB 스키마 설계</td><td>AP-02</td><td><span class="badge badge-red">L</span></td><td>03-03</td><td>03-10</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>초기데이터-DB설계</td><td>시기별 농작업 마스터 테이블</td><td>AP-02</td><td><span class="badge badge-orange">M</span></td><td>03-10</td><td>03-13</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>초기데이터-DB설계</td><td>농기계 카테고리 + 스펙 범위 테이블</td><td>AP-02</td><td><span class="badge badge-orange">M</span></td><td>03-13</td><td>03-17</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>초기데이터-DB설계</td><td>농작업-농기계 매칭 규칙 테이블</td><td>AP-02</td><td><span class="badge badge-red">L</span></td><td>03-17</td><td>03-21</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>백오피스-데이터관리</td><td>백오피스 프레임워크 (React Admin)</td><td>AP-03</td><td><span class="badge badge-red">L</span></td><td>03-21</td><td>03-28</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>백오피스-데이터관리</td><td>농작업-농기계 매칭 DB CRUD UI</td><td>AP-03</td><td><span class="badge badge-orange">M</span></td><td>03-28</td><td>04-01</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>백오피스-데이터관리</td><td>농기계 카테고리 관리 UI + 이미지 업로드</td><td>AP-03</td><td><span class="badge badge-orange">M</span></td><td>04-01</td><td>04-04</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>백오피스-데이터관리</td><td>엑셀 일괄 업로드 + 유효성 검사</td><td>AP-03</td><td><span class="badge badge-red">L</span></td><td>04-04</td><td>04-11</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>백오피스-데이터관리</td><td>초기 데이터 50건 입력</td><td>AP-03</td><td><span class="badge badge-orange">M</span></td><td>04-11</td><td>04-14</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>앱-홈화면</td><td>홈 화면 레이아웃</td><td>AP-04</td><td><span class="badge badge-orange">M</span></td><td>04-14</td><td>04-18</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>앱-홈화면</td><td>위치 기반 반경 검색 API + UI</td><td>AP-04</td><td><span class="badge badge-red">L</span></td><td>04-18</td><td>04-25</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>앱-홈화면</td><td>시기별 추천 작업 카드</td><td>AP-04</td><td><span class="badge badge-orange">M</span></td><td>04-25</td><td>04-29</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>앱-장비조회</td><td>장비 리스트 화면</td><td>AP-05</td><td><span class="badge badge-orange">M</span></td><td>04-29</td><td>05-02</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>앱-장비조회</td><td>장비 상세 화면</td><td>AP-05</td><td><span class="badge badge-orange">M</span></td><td>05-02</td><td>05-06</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>앱-장비조회</td><td>장비 필터</td><td>AP-05</td><td><span class="badge badge-orange">M</span></td><td>05-06</td><td>05-09</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>앱-장비등록</td><td>내 장비 등록 폼</td><td>AP-06</td><td><span class="badge badge-red">L</span></td><td>05-09</td><td>05-16</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>앱-장비등록</td><td>장비 사진 업로드 (최대 10장)</td><td>AP-06</td><td><span class="badge badge-orange">M</span></td><td>05-16</td><td>05-19</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>앱-장비등록</td><td>부착 장비 + 지역/가격 입력</td><td>AP-06</td><td><span class="badge badge-orange">M</span></td><td>05-19</td><td>05-22</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>앱-장비등록</td><td>시기별 알림 설정</td><td>AP-06</td><td><span class="badge badge-green">S</span></td><td>05-22</td><td>05-23</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>통합테스트</td><td>EP1 E2E 시나리오 테스트</td><td>AP-07</td><td><span class="badge badge-red">L</span></td><td>05-23</td><td>05-30</td><td><span class="badge badge-purple">NOT</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== S08: EP2 Overview ==================== -->
+<div class="slide" id="s8">
+  <div class="grid-bg"></div><div class="glow-tl"></div>
+  <div class="section-num">EP2</div>
+  <div class="slide-label">EP2 GATE &mdash; 의뢰자 온보딩 + 매칭/거래</div>
+  <h2>EP2 — 의뢰자 온보딩부터 거래 성사까지: 매칭의 완성 <span class="tag-gate">GATE 2026-09-12</span></h2>
+
+  <div class="grid-4" style="margin-bottom:8px">
+    <div class="card card-accent" style="padding:10px">
+      <div class="num">산출물 01</div>
+      <h3>필지 등록 시스템</h3>
+      <p>주소 검색 + 면적 입력 + 지도 마킹</p>
+    </div>
+    <div class="card card-accent" style="padding:10px">
+      <div class="num">산출물 02</div>
+      <h3>연간 농작업 캘린더</h3>
+      <p>필지별 작기 스케줄 자동 추천</p>
+    </div>
+    <div class="card card-accent" style="padding:10px">
+      <div class="num">산출물 03</div>
+      <h3>의뢰 등록 + 자동 추천</h3>
+      <p>필지/시기/작업 기반 매칭</p>
+    </div>
+    <div class="card card-accent" style="padding:10px">
+      <div class="num">산출물 04</div>
+      <h3>1:1 채팅 + 계약 체결</h3>
+      <p>텍스트/이미지 + 인앱 계약서</p>
+    </div>
+  </div>
+  <div class="grid-4" style="margin-bottom:10px">
+    <div class="card card-green" style="padding:10px">
+      <div class="num">산출물 05</div>
+      <h3>작업 수행 + 평가 + 정산</h3>
+      <p>완료 보고 + 별점/후기 + 정산 확인</p>
+    </div>
+    <div class="card card-green" style="padding:10px">
+      <div class="num">산출물 06</div>
+      <h3>수익 대시보드</h3>
+      <p>"이번주 우리동네 수입왕" 리더보드</p>
+    </div>
+    <div class="card card-green" style="padding:10px">
+      <div class="num">산출물 07</div>
+      <h3>평판 시스템</h3>
+      <p>거래 건수 + 평점 + 응답률 + 완료율</p>
+    </div>
+    <div class="card card-green" style="padding:10px">
+      <div class="num">산출물 08</div>
+      <h3>가격 통계</h3>
+      <p>최근 평균 거래 가격 안내</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>게이트 조건:</strong> 필지 등록 &rarr; 작업 등록 &rarr; 자동 추천 &rarr; 채팅 협의 &rarr; 계약 체결 &rarr; 작업 완료 &rarr; 평가 &rarr; 정산 전 사이클 오류 없이 완료. 수익 대시보드 + 리더보드 정상 표시.</p>
+  </div>
+</div>
+
+<!-- ==================== S09: EP2 Narrative ==================== -->
+<div class="slide" id="s9">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP2</div>
+  <div class="slide-label">EP2 DEMO NARRATIVE &mdash; 이야기로 보는 매칭/거래 전 과정</div>
+  <h2>EP2 데모 — 필지 등록에서 정산까지, 매칭의 완성</h2>
+
+  <div class="narrative" style="margin-top:8px">
+    <p>9월, <span class="place">부량면</span>에 가을바람이 불기 시작합니다. 벼베기 시즌입니다.</p>
+    <p style="margin-top:8px"><span class="person">의뢰자 김민준</span>씨는 먼저 자신의 농지를 앱에 등록합니다. <strong>"전북 김제시 부량면 신용리 산 12번지, 3,000평, 벼"</strong> &mdash; 카카오맵에 핀이 찍히고 농지가 저장됩니다. 이어서 <em>"연간 작업 캘린더"</em>를 열면 AI가 추천합니다: <strong>"3월 로터리, 5월 모내기, 6~8월 방제 3회, 9월 벼베기"</strong>. 전체 수락!</p>
+    <p style="margin-top:8px">9월 1일, <span class="person">김민준</span>씨의 폰에 푸시 알림이 뜹니다. <em>"벼베기 시즌입니다! 주변 콤바인 보유 작업자 5명을 찾았습니다."</em> 의뢰를 등록합니다 &mdash; 필지 정보가 자동 입력되고, 시스템이 <strong>"최근 평균 거래 가격: 평당 4,500원"</strong>을 안내합니다. 희망일 9/15~20, 예산 평당 5,000원(총 1,500만원)으로 등록하면, 적합한 작업자들에게 즉시 알림이 갑니다.</p>
+    <p style="margin-top:8px"><span class="person">작업자 이철수</span>씨(★4.8, 2km)가 알림을 확인하고 지원합니다. <em>"R532 콤바인 보유, 9/15 오전 6시 작업 가능합니다."</em> 다른 2명도 지원합니다. <span class="person">김민준</span>씨는 가장 가깝고 평점 높은 <span class="person">이철수</span>씨를 선택합니다.</p>
+    <p style="margin-top:8px">채팅방이 열립니다. 진입로 확인, 일정 조율, 금액 합의 &mdash; 평당 5,000원, 총 1,500만원. <span class="action">계약 체결</span> 버튼으로 인앱 계약서에 양측이 서명합니다.</p>
+    <p style="margin-top:8px">9월 15일, 작업 완료. <span class="person">이철수</span>씨가 사진 3장과 함께 완료 보고를 올립니다. 이어서 <span class="action">건조 위탁</span>을 진행합니다 &mdash; 앱이 <em>"수확한 벼 건조 필요"</em>를 감지하고, 근처 <strong>농협 건조장(2km)</strong>을 추천합니다. 수확 50가마를 입고 신청합니다.</p>
+    <p style="margin-top:8px">48시간 후, 건조 완료. 시스템이 자동으로 수율을 계산합니다: <strong>투입 50가마 → 산출 43가마 = 수율 86%, 수분율 14.2%, 등급 상</strong>. 완료서를 받습니다.</p>
+    <p style="margin-top:8px">계약 체결 완료 후, <span class="action">결제 시스템</span>이 시작됩니다. 의뢰자가 <strong>1,500만원을 에스크로에 입금</strong>하면, 시스템이 토스페이먼츠로 안전하게 보관합니다. 작업 완료 후 확인되면, <strong>수수료 3% (45만원) 차감하여 1,455만원</strong>이 <span class="person">이철수</span>씨의 계좌에 자동 입금됩니다.</p>
+    <p style="margin-top:8px"><span class="person">김민준</span>씨가 작업을 확인하고 별점 5점, <em>"시간 약속 잘 지키시고 깔끔하게 작업해주셨습니다."</em> 정산 완료.</p>
+    <p style="margin-top:8px"><span class="person">이철수</span>씨의 수익 대시보드: 이번 주 1,455만원, 이번 달 누적 2,850만원, 평균 평점 4.9. <strong>"이번주 우리동네 수입왕"</strong> 리더보드 1위!</p>
+  </div>
+</div>
+
+<!-- ==================== S10: EP2 Demo Steps 1-6 ==================== -->
+<div class="slide slide-scroll" id="s10">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP2</div>
+  <div class="slide-label">EP2 DEMO &mdash; Micro Steps 1~6 (필지 등록 ~ 매칭 선택)</div>
+  <h2>EP2 Micro Steps 1~6</h2>
+
+  <div class="two-col">
+    <div>
+      <ul class="step-list">
+        <li><span class="step-num">01</span><span class="ms ms-click">Click</span> "내 농지 등록" &rarr; <span class="ms ms-input">Input</span> 주소: 전북 김제시 부량면 신용리 산 12번지 &rarr; <span class="ms ms-auto">Auto</span> 카카오맵 핀 표시 &rarr; <span class="ms ms-input">Input</span> 면적: 3,000평 / 작물: 벼 &rarr; <span class="ms ms-toast">Toast</span> "농지가 등록되었습니다."</li>
+        <li><span class="step-num">02</span><span class="ms ms-click">Click</span> "연간 작업 캘린더" &rarr; <span class="ms ms-auto">Auto</span> AI 추천: "3월 로터리, 5월 모내기, 6~8월 방제 3회, 9월 벼베기" &rarr; <span class="ms ms-click">Click</span> "전체 수락" &rarr; <span class="ms ms-toast">Toast</span> "연간 작업 일정이 등록되었습니다."</li>
+        <li><span class="step-num">03</span><span class="ms ms-auto">Auto</span> 9/1 푸시: "벼베기 시즌입니다! 콤바인 보유 작업자 5명" &rarr; <span class="ms ms-click">Click</span> 알림 &rarr; <span class="ms ms-state">State</span> 추천 작업자 리스트 &mdash; 이철수(4.8점, 2km), 박영호(4.5점, 5km), 김수현(4.2점, 8km)</li>
+        <li><span class="step-num">04</span><span class="ms ms-click">Click</span> "지금 의뢰 등록" &rarr; <span class="ms ms-auto">Auto</span> 필지 정보 자동 입력 &rarr; <span class="ms ms-select">Select</span> 작업: 벼베기 &rarr; <span class="ms ms-input">Input</span> 희망일: 9/15~20 &rarr; <span class="ms ms-state">State</span> "최근 평균: 평당 4,500원" &rarr; <span class="ms ms-input">Input</span> 예산: 평당 5,000원 / 총 1,500만원 &rarr; <span class="ms ms-toast">Toast</span> "의뢰가 등록되었습니다."</li>
+        <li><span class="step-num">05</span><span class="ms ms-auto">Auto</span> 작업자 이철수 앱 &rarr; 푸시: "부량면 벼베기 3,000평" &rarr; <span class="ms ms-click">Click</span> 알림 &rarr; <span class="ms ms-state">State</span> 의뢰 상세 &rarr; <span class="ms ms-click">Click</span> "지원하기" &rarr; <span class="ms ms-input">Input</span> "R532 콤바인, 9/15 오전 6시 가능" &rarr; <span class="ms ms-toast">Toast</span> "지원 완료"</li>
+        <li><span class="step-num">06</span><span class="ms ms-state">State</span> 의뢰자 앱 "지원자 3명" &rarr; <span class="ms ms-click">Click</span> 지원자 목록 &rarr; <span class="ms ms-click">Click</span> 이철수 선택 &rarr; <span class="ms ms-modal">Modal</span> "이철수님을 선택하시겠습니까?" &rarr; <span class="ms ms-click">Click</span> 확인 &rarr; <span class="ms ms-toast">Toast</span> "매칭 완료, 채팅방 생성"</li>
+      </ul>
+    </div>
+    <div class="screen-grid" style="justify-content:center">
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 내 농지 등록</div>
+            <div class="phone-body">
+              <div class="mock-field">주소: 김제시 부량면 신용리</div>
+              <div style="height:50px;background:var(--bg-secondary);border:1px solid var(--border);margin:3px 0;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:7px;color:var(--text-muted)">카카오맵 (핀 표시)</div>
+              <div class="mock-field">면적: 3,000평</div>
+              <div class="mock-field">작물: 벼</div>
+              <div class="mock-btn" style="margin-top:6px">농지 등록</div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">필지 등록</div>
+      </div>
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 추천 작업자</div>
+            <div class="phone-body">
+              <div style="font-size:7px;color:var(--accent);margin-bottom:4px">벼베기 &middot; 부량면 3,000평</div>
+              <div class="mock-card" style="border-left:2px solid var(--green)">
+                <div class="mock-card-title">이철수 <span class="mock-badge mock-badge-green">★4.8</span></div>
+                <div class="mock-card-sub">콤바인 R532 &middot; 2km &middot; "9/15 오전 가능"</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-title">박영호 <span class="mock-badge mock-badge-green">★4.5</span></div>
+                <div class="mock-card-sub">콤바인 &middot; 5km</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-title">김수현 <span class="mock-badge mock-badge-green">★4.2</span></div>
+                <div class="mock-card-sub">콤바인 &middot; 8km</div>
+              </div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">추천 작업자</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S11: EP2 Demo Steps 7-12 ==================== -->
+<div class="slide slide-scroll" id="s11">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP2</div>
+  <div class="slide-label">EP2 DEMO &mdash; Micro Steps 7~12 (채팅 ~ 수익 대시보드)</div>
+  <h2>EP2 Micro Steps 7~12</h2>
+
+  <div class="two-col">
+    <div>
+      <ul class="step-list">
+        <li><span class="step-num">07</span><span class="ms ms-auto">Auto</span> 채팅방 생성 &rarr; <span class="ms ms-state">State</span> 1:1 채팅 &mdash; 의뢰자: "9/15 오전 6시 부량면 논으로..." &rarr; 작업자: "사전답사 다녀오겠습니다." &rarr; 금액 확인: "평당 5,000원 총 1,500만원"</li>
+        <li><span class="step-num">08</span><span class="ms ms-click">Click</span> "계약 체결" &rarr; <span class="ms ms-modal">Modal</span> 계약서(작업/면적/금액/일시/서명란) &rarr; <span class="ms ms-click">Click</span> 의뢰자 동의 &rarr; <span class="ms ms-auto">Auto</span> 작업자 알림 &rarr; <span class="ms ms-click">Click</span> 작업자 동의 &rarr; <span class="ms ms-toast">Toast</span> "계약 체결"</li>
+        <li><span class="step-num">09</span><span class="ms ms-state">State</span> 9/15 작업 완료 &rarr; <span class="ms ms-click">Click</span> "작업 완료 보고" &rarr; <span class="ms ms-upload">Upload</span> 사진 3장 &rarr; <span class="ms ms-input">Input</span> 면적: 3,000평 / 시간: 8시간 &rarr; <span class="ms ms-auto">Auto</span> 의뢰자 알림</li>
+        <li><span class="step-num">10</span><span class="ms ms-click">Click</span> "작업 확인" &rarr; <span class="ms ms-click">Click</span> "작업 확인 완료" &rarr; <span class="ms ms-modal">Modal</span> 평가 &rarr; <span class="ms ms-input">Input</span> ★5점 + "깔끔하게 작업해주셨습니다." &rarr; <span class="ms ms-click">Click</span> 평가 완료</li>
+        <li><span class="step-num">11</span><span class="ms ms-click">Click</span> "정산 확인" &rarr; <span class="ms ms-state">State</span> 15,000,000원 / 정산 대기 &rarr; <span class="ms ms-click">Click</span> "정산 완료" &rarr; <span class="ms ms-toast">Toast</span> "정산이 완료되었습니다."</li>
+        <li><span class="step-num">12</span><span class="ms ms-click">Click</span> "수익 대시보드" &rarr; <span class="ms ms-state">State</span> 이번 주: 1,500만원 / 이번 달: 2,850만원 / 작업 7건 / 평점 4.9 &rarr; <span class="ms ms-auto">Auto</span> 리더보드 1위: 이철수(1,500만), 2위: 박영호(1,200만), 3위: 김수현(800만) + 조합 프로필 카드</li>
+      </ul>
+    </div>
+    <div class="screen-grid" style="justify-content:center">
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 이철수</div>
+            <div class="phone-body" style="display:flex;flex-direction:column;gap:2px">
+              <div class="mock-chat-bubble mock-chat-me">9/15 오전 6시 부량면 논으로 와주시면 됩니다</div>
+              <div class="mock-chat-bubble mock-chat-other">네, 사전답사 다녀오겠습니다</div>
+              <div class="mock-chat-bubble mock-chat-me">평당 5,000원 총 1,500만원 맞으시죠?</div>
+              <div class="mock-chat-bubble mock-chat-other">네, 맞습니다.</div>
+              <div style="margin-top:auto">
+                <div class="mock-btn mock-btn-accent" style="font-size:7px">계약 체결</div>
+              </div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">1:1 채팅</div>
+      </div>
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 수익 대시보드</div>
+            <div class="phone-body">
+              <div style="text-align:center;margin-bottom:4px">
+                <div style="font-size:12px;font-weight:800;color:var(--green)">15,000,000원</div>
+                <div style="font-size:6px;color:var(--text-muted)">이번 주 수익</div>
+              </div>
+              <div style="display:flex;gap:4px;margin-bottom:6px">
+                <div style="flex:1;background:var(--bg-elevated);padding:3px;border-radius:2px;text-align:center">
+                  <div style="font-size:8px;font-weight:700;color:var(--accent)">2,850만</div>
+                  <div style="font-size:5px;color:var(--text-muted)">이번 달</div>
+                </div>
+                <div style="flex:1;background:var(--bg-elevated);padding:3px;border-radius:2px;text-align:center">
+                  <div style="font-size:8px;font-weight:700;color:var(--orange)">7건</div>
+                  <div style="font-size:5px;color:var(--text-muted)">완료</div>
+                </div>
+                <div style="flex:1;background:var(--bg-elevated);padding:3px;border-radius:2px;text-align:center">
+                  <div style="font-size:8px;font-weight:700;color:var(--yellow)">★4.9</div>
+                  <div style="font-size:5px;color:var(--text-muted)">평점</div>
+                </div>
+              </div>
+              <div style="font-size:7px;font-weight:600;color:var(--text-primary);margin-bottom:3px">이번주 우리동네 수입왕</div>
+              <div class="mock-card" style="border-left:2px solid var(--yellow)">
+                <div class="mock-card-title">1위 이철수 <span style="color:var(--yellow)">1,500만</span></div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-title">2위 박영호 <span style="color:var(--text-muted)">1,200만</span></div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-title">3위 김수현 <span style="color:var(--text-muted)">800만</span></div>
+              </div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">수익 + 리더보드</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S11b: EP2 Demo Steps 13-15 (건조/건조위탁) ==================== -->
+<div class="slide slide-scroll" id="s11b">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP2</div>
+  <div class="slide-label">EP2 DEMO &mdash; Micro Steps 13~15 (건조시설 검색 & 위탁)</div>
+  <h2>EP2 Micro Steps 13~15 — 건조 위탁 시스템</h2>
+
+  <div class="two-col">
+    <div>
+      <ul class="step-list">
+        <li><span class="step-num">13</span><span class="ms ms-state">State</span> 벼베기 완료 후, 시스템이 <em>"수확한 벼 건조 완료 필요"</em> 알림 &rarr; <span class="ms ms-click">Click</span> "건조시설 찾기" &rarr; <span class="ms ms-auto">Auto</span> 근처 건조시설 4곳 검색 (반경 10km)</li>
+        <li><span class="step-num">14</span><span class="ms ms-state">State</span> 건조시설 카드: 농협 건조장(2km, 가마당 15,000원), 개인 건조장(5km, 14,000원) &rarr; <span class="ms ms-click">Click</span> 농협 선택 &rarr; <span class="ms ms-input">Input</span> 벼 50가마 입고 신청 &rarr; <span class="ms ms-toast">Toast</span> "건조 위탁 신청 완료"</li>
+        <li><span class="step-num">15</span><span class="ms ms-auto">Auto</span> 건조 진행 상태: "입고(50가마) → 건조 중(48h) → 건조 완료" &rarr; <span class="ms ms-state">State</span> 수율/품질 자동 계산 &mdash; 투입 50가마 → 산출 43가마 = 수율 86%, 수분율 14.2%, 등급 상 &rarr; <span class="ms ms-click">Click</span> "수료서 다운로드"</li>
+      </ul>
+    </div>
+    <div class="screen-grid" style="justify-content:center">
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 건조시설 검색</div>
+            <div class="phone-body">
+              <div style="font-size:7px;color:var(--text-muted);margin-bottom:4px">투입: 50가마 · 건조 요청</div>
+              <div class="mock-card" style="border-left:2px solid var(--green)">
+                <div class="mock-card-title">농협 건조장 <span class="mock-badge mock-badge-green">2km</span></div>
+                <div class="mock-card-sub">평가 4.7 · 가마당 15,000원</div>
+                <div class="mock-card-sub" style="margin-top:3px;font-size:6px;color:var(--accent)">현재 가용 용량: 80가마</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-title">개인 건조장 <span class="mock-badge mock-badge-blue">5km</span></div>
+                <div class="mock-card-sub">평가 4.5 · 가마당 14,000원</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-title">대동 건조센터 <span class="mock-badge mock-badge-orange">8km</span></div>
+                <div class="mock-card-sub">평가 4.6 · 가마당 16,000원</div>
+              </div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">건조시설 검색</div>
+      </div>
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 건조 진행 상태</div>
+            <div class="phone-body">
+              <div style="font-size:8px;font-weight:600;color:var(--text-primary);margin-bottom:4px">농협 건조장</div>
+              <div class="mock-card">
+                <div style="font-size:7px;color:var(--text-muted);margin-bottom:2px">상태</div>
+                <div style="display:flex;gap:2px;margin-bottom:3px">
+                  <div style="flex:1;text-align:center;padding:2px;background:var(--green);border-radius:2px;font-size:6px;color:#fff;font-weight:600">입고</div>
+                  <div style="flex:1;text-align:center;padding:2px;background:var(--bg-secondary);border-radius:2px;font-size:6px;color:var(--text-muted)">건조</div>
+                  <div style="flex:1;text-align:center;padding:2px;background:var(--bg-secondary);border-radius:2px;font-size:6px;color:var(--text-muted)">출고</div>
+                </div>
+                <div style="font-size:7px;color:var(--accent)">50가마 입고 완료</div>
+              </div>
+              <div style="font-size:8px;font-weight:600;color:var(--text-primary);margin-top:6px;margin-bottom:3px">수율 &amp; 품질</div>
+              <div class="mock-card">
+                <div style="display:flex;justify-content:space-between;font-size:7px;margin-bottom:2px">
+                  <span>투입</span><span style="color:var(--text-primary)">50가마</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:7px;margin-bottom:2px">
+                  <span>산출</span><span style="color:var(--green)">43가마</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:7px;border-top:1px solid var(--border);padding-top:2px;margin-top:2px">
+                  <span>수율</span><span style="color:var(--green);font-weight:600">86%</span>
+                </div>
+              </div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">건조 진행 상태</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S11c: EP2 Demo Steps 16-17 (결제/에스크로) ==================== -->
+<div class="slide slide-scroll" id="s11c">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP2</div>
+  <div class="slide-label">EP2 DEMO &mdash; Micro Steps 16~17 (결제 & 에스크로)</div>
+  <h2>EP2 Micro Steps 16~17 — 에스크로 결제 시스템</h2>
+
+  <div class="two-col">
+    <div>
+      <ul class="step-list">
+        <li><span class="step-num">16</span><span class="ms ms-state">State</span> 계약 체결 완료 → <span class="ms ms-click">Click</span> "결제 진행" &rarr; <span class="ms ms-modal">Modal</span> 결제 정보 &mdash; 금액 1,500만원, 수수료 3% 차감 &rarr; <span class="ms ms-click">Click</span> "토스페이먼츠로 결제" &rarr; <span class="ms ms-auto">Auto</span> 결제 화면 연동 (카드/계좌/간편결제) &rarr; <span class="ms ms-input">Input</span> 카드 선택 &amp; 인증 &rarr; <span class="ms ms-toast">Toast</span> "결제 완료, 에스크로 보관 중"</li>
+        <li><span class="step-num">17</span><span class="ms ms-state">State</span> 작업 완료 보고 + 사진 제출 &rarr; 의뢰자 확인 완료 &rarr; <span class="ms ms-auto">Auto</span> 에스크로 즉시 출금 &rarr; 작업자 계좌: 1,455만원(3% 수수료 45만원 차감) 입금 &rarr; <span class="ms ms-toast">Toast</span> "정산 완료, 계좌 입금 확인"</li>
+      </ul>
+    </div>
+    <div class="screen-grid" style="justify-content:center">
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 결제 정보</div>
+            <div class="phone-body">
+              <div style="background:var(--bg-elevated);padding:6px;border-radius:3px;margin-bottom:6px">
+                <div style="font-size:7px;color:var(--text-muted);margin-bottom:2px">작업비</div>
+                <div style="font-size:14px;font-weight:800;color:var(--text-primary)">15,000,000원</div>
+                <div style="font-size:7px;color:var(--text-muted);margin-top:4px">수수료 3% (450,000원) 차감</div>
+              </div>
+              <div class="mock-field" style="margin-bottom:6px;background:var(--green);color:#fff;font-weight:600">토스페이먼츠 (카드/계좌/간편)</div>
+              <div style="font-size:7px;color:var(--text-secondary);line-height:1.6;margin-bottom:4px">
+                <div style="margin-bottom:3px"><strong>작업자 정보</strong></div>
+                <div>이철수 · 010-1234-5678</div>
+                <div>계좌: 농협 123-456-789012</div>
+              </div>
+              <div class="mock-btn mock-btn-accent">결제 진행</div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">결제 정보</div>
+      </div>
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 정산 현황</div>
+            <div class="phone-body">
+              <div style="font-size:8px;font-weight:600;color:var(--text-primary);margin-bottom:4px">에스크로 정산</div>
+              <div class="mock-card" style="border-left:2px solid var(--green)">
+                <div class="mock-card-sub">의뢰 접수</div>
+                <div class="mock-card-title" style="color:var(--green)">15,000,000원</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-sub">작업 완료 대기</div>
+                <div class="mock-card-title">15,000,000원</div>
+              </div>
+              <div class="mock-card" style="border-left:2px solid var(--yellow)">
+                <div class="mock-card-sub">정산 예정</div>
+                <div class="mock-card-title" style="color:var(--yellow)">14,550,000원</div>
+                <div class="mock-card-sub" style="margin-top:2px">수수료 450,000원 차감</div>
+              </div>
+              <div class="mock-btn mock-btn-accent" style="margin-top:6px">정산 완료</div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">정산 현황</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S12: EP2 WBS ==================== -->
+<div class="slide slide-scroll" id="s12">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP2</div>
+  <div class="slide-label">EP2 WBS &mdash; 25 Tasks / AP-08 ~ AP-20</div>
+  <h2>EP2 WBS</h2>
+
+  <table class="tbl">
+    <thead><tr><th>MODULE</th><th>TASK</th><th>AP</th><th>SIZE</th><th>START</th><th>END</th><th>STATUS</th></tr></thead>
+    <tbody>
+      <tr><td>필지-등록</td><td>필지 등록 (주소 검색 + 면적 + 지도 마킹)</td><td>AP-08</td><td><span class="badge badge-red">L</span></td><td>06-01</td><td>06-06</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>필지-등록</td><td>카카오맵 연동 (필지 핀/폴리곤)</td><td>AP-08</td><td><span class="badge badge-red">L</span></td><td>06-06</td><td>06-13</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>필지-캘린더</td><td>연간 농작업 캘린더 자동 추천</td><td>AP-09</td><td><span class="badge badge-red">L</span></td><td>06-13</td><td>06-20</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>필지-캘린더</td><td>캘린더 UI (월별 타임라인)</td><td>AP-09</td><td><span class="badge badge-orange">M</span></td><td>06-20</td><td>06-24</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>의뢰-등록</td><td>의뢰 등록 폼 (필지 자동연동)</td><td>AP-10</td><td><span class="badge badge-orange">M</span></td><td>06-24</td><td>06-27</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>의뢰-등록</td><td>최근 평균 거래 가격 안내</td><td>AP-10</td><td><span class="badge badge-red">L</span></td><td>06-27</td><td>07-04</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>매칭-자동추천</td><td>자동 매칭 추천 알고리즘</td><td>AP-11</td><td><span class="badge badge-red">L</span></td><td>07-04</td><td>07-11</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>매칭-자동추천</td><td>추천 작업자 리스트 (스코어링)</td><td>AP-11</td><td><span class="badge badge-orange">M</span></td><td>07-11</td><td>07-15</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>매칭-지원선택</td><td>지원/선택 플로우</td><td>AP-12</td><td><span class="badge badge-orange">M</span></td><td>07-15</td><td>07-18</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>채팅-계약</td><td>1:1 채팅 (텍스트 + 이미지)</td><td>AP-13</td><td><span class="badge badge-red">L</span></td><td>07-18</td><td>07-25</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>채팅-계약</td><td>인앱 계약서 (서명)</td><td>AP-13</td><td><span class="badge badge-red">L</span></td><td>07-25</td><td>08-01</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>작업-완료</td><td>작업 완료 보고 (사진 + 실적)</td><td>AP-14</td><td><span class="badge badge-orange">M</span></td><td>08-01</td><td>08-05</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>작업-완료</td><td>작업 확인 + 평가 (별점 + 후기)</td><td>AP-14</td><td><span class="badge badge-orange">M</span></td><td>08-05</td><td>08-08</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>정산-수익</td><td>정산 시스템</td><td>AP-15</td><td><span class="badge badge-red">L</span></td><td>08-08</td><td>08-15</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>정산-수익</td><td>수익 대시보드 (주간/월간)</td><td>AP-15</td><td><span class="badge badge-orange">M</span></td><td>08-15</td><td>08-19</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>정산-수익</td><td>"우리동네 수입왕" 리더보드</td><td>AP-15</td><td><span class="badge badge-orange">M</span></td><td>08-19</td><td>08-22</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>평판-시스템</td><td>평판 점수 엔진</td><td>AP-16</td><td><span class="badge badge-orange">M</span></td><td>08-22</td><td>08-25</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>평판-시스템</td><td>조합 프로필 카드</td><td>AP-16</td><td><span class="badge badge-green">S</span></td><td>08-25</td><td>08-26</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>결제-에스크로</td><td>에스크로 결제 시스템 (PG 연동)</td><td>AP-18</td><td><span class="badge badge-red">L</span></td><td>08-08</td><td>08-15</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>결제-에스크로</td><td>토스페이먼츠 PG 통합</td><td>AP-18</td><td><span class="badge badge-red">L</span></td><td>08-15</td><td>08-22</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>건조-시설검색</td><td>건조시설 검색 (위치 기반)</td><td>AP-19</td><td><span class="badge badge-red">L</span></td><td>07-08</td><td>07-15</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>건조-위탁</td><td>건조 위탁 신청 &amp; 관리</td><td>AP-19</td><td><span class="badge badge-red">L</span></td><td>07-15</td><td>07-22</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>건조-수율품질</td><td>수율/품질 자동 계산 &amp; 기록</td><td>AP-19</td><td><span class="badge badge-red">L</span></td><td>07-22</td><td>08-01</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>통합테스트</td><td>EP2 E2E 시나리오 테스트 (건조/결제 포함)</td><td>AP-20</td><td><span class="badge badge-red">L</span></td><td>09-05</td><td>09-12</td><td><span class="badge badge-purple">NOT</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== S13: EP3 Overview + Narrative ==================== -->
+<div class="slide slide-scroll" id="s13">
+  <div class="grid-bg"></div><div class="glow-br"></div>
+  <div class="section-num">EP3</div>
+  <div class="slide-label">EP3 GATE &mdash; 지자체 보조금 + 농작업 대행단: 공공 플랫폼으로의 도약</div>
+  <h2>EP3 — 지자체 보조금 연계 &amp; 농작업 대행단 <span class="tag-gate">GATE 2026-12-26</span></h2>
+
+  <div class="grid-3" style="margin-bottom:8px">
+    <div class="card card-orange" style="padding:10px">
+      <div class="num">산출물 01</div>
+      <h3>대행단 생성</h3>
+      <p>농업인 그룹 창설, 멤버 초대</p>
+    </div>
+    <div class="card card-orange" style="padding:10px">
+      <div class="num">산출물 02</div>
+      <h3>대행단 프로필</h3>
+      <p>멤버, 장비, 경력, 평점 공개</p>
+    </div>
+    <div class="card card-orange" style="padding:10px">
+      <div class="num">산출물 03</div>
+      <h3>그룹 수주</h3>
+      <p>대행단 단위의 대량 의뢰 수주</p>
+    </div>
+    <div class="card card-red" style="padding:10px">
+      <div class="num">산출물 04</div>
+      <h3>내부 자동 할당</h3>
+      <p>장비/위치/일정 기반 스마트 배분</p>
+    </div>
+    <div class="card card-red" style="padding:10px">
+      <div class="num">산출물 05</div>
+      <h3>대행단 수익관리</h3>
+      <p>멤버별 배분, 정산, 수수료</p>
+    </div>
+    <div class="card card-red" style="padding:10px">
+      <div class="num">산출물 06</div>
+      <h3>보조금 단체매칭</h3>
+      <p>보조금 연계 대행단 매칭</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <h3 style="color:var(--orange);margin-bottom:6px">데모 내러티브</h3>
+  <div class="narrative" style="font-size:12px;line-height:1.8">
+    <p><span class="place">김제시청</span> 농업진흥과 <span class="person">담당자 최수정</span>이 백오피스에 로그인합니다. <em>"2026년 하반기 항공방제 보조금"</em> 사업을 등록합니다 &mdash; 예산 <strong>5억원</strong>, 대상 작업은 드론 방제, 지원 비율 <strong>70%</strong>(자부담 30%), 1인당 한도 500만원.</p>
+    <p style="margin-top:4px"><span class="person">농업인 김민준</span>씨에게 알림이 갑니다. 드론 방제 비용 <strong>300만원</strong> 중 <strong>210만원</strong>을 보조금으로! 필지를 선택하고 신청합니다. 지자체가 승인하면 드론 방제 작업자 <span class="person">이철수 드론팀</span>과 자동 매칭됩니다. 작업 완료 후 GPS 경로, 비행 로그, 방제 사진이 포함된 <span class="action">PDF 보고서가 자동 생성</span>되어 시청에 발송됩니다. 보조금 210만원은 작업자에게, 자부담 90만원은 별도 정산.</p>
+  </div>
+</div>
+
+<!-- ==================== S14: EP3 Demo Steps 1-10 ==================== -->
+<div class="slide slide-scroll" id="s14">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP3</div>
+  <div class="slide-label">EP3 DEMO &mdash; Micro Steps 1~10 (보조금 전 과정)</div>
+  <h2>EP3 Micro Steps 1~10</h2>
+
+  <div class="two-col">
+    <div>
+      <ul class="step-list">
+        <li><span class="step-num">01</span><span class="ms ms-click">Click</span> 백오피스 로그인 (김제시청) &rarr; <span class="ms ms-state">State</span> 지자체 관리자 대시보드 &rarr; <span class="ms ms-click">Click</span> "보조금 사업 등록"</li>
+        <li><span class="step-num">02</span><span class="ms ms-input">Input</span> 사업명: 항공방제 보조금 / 예산: 5억 / 대상: 드론 방제 / 지원: 70% / 한도: 500만 / 기간: 06-01~08-31 &rarr; <span class="ms ms-toast">Toast</span> "등록 완료, 알림 발송"</li>
+        <li><span class="step-num">03</span><span class="ms ms-auto">Auto</span> 김민준 앱 푸시: "항공방제 보조금 신청 시작 (70% 지원)" &rarr; <span class="ms ms-click">Click</span> 알림 &rarr; <span class="ms ms-state">State</span> 보조금 신청 화면</li>
+        <li><span class="step-num">04</span><span class="ms ms-select">Select</span> 대상 필지: 부량면 3,000평(벼) &rarr; <span class="ms ms-auto">Auto</span> 예상비용 300만원 / 보조금 210만원 / 자부담 90만원 &rarr; <span class="ms ms-click">Click</span> "보조금 신청" &rarr; <span class="ms ms-toast">Toast</span> "신청 완료"</li>
+        <li><span class="step-num">05</span><span class="ms ms-state">State</span> 지자체 대시보드 "신청 42건 대기" &rarr; <span class="ms ms-click">Click</span> 김민준 건 &rarr; <span class="ms ms-click">Click</span> "승인" &rarr; <span class="ms ms-auto">Auto</span> 농업인 알림: "승인됨"</li>
+        <li><span class="step-num">06</span><span class="ms ms-auto">Auto</span> 보조금 연계 매칭 &rarr; "드론 방제 가능 작업자 3명" &rarr; <span class="ms ms-click">Click</span> 이철수 드론팀 &rarr; 채팅 &rarr; <span class="ms ms-click">Click</span> 보조금 연계 계약 체결 (210만원 보조금 + 90만원 자부담)</li>
+        <li><span class="step-num">07</span><span class="ms ms-state">State</span> 작업 완료 &rarr; <span class="ms ms-upload">Upload</span> 드론 비행 로그 + GPS 경로 + 방제 사진 5장 &rarr; <span class="ms ms-auto">Auto</span> 보조금 사용 근거 PDF 자동 생성</li>
+        <li><span class="step-num">08</span><span class="ms ms-click">Click</span> "리포트 확인" &rarr; <span class="ms ms-state">State</span> PDF 미리보기 &rarr; <span class="ms ms-click">Click</span> "지자체 발송" &rarr; <span class="ms ms-auto">Auto</span> API 전송 &rarr; <span class="ms ms-toast">Toast</span> "김제시청에 발송 완료"</li>
+        <li><span class="step-num">09</span><span class="ms ms-state">State</span> 지자체 대시보드 "정산 대기 15건" &rarr; 김민준 건: 210만원 &rarr; <span class="ms ms-click">Click</span> "정산 승인" &rarr; <span class="ms ms-auto">Auto</span> 작업자 210만원 + 자부담 90만원 정산 &rarr; <span class="ms ms-toast">Toast</span> "정산 완료"</li>
+        <li><span class="step-num">10</span><span class="ms ms-state">State</span> 집행 현황 &mdash; 총 5억 / 집행 2.1억(42%) / 잔여 2.9억 / 수혜 98명 / 완료 84건</li>
+      </ul>
+    </div>
+    <div class="screen-grid" style="justify-content:center;flex-direction:column;align-items:center">
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 보조금 신청</div>
+            <div class="phone-body">
+              <div style="background:var(--orange);color:#fff;padding:4px 6px;border-radius:3px;font-size:7px;font-weight:600;margin-bottom:4px">항공방제 보조금 (70% 지원)</div>
+              <div class="mock-field">대상 필지: 부량면 3,000평 (벼)</div>
+              <div style="background:var(--bg-elevated);padding:5px;border-radius:3px;margin:4px 0">
+                <div style="font-size:7px;display:flex;justify-content:space-between"><span>예상 드론 방제 비용</span><span style="color:var(--text-primary)">3,000,000원</span></div>
+                <div style="font-size:7px;display:flex;justify-content:space-between"><span>보조금 지원 (70%)</span><span style="color:var(--green)">-2,100,000원</span></div>
+                <div style="font-size:7px;display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:3px;margin-top:3px"><span style="font-weight:700">자부담 (30%)</span><span style="color:var(--orange);font-weight:700">900,000원</span></div>
+              </div>
+              <div class="mock-btn" style="background:var(--orange)">보조금 신청</div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">보조금 신청</div>
+      </div>
+      <div style="margin-top:10px">
+        <div class="browser-frame" style="max-width:260px">
+          <div class="browser-titlebar">
+            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+            <div class="browser-urlbar">admin.danngam.kr/subsidy</div>
+          </div>
+          <div class="browser-body" style="min-height:100px">
+            <div style="font-size:9px;font-weight:700;color:var(--text-primary);margin-bottom:6px">보조금 집행 현황</div>
+            <div style="display:flex;gap:4px;margin-bottom:6px">
+              <div style="flex:1;background:var(--bg-secondary);padding:4px;border-radius:2px;text-align:center"><div style="font-size:10px;font-weight:800;color:var(--orange)">5억</div><div style="font-size:6px;color:var(--text-muted)">총 예산</div></div>
+              <div style="flex:1;background:var(--bg-secondary);padding:4px;border-radius:2px;text-align:center"><div style="font-size:10px;font-weight:800;color:var(--green)">2.1억</div><div style="font-size:6px;color:var(--text-muted)">집행</div></div>
+              <div style="flex:1;background:var(--bg-secondary);padding:4px;border-radius:2px;text-align:center"><div style="font-size:10px;font-weight:800;color:var(--accent)">98명</div><div style="font-size:6px;color:var(--text-muted)">수혜</div></div>
+            </div>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:42%;height:100%;background:var(--orange)"></div></div>
+            <div style="font-size:6px;color:var(--text-muted);margin-top:2px">집행률 42% &middot; 잔여 2.9억</div>
+          </div>
+        </div>
+        <div class="browser-label">지자체 집행 현황</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S14B: EP3 Demo B - Crew System ==================== -->
+<div class="slide slide-scroll" id="s14b">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP3</div>
+  <div class="slide-label">EP3 DEMO B &mdash; 농작업 대행단 Micro Steps</div>
+  <h2>EP3 Micro Steps B — 농작업 대행단 (부량 콤바인팀)</h2>
+
+  <div class="two-col">
+    <div>
+      <ul class="step-list">
+        <li><span class="step-num">01</span><span class="ms ms-click">Click</span> 대행단 생성 &rarr; <span class="ms ms-input">Input</span> 대행단명: "부량 콤바인팀" / 대표: 최동훈 / 위치: 전북 부량면 &rarr; <span class="ms ms-toast">Toast</span> "대행단 생성 완료"</li>
+        <li><span class="step-num">02</span><span class="ms ms-click">Click</span> 멤버 초대 &rarr; <span class="ms ms-input">Input</span> 5명 농업인 추가 (최동훈, 이준석, 황영준, 박영일, 이홍석) &rarr; <span class="ms ms-toast">Toast</span> "5명 가입 대기"</li>
+        <li><span class="step-num">03</span><span class="ms ms-click">Click</span> 장비 등록 &rarr; <span class="ms ms-input">Input</span> 콤바인 3대 + 트랙터 2대 + 건조기 3대 (총 8대) &rarr; <span class="ms ms-state">State</span> 장비 목록 확인</li>
+        <li><span class="step-num">04</span><span class="ms ms-click">Click</span> 프로필 공개 &rarr; <span class="ms ms-state">State</span> 대행단 프로필 페이지 (멤버 5명, 콤바인 3대, 트랙터 2대, 평점 4.9⭐, 47건 완료) &rarr; <span class="ms ms-toast">Toast</span> "프로필 공개됨"</li>
+        <li><span class="step-num">05</span><span class="ms ms-auto">Auto</span> 12건 벼베기 의뢰 자동 매칭 &rarr; "김제 지역 3일간 1,500평 × 12필지" &rarr; <span class="ms ms-click">Click</span> "일괄 수주" &rarr; <span class="ms ms-toast">Toast</span> "12건 수주 완료"</li>
+        <li><span class="step-num">06</span><span class="ms ms-state">State</span> 자동 할당표 생성 &rarr; 장비/위치/일정 기반 멤버별 배분 &rarr; 최동훈(4건), 이준석(3건), 황영준(3건), 박영일(1건), 이홍석(1건)</li>
+        <li><span class="step-num">07</span><span class="ms ms-click">Click</span> 대표 확인 &rarr; <span class="ms ms-state">State</span> 할당 일정표 검토 &rarr; <span class="ms ms-click">Click</span> "확정" or "수정" &rarr; <span class="ms ms-toast">Toast</span> "일정 확정"</li>
+        <li><span class="step-num">08</span><span class="ms ms-state">State</span> 작업 진행 (사진/GPS 자동 기록) &rarr; 12건 모두 완료 &rarr; <span class="ms ms-toast">Toast</span> "모든 작업 완료!"</li>
+        <li><span class="step-num">09</span><span class="ms ms-state">State</span> 그룹 정산 화면 &rarr; 총 수익 2,340만원 &rarr; 멤버별 배분 (최동훈 800만, 이준석 650만, 황영준 600만, 박영일 150만, 이홍석 140만)</li>
+        <li><span class="step-num">10</span><span class="ms ms-click">Click</span> "정산 승인" &rarr; <span class="ms ms-auto">Auto</span> 각 멤버에게 개별 계좌 송금 &rarr; <span class="ms ms-toast">Toast</span> "정산 완료"</li>
+      </ul>
+    </div>
+    <div class="screen-grid" style="justify-content:center;flex-direction:column;align-items:center">
+      <div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 대행단 프로필</div>
+            <div class="phone-body">
+              <div class="mock-card">
+                <div class="mock-card-title">부량 콤바인팀</div>
+                <div style="font-size:7px;color:var(--text-muted);margin:2px 0">전북 부량면 &middot; 대표 최동훈</div>
+                <div style="background:var(--bg-secondary);padding:3px;border-radius:2px;margin:3px 0">
+                  <div style="font-size:7px;display:flex;justify-content:space-between;margin:1px 0">
+                    <span>멤버</span><span style="color:var(--text-primary);font-weight:600">5명</span>
+                  </div>
+                  <div style="font-size:7px;display:flex;justify-content:space-between;margin:1px 0">
+                    <span>콤바인</span><span style="color:var(--text-primary);font-weight:600">3대</span>
+                  </div>
+                  <div style="font-size:7px;display:flex;justify-content:space-between;margin:1px 0">
+                    <span>트랙터</span><span style="color:var(--text-primary);font-weight:600">2대</span>
+                  </div>
+                  <div style="font-size:7px;display:flex;justify-content:space-between;margin:1px 0;border-top:1px solid var(--border);padding-top:2px">
+                    <span>평점</span><span style="color:var(--green);font-weight:600">4.9 ⭐</span>
+                  </div>
+                  <div style="font-size:7px;color:var(--text-muted)">47건 완료</div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">대행단 프로필</div>
+      </div>
+      <div style="margin-top:10px">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 자동 할당</div>
+            <div class="phone-body">
+              <div style="font-size:8px;font-weight:600;color:var(--text-primary);margin-bottom:3px">12건 벼베기 자동 할당표</div>
+              <div class="mock-card" style="padding:3px;margin:2px 0">
+                <div style="font-size:7px;color:var(--text-primary);font-weight:600">최동훈</div>
+                <div style="font-size:6px;color:var(--text-muted)">콤바인 #1 · 4건</div>
+              </div>
+              <div class="mock-card" style="padding:3px;margin:2px 0">
+                <div style="font-size:7px;color:var(--text-primary);font-weight:600">이준석</div>
+                <div style="font-size:6px;color:var(--text-muted)">콤바인 #2 · 3건</div>
+              </div>
+              <div class="mock-card" style="padding:3px;margin:2px 0">
+                <div style="font-size:7px;color:var(--text-primary);font-weight:600">황영준</div>
+                <div style="font-size:6px;color:var(--text-muted)">콤바인 #3 · 3건</div>
+              </div>
+              <div class="mock-card" style="padding:3px;margin:2px 0">
+                <div style="font-size:7px;color:var(--text-primary);font-weight:600">박영일</div>
+                <div style="font-size:6px;color:var(--text-muted)">트랙터 #1 · 1건</div>
+              </div>
+              <div style="font-size:7px;color:var(--accent);text-align:center;margin-top:3px">+1명</div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">자동 할당표</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S15: EP3 WBS ==================== -->
+<div class="slide slide-scroll" id="s15">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP3</div>
+  <div class="slide-label">EP3 WBS &mdash; 20 Tasks / AP-18 ~ AP-23 (대행단 포함)</div>
+  <h2>EP3 WBS</h2>
+
+  <table class="tbl">
+    <thead><tr><th>MODULE</th><th>TASK</th><th>AP</th><th>SIZE</th><th>START</th><th>END</th><th>STATUS</th></tr></thead>
+    <tbody>
+      <tr><td>보조금-사업등록</td><td>지자체 관리자 포털 기본 구조</td><td>AP-18</td><td><span class="badge badge-red">L</span></td><td>09-01</td><td>09-08</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>보조금-사업등록</td><td>보조금 사업 등록 폼</td><td>AP-18</td><td><span class="badge badge-orange">M</span></td><td>09-08</td><td>09-12</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>보조금-사업등록</td><td>보조금 대상 작업 필터</td><td>AP-18</td><td><span class="badge badge-orange">M</span></td><td>09-12</td><td>09-16</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>보조금-신청</td><td>농업인 보조금 신청 화면</td><td>AP-19</td><td><span class="badge badge-red">L</span></td><td>09-16</td><td>09-23</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>보조금-신청</td><td>신청 승인/반려 워크플로우</td><td>AP-19</td><td><span class="badge badge-orange">M</span></td><td>09-23</td><td>09-26</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>보조금-매칭</td><td>보조금 연계 매칭</td><td>AP-20</td><td><span class="badge badge-orange">M</span></td><td>09-26</td><td>09-30</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>보조금-매칭</td><td>보조금 연계 계약서</td><td>AP-20</td><td><span class="badge badge-orange">M</span></td><td>09-30</td><td>10-03</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>보조금-리포트</td><td>보조금 사용 근거 자동 생성</td><td>AP-21</td><td><span class="badge badge-red">L</span></td><td>10-03</td><td>10-10</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>보조금-리포트</td><td>PDF 보고서 생성</td><td>AP-21</td><td><span class="badge badge-red">L</span></td><td>10-10</td><td>10-17</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>보조금-리포트</td><td>지자체 API 자동 발송</td><td>AP-21</td><td><span class="badge badge-red">L</span></td><td>10-17</td><td>10-24</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>보조금-정산</td><td>보조금 정산 워크플로우</td><td>AP-22</td><td><span class="badge badge-red">L</span></td><td>10-24</td><td>10-31</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>보조금-정산</td><td>보조금 집행 현황 대시보드</td><td>AP-22</td><td><span class="badge badge-orange">M</span></td><td>10-31</td><td>11-04</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>대행단-기본</td><td>대행단 그룹 생성 + 멤버 관리</td><td>AP-23a</td><td><span class="badge badge-red">L</span></td><td>09-16</td><td>09-30</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>대행단-프로필</td><td>대행단 프로필 공개 페이지</td><td>AP-23b</td><td><span class="badge badge-orange">M</span></td><td>09-30</td><td>10-07</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>대행단-할당</td><td>장비/위치/일정 기반 자동 배분</td><td>AP-23c</td><td><span class="badge badge-red">L</span></td><td>10-07</td><td>10-21</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>대행단-정산</td><td>멤버별 수익 배분 + 정산</td><td>AP-23d</td><td><span class="badge badge-orange">M</span></td><td>10-21</td><td>10-24</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>통합테스트</td><td>EP3 E2E 시나리오 테스트</td><td>AP-23</td><td><span class="badge badge-red">L</span></td><td>11-04</td><td>11-14</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>통합테스트</td><td>파일럿 운영 (김제시 1개 사업)</td><td>AP-23</td><td><span class="badge badge-red">L</span></td><td>11-14</td><td>11-28</td><td><span class="badge badge-purple">NOT</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== S16: EP4 Overview + Narrative ==================== -->
+<div class="slide slide-scroll" id="s16">
+  <div class="grid-bg"></div><div class="glow-tl"></div>
+  <div class="section-num">EP4</div>
+  <div class="slide-label">EP4 GATE &mdash; 제조사 &middot; R&amp;D 연계: 산업 플랫폼 확장</div>
+  <h2>EP4 — 제조사 &middot; R&D 연계 <span class="tag-gate">GATE 2027-03-12</span></h2>
+
+  <div class="grid-3" style="margin-bottom:8px">
+    <div class="card card-red" style="padding:10px">
+      <div class="num">산출물 01</div>
+      <h3>제조사 포털</h3>
+      <p>제품 등록, 시험포 모집, 데이터 리포트</p>
+    </div>
+    <div class="card card-red" style="padding:10px">
+      <div class="num">산출물 02</div>
+      <h3>시험포 신청 시스템</h3>
+      <p>농업인 &rarr; 제조사 제품 시험 참여</p>
+    </div>
+    <div class="card card-red" style="padding:10px">
+      <div class="num">산출물 03</div>
+      <h3>시험 결과 리포트</h3>
+      <p>데이터 수집 + 종합 리포트 생성</p>
+    </div>
+    <div class="card card-purple" style="padding:10px">
+      <div class="num">산출물 04</div>
+      <h3>국가 R&D 실증 신청</h3>
+      <p>마을 단위 실증사업 참여</p>
+    </div>
+    <div class="card card-purple" style="padding:10px">
+      <div class="num">산출물 05</div>
+      <h3>스마트팜/자율주행 실증</h3>
+      <p>첨단 기술 실증 매칭</p>
+    </div>
+    <div class="card card-purple" style="padding:10px">
+      <div class="num">산출물 06</div>
+      <h3>첨단 도입 농가 DB</h3>
+      <p>희망 농가 + 제조사 연결</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <h3 style="color:var(--red);margin-bottom:6px">데모 내러티브</h3>
+  <div class="narrative" style="font-size:12px;line-height:1.8">
+    <p><span class="person">대동(농기계 제조사) 담당자</span>가 제조사 포털에 로그인합니다. 신형 <strong>RX8040 트랙터(80마력, 자동변속)</strong>의 시험포 <strong>10곳</strong>을 모집합니다 &mdash; 3개월 무상 대여, 유지보수 무료. 전북 전체, 경작 면적 2,000평 이상 조건.</p>
+    <p style="margin-top:4px"><span class="person">김민준</span>씨에게 알림이 갑니다. <em>"대동 RX8040 시험포 농가 모집 (3개월 무상 대여)"</em> &mdash; 신청하고 선정됩니다! 시험 기간 동안 주간 리포트를 입력합니다: 작업일, 면적, 연비, 만족도, 특이사항. 시험 종료 후 <strong>10곳 종합 리포트</strong>가 자동 생성됩니다.</p>
+    <p style="margin-top:4px">한편, 농림부 <em>"자율주행 농기계 실증"</em> 사업에 <span class="place">부량면 신용리 마을회</span>가 마을 단위로 신청합니다. 마을 내 단감 등록 농가 <strong>15가구, 25ha</strong>가 자동 집계되고, 실증사업 선정 후 제조사와 자동 매칭됩니다.</p>
+  </div>
+</div>
+
+<!-- ==================== S17: EP4 Demo Steps 1-9 ==================== -->
+<div class="slide slide-scroll" id="s17">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP4</div>
+  <div class="slide-label">EP4 DEMO &mdash; Micro Steps 1~9 (시험포 + R&amp;D 실증)</div>
+  <h2>EP4 Micro Steps 1~9</h2>
+
+  <div class="two-col">
+    <div>
+      <ul class="step-list">
+        <li><span class="step-num">01</span><span class="ms ms-click">Click</span> 제조사 포털 로그인 (대동) &rarr; <span class="ms ms-state">State</span> 제조사 대시보드 &rarr; <span class="ms ms-click">Click</span> "시험포 모집 등록"</li>
+        <li><span class="step-num">02</span><span class="ms ms-input">Input</span> 제품: RX8040 80마력 자동변속 / 지역: 전북 / 인원: 10명 / 기간: 2027-03~05 / 혜택: 무상 대여+유지보수 / 조건: 2,000평+ &rarr; <span class="ms ms-upload">Upload</span> 카탈로그+사진 &rarr; <span class="ms ms-toast">Toast</span> "등록 완료"</li>
+        <li><span class="step-num">03</span><span class="ms ms-auto">Auto</span> 김민준 앱 푸시: "RX8040 시험포 모집 (3개월 무상)" &rarr; <span class="ms ms-click">Click</span> 알림 &rarr; <span class="ms ms-state">State</span> 시험포 상세 &rarr; <span class="ms ms-click">Click</span> "시험 참여 신청" &rarr; <span class="ms ms-auto">Auto</span> 필지 연동 &rarr; <span class="ms ms-toast">Toast</span> "신청 완료"</li>
+        <li><span class="step-num">04</span><span class="ms ms-state">State</span> 제조사 대시보드 "신청 23명" &rarr; <span class="ms ms-click">Click</span> 김민준 &rarr; 필지/재배 이력 확인 &rarr; <span class="ms ms-click">Click</span> "선정" &rarr; <span class="ms ms-auto">Auto</span> "시험포 선정!" 알림</li>
+        <li><span class="step-num">05</span><span class="ms ms-state">State</span> 시험 기간 &rarr; <span class="ms ms-auto">Auto</span> 주간 리포트 요청 &rarr; <span class="ms ms-input">Input</span> 작업일/면적/연비/만족도/특이사항 &rarr; <span class="ms ms-upload">Upload</span> 작업 사진 &rarr; <span class="ms ms-click">Click</span> 제출</li>
+        <li><span class="step-num">06</span><span class="ms ms-state">State</span> 시험 종료 &rarr; <span class="ms ms-auto">Auto</span> 전체 데이터 집계 &rarr; <span class="ms ms-click">Click</span> "리포트 생성" &rarr; <span class="ms ms-auto">Auto</span> 10곳 종합 리포트 (만족도 4.6, 연비, 피드백 워드클라우드) &rarr; <span class="ms ms-click">Click</span> "다운로드"</li>
+        <li><span class="step-num">07</span><span class="ms ms-click">Click</span> "국가 R&D 실증사업" &rarr; <span class="ms ms-state">State</span> 사업 목록: "자율주행 농기계 실증(농림부)", "스마트팜 혁신밸리 2단계(농진청)" &rarr; <span class="ms ms-click">Click</span> "자율주행 농기계 실증"</li>
+        <li><span class="step-num">08</span><span class="ms ms-state">State</span> 사업 상세 (마을 단위, 10ha+, 10가구+) &rarr; <span class="ms ms-click">Click</span> "우리 마을 신청" &rarr; <span class="ms ms-select">Select</span> 부량면 신용리 마을회 &rarr; <span class="ms ms-auto">Auto</span> 등록 농가 15가구, 25ha 자동 집계 &rarr; <span class="ms ms-toast">Toast</span> "실증사업 신청 접수"</li>
+        <li><span class="step-num">09</span><span class="ms ms-auto">Auto</span> 선정 알림 &rarr; <span class="ms ms-state">State</span> "첨단 기술 도입 희망 농가" DB 자동 등록 &rarr; <span class="ms ms-auto">Auto</span> 제조사 정보 공유 동의 &rarr; <span class="ms ms-click">Click</span> 동의 &rarr; <span class="ms ms-state">State</span> 제조사-마을 매칭 완료</li>
+      </ul>
+    </div>
+    <div class="screen-grid" style="justify-content:center;flex-direction:column;align-items:center">
+      <div>
+        <div class="browser-frame" style="max-width:260px">
+          <div class="browser-titlebar">
+            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+            <div class="browser-urlbar">mfg.danngam.kr/portal</div>
+          </div>
+          <div class="browser-body" style="min-height:120px">
+            <div style="font-size:9px;font-weight:700;color:var(--text-primary);margin-bottom:4px">대동 제조사 포털</div>
+            <div style="font-size:7px;color:var(--text-muted);margin-bottom:6px">시험포 모집 관리</div>
+            <div style="background:var(--bg-secondary);padding:5px;border-radius:3px;margin-bottom:4px">
+              <div style="font-size:8px;font-weight:600;color:var(--red)">RX8040 신형 트랙터</div>
+              <div style="font-size:7px;color:var(--text-muted)">80마력 &middot; 자동변속 &middot; 시험포 10곳 모집</div>
+              <div style="display:flex;gap:3px;margin-top:3px">
+                <span class="mock-badge mock-badge-green">신청 23명</span>
+                <span class="mock-badge mock-badge-blue">선정 10명</span>
+              </div>
+            </div>
+            <div style="background:var(--bg-secondary);padding:5px;border-radius:3px">
+              <div style="font-size:8px;font-weight:600;color:var(--text-primary)">종합 리포트</div>
+              <div style="font-size:7px;color:var(--text-muted)">만족도 4.6 &middot; 연비 8L/h &middot; 피드백 수집 완료</div>
+            </div>
+          </div>
+        </div>
+        <div class="browser-label">제조사 포털</div>
+      </div>
+      <div style="margin-top:10px">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 시험포 신청</div>
+            <div class="phone-body">
+              <div style="background:var(--red);color:#fff;padding:4px 6px;border-radius:3px;font-size:7px;font-weight:600;margin-bottom:4px">대동 RX8040 시험포</div>
+              <div style="font-size:7px;color:var(--text-secondary);margin-bottom:4px">80마력 &middot; 자동변속 &middot; 3개월 무상 대여</div>
+              <div class="mock-field">내 필지: 부량면 3,000평 (자동 연동)</div>
+              <div class="mock-field">재배 이력: 벼 3년 연속</div>
+              <div style="background:var(--bg-elevated);padding:4px;border-radius:2px;margin:3px 0;font-size:6px">
+                <div style="color:var(--green)">V 경작 면적 2,000평 이상</div>
+                <div style="color:var(--green)">V 벼/밭작물 재배</div>
+              </div>
+              <div class="mock-btn" style="background:var(--red)">시험 참여 신청</div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">시험포 신청</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S18: EP4 WBS ==================== -->
+<div class="slide slide-scroll" id="s18">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP4</div>
+  <div class="slide-label">EP4 WBS &mdash; 12 Tasks / AP-24 ~ AP-28</div>
+  <h2>EP4 WBS</h2>
+
+  <table class="tbl">
+    <thead><tr><th>MODULE</th><th>TASK</th><th>AP</th><th>SIZE</th><th>START</th><th>END</th><th>STATUS</th></tr></thead>
+    <tbody>
+      <tr><td>제조사-포털</td><td>제조사 포털 기본 구조</td><td>AP-24</td><td><span class="badge badge-red">L</span></td><td>12-01</td><td>12-08</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>제조사-포털</td><td>제품 등록 시스템</td><td>AP-24</td><td><span class="badge badge-orange">M</span></td><td>12-08</td><td>12-12</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>시험포-모집</td><td>시험포 모집 등록</td><td>AP-25</td><td><span class="badge badge-red">L</span></td><td>12-12</td><td>12-19</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>시험포-모집</td><td>농업인 시험포 신청 화면</td><td>AP-25</td><td><span class="badge badge-orange">M</span></td><td>12-19</td><td>12-23</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>시험포-모집</td><td>선정 워크플로우</td><td>AP-25</td><td><span class="badge badge-orange">M</span></td><td>12-23</td><td>12-26</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>시험포-데이터</td><td>시험 데이터 수집 폼</td><td>AP-26</td><td><span class="badge badge-orange">M</span></td><td>12-26</td><td>01-02</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>시험포-데이터</td><td>시험 결과 종합 리포트</td><td>AP-26</td><td><span class="badge badge-red">L</span></td><td>01-02</td><td>01-09</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>RnD-실증</td><td>국가 R&D 실증사업 목록 연동</td><td>AP-27</td><td><span class="badge badge-red">L</span></td><td>01-09</td><td>01-16</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>RnD-실증</td><td>마을 단위 실증 신청 시스템</td><td>AP-27</td><td><span class="badge badge-red">L</span></td><td>01-16</td><td>01-23</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>RnD-실증</td><td>첨단 농가 DB + 제조사 매칭</td><td>AP-27</td><td><span class="badge badge-orange">M</span></td><td>01-23</td><td>01-28</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>통합테스트</td><td>EP4 E2E 시나리오 테스트</td><td>AP-28</td><td><span class="badge badge-red">L</span></td><td>01-28</td><td>02-12</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>통합테스트</td><td>제조사 1사 파일럿</td><td>AP-28</td><td><span class="badge badge-red">L</span></td><td>02-12</td><td>02-26</td><td><span class="badge badge-purple">NOT</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== S19: EP5 Overview + Narrative ==================== -->
+<div class="slide slide-scroll" id="s19">
+  <div class="grid-bg"></div><div class="glow-br"></div>
+  <div class="section-num">EP5</div>
+  <div class="slide-label">EP5 GATE &mdash; 전국 대형장비 스케줄링: 농업의 미래를 연결하다</div>
+  <h2>EP5 — 데이터 플랫폼 + AI + 전국 스케줄링 <span class="tag-gate">GATE 2027-06-27</span></h2>
+
+  <div class="grid-4" style="margin-bottom:6px;font-size:10px">
+    <div class="card card-purple" style="padding:10px">
+      <div class="num">산출물 01</div>
+      <h3>전국 스케줄 보드</h3>
+      <p>대형장비 위치 + 일정 시각화</p>
+    </div>
+    <div class="card card-purple" style="padding:10px">
+      <div class="num">산출물 02</div>
+      <h3>가용 여부 실시간 체크</h3>
+      <p>장비별 스케줄 조회 + 예약</p>
+    </div>
+    <div class="card card-purple" style="padding:10px">
+      <div class="num">산출물 03</div>
+      <h3>AI 경로 최적화</h3>
+      <p>이동 경로 자동 계산 + 비용</p>
+    </div>
+    <div class="card card-purple" style="padding:10px">
+      <div class="num">산출물 04</div>
+      <h3>대행단 간 장비 공유</h3>
+      <p>광역 협력 + 수익 배분</p>
+    </div>
+  </div>
+  <div class="grid-3" style="margin-bottom:8px">
+    <div class="card card-cyan" style="padding:10px">
+      <div class="num">산출물 05</div>
+      <h3>데이터 분석 대시보드</h3>
+      <p>거래량, 가격 추이, 지역별 수급</p>
+    </div>
+    <div class="card card-cyan" style="padding:10px">
+      <div class="num">산출물 06</div>
+      <h3>AI 수요/가격 예측</h3>
+      <p>시계열 분석 + 외부 변수</p>
+    </div>
+    <div class="card card-cyan" style="padding:10px">
+      <div class="num">산출물 07</div>
+      <h3>정책 분석 리포트</h3>
+      <p>지자체/중앙부처용 자동 생성</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <h3 style="color:var(--purple);margin-bottom:6px">데모 내러티브</h3>
+  <div class="narrative" style="font-size:12px;line-height:1.8">
+    <p>2년간 <strong>10만 건</strong>의 거래 데이터가 축적되었습니다. 9월 벼베기 시즌 D-30.</p>
+    <p style="margin-top:4px">관리자가 <em>"데이터 분석"</em> 대시보드를 열면 전국 히트맵이 펼쳐집니다. <span class="action">AI 수요 예측</span>: <strong>"2027년 9월 벼베기 전국 12,400건 (전년 대비 +8%)"</strong>. 김제 지역은 수요 420건 vs 가용 작업자 85명, <strong>부족률 15%</strong>.</p>
+    <p style="margin-top:4px">AI Agent가 자동으로 움직입니다 &mdash; <span class="place">익산</span> 12명, <span class="place">정읍</span> 8명 작업자에게 김제 벼베기 시즌 안내를 발송합니다. 가격 예측은 <strong>평당 4,800원 (전년 대비 +6.7%)</strong>.</p>
+    <p style="margin-top:4px"><span class="place">전북도청</span>에 정책 리포트가 자동 생성됩니다 &mdash; 지역별 거래 현황, 인력 수급 분석, 가격 추이, <em>"작업자 양성 프로그램 확대 권고"</em>. 연구기관에는 데이터 API가 제공되고, 수출 농산물에는 작업 이력이 QR 코드로 추적됩니다.</p>
+  </div>
+</div>
+
+<!-- ==================== S20: EP5 Demo Steps 1-8 ==================== -->
+<div class="slide slide-scroll" id="s20">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP5</div>
+  <div class="slide-label">EP5 DEMO &mdash; Micro Steps 1~8 (데이터 + AI + 정책)</div>
+  <h2>EP5 Micro Steps 1~8</h2>
+
+  <div class="two-col">
+    <div>
+      <ul class="step-list">
+        <li><span class="step-num">01</span><span class="ms ms-click">Click</span> "데이터 분석" &rarr; <span class="ms ms-state">State</span> 전국 거래 현황 히트맵 + 월별 추이 + 파이차트 &rarr; <span class="ms ms-auto">Auto</span> "9월 벼베기 D-30" 배너</li>
+        <li><span class="step-num">02</span><span class="ms ms-click">Click</span> "AI 수요 예측" &rarr; <span class="ms ms-state">State</span> 예측: 전국 12,400건(+8%) / 전북 3,200건 / 김제 420건 vs 작업자 85명 &rarr; 부족률 15% 경보</li>
+        <li><span class="step-num">03</span><span class="ms ms-auto">Auto</span> AI Agent &rarr; <span class="ms ms-toast">Toast</span> "김제 작업자 부족 &rarr; 익산 12명, 정읍 8명에게 자동 알림 발송" &rarr; <span class="ms ms-state">State</span> 발송 내역</li>
+        <li><span class="step-num">04</span><span class="ms ms-click">Click</span> "가격 예측" &rarr; <span class="ms ms-state">State</span> 김제 벼베기 평당 4,800원(+6.7%) / 변동 요인: 수요+8%, 유류비+3%, 인건비+5% &rarr; <span class="ms ms-auto">Auto</span> 의뢰자 앱에 예상 비용 카드</li>
+        <li><span class="step-num">05</span><span class="ms ms-click">Click</span> "정책 리포트 생성" &rarr; <span class="ms ms-select">Select</span> 전북도청 / 2026-01~2027-06 &rarr; <span class="ms ms-auto">Auto</span> AI 리포트(요약, 수급 분석, 가격 추이, 정책 제안) &rarr; <span class="ms ms-click">Click</span> "발송" &rarr; <span class="ms ms-toast">Toast</span> "전북도청에 발송 완료"</li>
+        <li><span class="step-num">06</span><span class="ms ms-click">Click</span> "데이터 API" &rarr; <span class="ms ms-state">State</span> 연동 기관: 농진청, 농경연, 서울대 &rarr; <span class="ms ms-click">Click</span> "API 키 발급" &rarr; <span class="ms ms-auto">Auto</span> 접근 범위 설정 &rarr; <span class="ms ms-toast">Toast</span> "API 키 발급 완료"</li>
+        <li><span class="step-num">07</span><span class="ms ms-click">Click</span> "수출 이력 추적" &rarr; <span class="ms ms-select">Select</span> 벼(쌀) / 로트 2027-09-BL-001 &rarr; <span class="ms ms-state">State</span> 타임라인: 3월 로터리 &rarr; 5월 모내기 &rarr; 7월 방제 &rarr; 9월 벼베기 &rarr; 건조(수율 86%) &rarr; 도정 &rarr; <span class="ms ms-click">Click</span> "수출 이력 증명서" &rarr; <span class="ms ms-auto">Auto</span> QR 코드 PDF</li>
+        <li><span class="step-num">08</span><span class="ms ms-state">State</span> 종합 대시보드 &mdash; 사용자 45,000명 / 장비 8,500대 / 거래 102,000건 / 거래액 2,340억 / 보조금 185억 / 지자체 48개 / AI 정확도 92%</li>
+      </ul>
+    </div>
+    <div class="screen-grid" style="justify-content:center;flex-direction:column;align-items:center">
+      <div>
+        <div class="browser-frame" style="max-width:280px">
+          <div class="browser-titlebar">
+            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+            <div class="browser-urlbar">admin.danngam.kr/analytics</div>
+          </div>
+          <div class="browser-body" style="min-height:130px">
+            <div style="font-size:9px;font-weight:700;color:var(--text-primary);margin-bottom:4px">데이터 분석 대시보드</div>
+            <div style="display:flex;gap:3px;margin-bottom:6px">
+              <div style="flex:1;background:var(--bg-secondary);padding:4px;border-radius:2px;text-align:center"><div style="font-size:8px;font-weight:800;color:var(--purple)">102K</div><div style="font-size:5px;color:var(--text-muted)">거래</div></div>
+              <div style="flex:1;background:var(--bg-secondary);padding:4px;border-radius:2px;text-align:center"><div style="font-size:8px;font-weight:800;color:var(--green)">2,340억</div><div style="font-size:5px;color:var(--text-muted)">거래액</div></div>
+              <div style="flex:1;background:var(--bg-secondary);padding:4px;border-radius:2px;text-align:center"><div style="font-size:8px;font-weight:800;color:var(--accent)">45K</div><div style="font-size:5px;color:var(--text-muted)">사용자</div></div>
+            </div>
+            <div style="height:30px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:2px;margin-bottom:4px;display:flex;align-items:center;justify-content:center;font-size:6px;color:var(--text-muted)">전국 거래 히트맵</div>
+            <div style="background:var(--bg-secondary);padding:4px;border-radius:3px">
+              <div style="font-size:7px;font-weight:600;color:var(--red)">AI 경보: 김제 작업자 부족 15%</div>
+              <div style="font-size:6px;color:var(--text-muted)">수요 420건 vs 가용 85명</div>
+            </div>
+          </div>
+        </div>
+        <div class="browser-label">데이터 분석</div>
+      </div>
+      <div style="margin-top:10px">
+        <div class="browser-frame" style="max-width:280px">
+          <div class="browser-titlebar">
+            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+            <div class="browser-urlbar">admin.danngam.kr/ai-forecast</div>
+          </div>
+          <div class="browser-body" style="min-height:100px">
+            <div style="font-size:9px;font-weight:700;color:var(--text-primary);margin-bottom:4px">AI 수요 예측 &mdash; 2027년 9월 벼베기</div>
+            <div style="display:flex;gap:3px;margin-bottom:4px">
+              <div style="flex:1;background:var(--bg-secondary);padding:3px;border-radius:2px;text-align:center"><div style="font-size:8px;font-weight:800;color:var(--cyan)">12,400</div><div style="font-size:5px;color:var(--text-muted)">전국 수요</div></div>
+              <div style="flex:1;background:var(--bg-secondary);padding:3px;border-radius:2px;text-align:center"><div style="font-size:8px;font-weight:800;color:var(--orange)">+8%</div><div style="font-size:5px;color:var(--text-muted)">전년 대비</div></div>
+              <div style="flex:1;background:var(--bg-secondary);padding:3px;border-radius:2px;text-align:center"><div style="font-size:8px;font-weight:800;color:var(--green)">92%</div><div style="font-size:5px;color:var(--text-muted)">정확도</div></div>
+            </div>
+            <div style="font-size:7px;color:var(--accent);margin-bottom:2px">가격 예측</div>
+            <div style="font-size:7px;color:var(--text-secondary)">김제 벼베기: 평당 4,800원 (+6.7%)</div>
+            <div style="font-size:6px;color:var(--text-muted)">요인: 수요+8%, 유류비+3%, 인건비+5%</div>
+          </div>
+        </div>
+        <div class="browser-label">AI 수요/가격 예측</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S20B: EP5 Demo B - National Equipment Scheduling ==================== -->
+<div class="slide slide-scroll" id="s20b">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP5</div>
+  <div class="slide-label">EP5 DEMO B &mdash; 전국 대형장비 스케줄링 Micro Steps</div>
+  <h2>EP5 Micro Steps B — 전국 대형장비 스케줄링 (6조식 콤바인)</h2>
+
+  <div class="two-col">
+    <div>
+      <ul class="step-list">
+        <li><span class="step-num">01</span><span class="ms ms-state">State</span> 전국 스케줄 보드 열기 &rarr; 지도에 대형 장비 42대 위치 표시 (빨강: 작업 중, 녹색: 대기중, 회색: 예정)</li>
+        <li><span class="step-num">02</span><span class="ms ms-click">Click</span> 해남 대형장비팀 (6조식 콤바인 팀) &rarr; <span class="ms ms-state">State</span> 스케줄 확인: 9/10 해남 → 9/15 김제로 이동 예정 → 9/20 진안 → 9/28 진천 &rarr; 4주간 남→북 이동</li>
+        <li><span class="step-num">03</span><span class="ms ms-click">Click</span> 의뢰자(김제 지역) "가용 여부 체크" &rarr; <span class="ms ms-input">Input</span> 검색: 9/15~20 기간, 김제 6조식 콤바인 &rarr; <span class="ms ms-state">State</span> 가용 장비 1팀 발견 (해남팀, 이동료 150만원)</li>
+        <li><span class="step-num">04</span><span class="ms ms-click">Click</span> 해남팀 프로필 &rarr; <span class="ms ms-state">State</span> 경력 8년, 평점 4.8⭐, 320건 완료, 이동 거리 200km</li>
+        <li><span class="step-num">05</span><span class="ms ms-auto">Auto</span> AI 경로 최적화 &rarr; 해남→금산→진안(거쳐)→김제 최단 경로 추천 &rarr; 이동비 140만원 절감 (예상 총 1,850만원)</li>
+        <li><span class="step-num">06</span><span class="ms ms-click">Click</span> "가능성 문의" &rarr; <span class="ms ms-state">State</span> 해남팀 대표에게 채팅 요청 &rarr; 즉시 수락</li>
+        <li><span class="step-num">07</span><span class="ms ms-state">State</span> 계약서 자동 생성 &rarr; 1,500평 × 8일 × 6조식 베이스 + 기타 비용 &rarr; <span class="ms ms-click">Click</span> "수주 확정" &rarr; <span class="ms ms-toast">Toast</span> "의뢰 수주 완료"</li>
+        <li><span class="step-num">08</span><span class="ms ms-state">State</span> 해남팀 스케줄 업데이트 &rarr; 9/12~14 해남 작업 마무리 → 9/15 김제 이동 예정 &rarr; <span class="ms ms-auto">Auto</span> 모든 협력팀에 알림 (공동 이동 가능?)</li>
+        <li><span class="step-num">09</span><span class="ms ms-auto">Auto</span> 2024년 거래 데이터 기반 AI 예측 &rarr; "9월 전국 벼베기 수요 12,400건(+8%) / 김제 지역 부족률 12%" &rarr; 인근 지역 3개팀 추가 추천</li>
+        <li><span class="step-num">10</span><span class="ms ms-state">State</span> 종합 대시보드 &mdash; 전국 스케줄 점유율 86% / 광역 이동 장비 84대 / 대행단 간 공유 수익 2.3억</li>
+      </ul>
+    </div>
+    <div class="screen-grid" style="justify-content:center;flex-direction:column;align-items:center">
+      <div>
+        <div class="browser-frame" style="max-width:280px">
+          <div class="browser-titlebar">
+            <div class="browser-dot"></div><div class="browser-dot"></div><div class="browser-dot"></div>
+            <div class="browser-urlbar">danngam.kr/schedule-board</div>
+          </div>
+          <div class="browser-body" style="min-height:120px">
+            <div style="font-size:9px;font-weight:700;color:var(--text-primary);margin-bottom:6px">전국 스케줄 보드</div>
+            <div style="background:var(--bg-secondary);padding:8px;border-radius:2px;margin-bottom:6px;min-height:80px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:8px">
+              전국 지도 + 42개 대형장비팀 위치<br>
+              빨강: 작업 중 (12팀)<br>
+              녹색: 대기 (28팀)<br>
+              회색: 예정 (2팀)
+            </div>
+            <div style="font-size:7px;color:var(--accent);text-align:center">점유율 86%</div>
+          </div>
+        </div>
+        <div class="browser-label">전국 스케줄 보드</div>
+      </div>
+      <div style="margin-top:10px">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-inner">
+            <div class="phone-statusbar">9:41</div>
+            <div class="phone-appbar">&larr; 가용 장비 검색</div>
+            <div class="phone-body">
+              <div style="font-size:8px;font-weight:600;color:var(--text-primary);margin-bottom:3px">검색 조건</div>
+              <div class="mock-field">9/15~20 김제</div>
+              <div class="mock-field">6조식 콤바인</div>
+              <div style="background:var(--bg-secondary);padding:3px;border-radius:2px;margin:3px 0">
+                <div style="font-size:7px;font-weight:600;color:var(--green);margin-bottom:2px">✓ 1팀 발견</div>
+                <div class="mock-card" style="padding:2px">
+                  <div style="font-size:7px;color:var(--text-primary);font-weight:600">해남 대형장비팀</div>
+                  <div style="font-size:6px;color:var(--text-muted)">평점 4.8⭐ · 320건</div>
+                  <div style="font-size:6px;color:var(--orange);margin-top:1px">이동료: 150만원</div>
+                </div>
+              </div>
+              <div class="mock-btn mock-btn-accent">문의</div>
+            </div>
+            <div class="phone-home-bar"></div>
+          </div>
+        </div>
+        <div class="phone-label">가용 장비 검색</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S21: EP5 WBS + Calendar ==================== -->
+<div class="slide slide-scroll" id="s21">
+  <div class="grid-bg"></div>
+  <div class="section-num">EP5</div>
+  <div class="slide-label">EP5 WBS &mdash; 18 Tasks / AP-29 ~ AP-36 (스케줄링 포함) + Calendar Events</div>
+  <h2>EP5 WBS + 캘린더</h2>
+
+  <table class="tbl" style="margin-bottom:14px">
+    <thead><tr><th>MODULE</th><th>TASK</th><th>AP</th><th>SIZE</th><th>START</th><th>END</th><th>STATUS</th></tr></thead>
+    <tbody>
+      <tr><td>데이터-대시보드</td><td>전국 농작업 거래 현황 대시보드</td><td>AP-29</td><td><span class="badge badge-red">L</span></td><td>03-01</td><td>03-10</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>데이터-대시보드</td><td>다차원 분석 뷰</td><td>AP-29</td><td><span class="badge badge-red">L</span></td><td>03-10</td><td>03-17</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>AI-예측</td><td>AI 수요 예측 엔진</td><td>AP-30</td><td><span class="badge badge-red">L</span></td><td>03-17</td><td>03-28</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>AI-예측</td><td>AI 가격 예측 엔진</td><td>AP-30</td><td><span class="badge badge-red">L</span></td><td>03-28</td><td>04-07</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>AI-Agent</td><td>자동 매칭 + 일정 최적화</td><td>AP-31</td><td><span class="badge badge-red">L</span></td><td>04-07</td><td>04-18</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>AI-Agent</td><td>수급 불균형 탐지 + 알림</td><td>AP-31</td><td><span class="badge badge-red">L</span></td><td>04-18</td><td>04-25</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>정책-리포트</td><td>정책 분석 리포트 자동 생성</td><td>AP-32</td><td><span class="badge badge-red">L</span></td><td>04-25</td><td>05-05</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>데이터-API</td><td>데이터 API 오픈</td><td>AP-33</td><td><span class="badge badge-red">L</span></td><td>05-05</td><td>05-16</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>데이터-API</td><td>API 키 관리 + 접근 범위</td><td>AP-33</td><td><span class="badge badge-orange">M</span></td><td>05-16</td><td>05-20</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>수출-이력</td><td>수출 품질 이력 추적</td><td>AP-34</td><td><span class="badge badge-red">L</span></td><td>05-20</td><td>05-30</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>수출-이력</td><td>QR 수출 이력 증명서</td><td>AP-34</td><td><span class="badge badge-orange">M</span></td><td>05-30</td><td>06-03</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>스케줄-보드</td><td>전국 장비 스케줄 보드</td><td>AP-35a</td><td><span class="badge badge-red">L</span></td><td>05-15</td><td>05-28</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>스케줄-조회</td><td>장비 가용 여부 실시간 체크</td><td>AP-35b</td><td><span class="badge badge-orange">M</span></td><td>05-28</td><td>06-03</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>수급-안정화</td><td>수급 안정화 경보 시스템</td><td>AP-35</td><td><span class="badge badge-red">L</span></td><td>06-03</td><td>06-13</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>통합테스트</td><td>EP5 E2E 시나리오 테스트</td><td>AP-36</td><td><span class="badge badge-red">L</span></td><td>06-13</td><td>06-20</td><td><span class="badge badge-purple">NOT</span></td></tr>
+      <tr><td>통합테스트</td><td>종합 데모 준비 + 발표 자료</td><td>AP-36</td><td><span class="badge badge-orange">M</span></td><td>06-20</td><td>06-27</td><td><span class="badge badge-purple">NOT</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="color:var(--accent);margin-bottom:6px">캘린더 이벤트 (10개)</h3>
+  <table class="tbl">
+    <thead><tr><th>TITLE</th><th>DATE</th><th>TYPE</th></tr></thead>
+    <tbody>
+      <tr><td>[DG]-EP1 킥오프</td><td>2026-03-01</td><td><span class="badge badge-blue">milestone</span></td></tr>
+      <tr><td>[DG]-초기데이터 현장조사 (김제)</td><td>2026-04-01</td><td><span class="badge badge-orange">task</span></td></tr>
+      <tr><td>[DG]-EP1 데모</td><td>2026-05-30</td><td><span class="badge badge-green">demo</span></td></tr>
+      <tr><td>[DG]-EP2 Gate</td><td>2026-09-12</td><td><span class="badge badge-red">gate</span></td></tr>
+      <tr><td>[DG]-EP3 보조금 파일럿 시작</td><td>2026-09-01</td><td><span class="badge badge-blue">milestone</span></td></tr>
+      <tr><td>[DG]-EP3 Gate (보조금+대행단)</td><td>2026-12-26</td><td><span class="badge badge-red">gate</span></td></tr>
+      <tr><td>[DG]-EP4 제조사 파일럿 시작</td><td>2026-12-01</td><td><span class="badge badge-blue">milestone</span></td></tr>
+      <tr><td>[DG]-EP4 Gate</td><td>2027-03-12</td><td><span class="badge badge-red">gate</span></td></tr>
+      <tr><td>[DG]-EP5 데이터플랫폼 오픈</td><td>2027-03-01</td><td><span class="badge badge-blue">milestone</span></td></tr>
+      <tr><td>[DG]-EP5 Gate (최종)</td><td>2027-06-27</td><td><span class="badge badge-red">gate</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== S22: Summary + Vision ==================== -->
+<div class="slide" id="s22">
+  <div class="grid-bg"></div><div class="glow-tl"></div><div class="glow-br"></div>
+  <div class="section-num">END</div>
+  <div class="slide-label">VISION &mdash; 단감이 그리는 농업의 미래</div>
+  <h2>종합 요약 &amp; 비전</h2>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="card" style="text-align:center;padding:14px;border-top:3px solid var(--green)">
+      <div class="stat-big" style="color:var(--green)">45,000</div>
+      <div class="stat-label">등록 사용자</div>
+    </div>
+    <div class="card" style="text-align:center;padding:14px;border-top:3px solid var(--accent)">
+      <div class="stat-big" style="color:var(--accent)">8,500</div>
+      <div class="stat-label">등록 장비</div>
+    </div>
+    <div class="card" style="text-align:center;padding:14px;border-top:3px solid var(--orange)">
+      <div class="stat-big" style="color:var(--orange)">102K</div>
+      <div class="stat-label">누적 거래</div>
+    </div>
+    <div class="card" style="text-align:center;padding:14px;border-top:3px solid var(--purple)">
+      <div class="stat-big" style="color:var(--purple)">2,340억</div>
+      <div class="stat-label">누적 거래액</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:6px;margin-bottom:14px;align-items:center;justify-content:center;flex-wrap:wrap">
+    <div class="flow-box" style="border-left:3px solid var(--green);text-align:center">
+      <div style="font-size:9px;font-weight:700;color:var(--green)">EP1</div>
+      <div style="font-size:8px;color:var(--text-muted)">초기 데이터</div>
+      <div style="font-size:8px;color:var(--text-muted)">작업자 온보딩</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="border-left:3px solid var(--accent);text-align:center">
+      <div style="font-size:9px;font-weight:700;color:var(--accent)">EP2</div>
+      <div style="font-size:8px;color:var(--text-muted)">매칭 &middot; 거래</div>
+      <div style="font-size:8px;color:var(--text-muted)">수익 &middot; 평판</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="border-left:3px solid var(--orange);text-align:center">
+      <div style="font-size:9px;font-weight:700;color:var(--orange)">EP3</div>
+      <div style="font-size:8px;color:var(--text-muted)">지자체 보조금</div>
+      <div style="font-size:8px;color:var(--text-muted)">공공 플랫폼</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="border-left:3px solid var(--red);text-align:center">
+      <div style="font-size:9px;font-weight:700;color:var(--red)">EP4</div>
+      <div style="font-size:8px;color:var(--text-muted)">제조사 &middot; R&D</div>
+      <div style="font-size:8px;color:var(--text-muted)">산업 플랫폼</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box" style="border-left:3px solid var(--purple);text-align:center">
+      <div style="font-size:9px;font-weight:700;color:var(--purple)">EP5</div>
+      <div style="font-size:8px;color:var(--text-muted)">데이터 &middot; AI</div>
+      <div style="font-size:8px;color:var(--text-muted)">농업의 미래</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <h3 style="color:var(--accent);margin-bottom:6px">팀 구성</h3>
+      <table class="tbl">
+        <thead><tr><th>ID</th><th>NAME</th><th>ROLE</th></tr></thead>
+        <tbody>
+          <tr><td>grit-01</td><td>장한진</td><td>PM / Tech Lead</td></tr>
+          <tr><td>(향후)</td><td>현장 매니저</td><td>현장 운영</td></tr>
+          <tr><td>(향후)</td><td>AI/데이터 엔지니어</td><td>개발</td></tr>
+          <tr><td>(향후)</td><td>농업 도메인 전문가</td><td>자문</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3 style="color:var(--green);margin-bottom:6px">핵심 지표 (EP5 완료 시)</h3>
+      <div class="grid-2" style="gap:8px">
+        <div class="card" style="padding:8px;text-align:center"><div style="font-size:14px;font-weight:800;color:var(--green)">48</div><div style="font-size:8px;color:var(--text-muted)">연동 지자체</div></div>
+        <div class="card" style="padding:8px;text-align:center"><div style="font-size:14px;font-weight:800;color:var(--orange)">185억</div><div style="font-size:8px;color:var(--text-muted)">보조금 집행</div></div>
+        <div class="card" style="padding:8px;text-align:center"><div style="font-size:14px;font-weight:800;color:var(--cyan)">92%</div><div style="font-size:8px;color:var(--text-muted)">AI 예측 정확도</div></div>
+        <div class="card" style="padding:8px;text-align:center"><div style="font-size:14px;font-weight:800;color:var(--purple)">98</div><div style="font-size:8px;color:var(--text-muted)">WBS Tasks</div></div>
+        <div class="card" style="padding:8px;text-align:center"><div style="font-size:14px;font-weight:800;color:var(--cyan)">120</div><div style="font-size:8px;color:var(--text-muted)">대행단</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <div class="nav-left">
+    <span style="font-family:var(--mono);letter-spacing:1px">DANNGAM &mdash; 농기계 매칭 O2O</span>
+    <span class="kbd">&larr;</span> <span class="kbd">&rarr;</span>
+  </div>
+  <div class="nav-center">
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <span class="slide-counter" id="counter">01 / 25</span>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn" onclick="go(-1)">&larr; PREV</button>
+    <button class="nav-btn" onclick="go(1)">NEXT &rarr;</button>
+  </div>
+</div>
+
+<script>
+  let cur=0;const slides=document.querySelectorAll('.slide');const total=slides.length;
+  function show(n){slides[cur].classList.remove('active');cur=Math.max(0,Math.min(total-1,n));slides[cur].classList.add('active');document.getElementById('counter').textContent=String(cur+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');document.getElementById('progress').style.width=((cur+1)/total*100)+'%'}
+  function go(d){show(cur+d)}
+  document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(1)}if(e.key==='ArrowLeft'){e.preventDefault();go(-1)}if(e.key==='Home'){e.preventDefault();show(0)}if(e.key==='End'){e.preventDefault();show(total-1)}});
+  let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX});document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)go(dx<0?1:-1)});
+  show(0);
+</script>
+</body>
+</html>

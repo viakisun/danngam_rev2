@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S01 — 인증 플로우 | 단감 목업</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
+
+  /* Header */
+  .header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 16px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .header-badge { background: #16a34a; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px; }
+  .header-title { font-size: 16px; font-weight: 700; color: #0f172a; }
+  .header-sub { font-size: 12px; color: #64748b; margin-left: auto; }
+
+  /* Step tabs */
+  .tabs { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 24px; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 12px 14px; font-size: 12px; font-weight: 500; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; user-select: none; }
+  .tab:hover { color: #16a34a; }
+  .tab.active { color: #16a34a; border-bottom-color: #16a34a; font-weight: 600; }
+  .tab.error { color: #dc2626; }
+  .tab.error.active { color: #dc2626; border-bottom-color: #dc2626; }
+
+  /* Main layout */
+  .main { display: flex; gap: 32px; padding: 32px 32px; max-width: 1100px; margin: 0 auto; align-items: flex-start; }
+
+  /* Phone frame */
+  .phone-wrap { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .phone-label { font-size: 11px; color: #94a3b8; font-weight: 500; text-align: center; }
+  .phone { width: 320px; height: 680px; background: #1a1a2e; border-radius: 50px; padding: 14px; box-shadow: 0 0 0 2px #2d2d44, 0 20px 60px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.08); position: relative; }
+  .phone-inner { width: 100%; height: 100%; background: #fff; border-radius: 38px; overflow: hidden; display: flex; flex-direction: column; }
+  .status-bar { background: #fff; height: 44px; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 20px 8px; flex-shrink: 0; }
+  .status-time { font-size: 13px; font-weight: 600; color: #0f172a; }
+  .status-icons { display: flex; gap: 5px; align-items: center; }
+  .status-icons svg { width: 14px; height: 14px; fill: #0f172a; }
+  .notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 100px; height: 28px; background: #1a1a2e; border-radius: 0 0 18px 18px; z-index: 10; }
+  .screen { flex: 1; overflow-y: auto; background: #f8fafc; scrollbar-width: none; }
+  .screen::-webkit-scrollbar { display: none; }
+  .home-bar { height: 28px; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .home-bar-line { width: 100px; height: 4px; background: #1a1a2e; border-radius: 2px; opacity: 0.25; }
+
+  /* Info panel */
+  .info-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .step-header { display: flex; align-items: center; gap: 10px; }
+  .step-id { font-size: 11px; font-weight: 700; color: #64748b; background: #f1f5f9; padding: 3px 8px; border-radius: 4px; }
+  .step-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+  .step-desc { font-size: 13px; color: #475569; line-height: 1.6; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; }
+  .badge-ok { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #16a34a; background: #dcfce7; padding: 3px 10px; border-radius: 20px; }
+  .badge-err { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #dc2626; background: #fee2e2; padding: 3px 10px; border-radius: 20px; }
+
+  /* API block */
+  .api-block { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+  .api-block-header { padding: 10px 14px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; color: #64748b; }
+  .method { padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+  .method.post { background: #bbf7d0; color: #166534; }
+  .method.get { background: #bfdbfe; color: #1d4ed8; }
+  .method.patch { background: #fed7aa; color: #c2410c; }
+  .path { font-size: 12px; font-weight: 600; color: #0f172a; font-family: 'Courier New', monospace; }
+  .code-block { padding: 12px 14px; font-size: 11px; font-family: 'Courier New', monospace; line-height: 1.7; max-height: 200px; overflow-y: auto; }
+  .code-block.req { background: #1e293b; color: #94a3b8; }
+  .code-block.res { background: #0f172a; color: #94a3b8; }
+  .code-block.res.ok .val-str { color: #4ade80; }
+  .code-block.res.err .val-str { color: #f87171; }
+  .k { color: #7dd3fc; }
+  .vs { color: #86efac; }
+  .vn { color: #fbbf24; }
+  .vb-t { color: #4ade80; }
+  .vb-f { color: #f87171; }
+  .err-val { color: #f87171; }
+  .ok-val { color: #4ade80; }
+  .code-sep { height: 1px; background: #1e293b; }
+
+  /* Nav */
+  .nav { display: flex; align-items: center; justify-content: space-between; padding-top: 8px; }
+  .nav-btn { padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #e2e8f0; background: #fff; color: #475569; transition: all 0.15s; }
+  .nav-btn:hover { background: #f1f5f9; }
+  .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .nav-btn.primary { background: #16a34a; color: #fff; border-color: #16a34a; }
+  .nav-btn.primary:hover { background: #15803d; }
+  .nav-counter { font-size: 12px; color: #94a3b8; }
+
+  /* App screen components */
+  .app-screen { height: 100%; display: flex; flex-direction: column; background: #f8fafc; }
+  .app-header { background: #fff; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 16px; font-weight: 700; color: #0f172a; }
+  .app-content { flex: 1; padding: 20px 16px; display: flex; flex-direction: column; gap: 14px; }
+  .input-label { font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+  .input-field { width: 100%; padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; background: #fff; color: #0f172a; font-family: 'Inter', system-ui; }
+  .input-field.active { border-color: #16a34a; }
+  .input-field.error { border-color: #dc2626; }
+  .btn-primary { width: 100%; padding: 12px; background: #16a34a; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .btn-primary.disabled { background: #d1d5db; }
+  .btn-secondary { width: 100%; padding: 10px; background: none; border: none; color: #64748b; font-size: 12px; cursor: pointer; }
+  .brand-area { text-align: center; padding: 20px 0 10px; }
+  .brand-name { font-size: 32px; font-weight: 800; color: #16a34a; }
+  .brand-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .otp-row { display: flex; gap: 8px; justify-content: center; }
+  .otp-box { width: 40px; height: 48px; border: 1.5px solid #e2e8f0; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; background: #fff; }
+  .otp-box.filled { border-color: #16a34a; color: #0f172a; }
+  .otp-box.active { border-color: #16a34a; background: #f0fdf4; }
+  .success-card { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+  .success-icon { font-size: 32px; }
+  .success-title { font-size: 15px; font-weight: 700; color: #166534; }
+  .success-sub { font-size: 11px; color: #16a34a; }
+  .error-card { background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 12px; padding: 14px; }
+  .error-title { font-size: 13px; font-weight: 700; color: #dc2626; margin-bottom: 4px; }
+  .error-msg { font-size: 11px; color: #ef4444; line-height: 1.4; }
+  .error-code { font-size: 10px; color: #dc2626; font-family: monospace; background: #fee2e2; padding: 2px 6px; border-radius: 4px; margin-top: 6px; display: inline-block; }
+  .info-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+  .info-key { color: #64748b; }
+  .info-val { color: #0f172a; font-weight: 600; font-family: monospace; }
+  .info-val.green { color: #16a34a; }
+  .info-val.red { color: #dc2626; }
+  .divider { height: 1px; background: #f1f5f9; }
+  .token-row { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; }
+  .token-label { font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+  .token-val { font-size: 9px; font-family: monospace; color: #0f172a; word-break: break-all; line-height: 1.4; }
+  .chip { display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .chip.new-user { background: #ede9fe; color: #7c3aed; }
+  .chip.existing { background: #fef3c7; color: #d97706; }
+  .chip.blocked { background: #fee2e2; color: #dc2626; }
+  .timer-bar { background: #f1f5f9; border-radius: 6px; height: 6px; overflow: hidden; }
+  .timer-fill { height: 100%; background: #16a34a; border-radius: 6px; width: 60%; }
+  .timer-fill.red { background: #dc2626; width: 8%; }
+  .hint-text { font-size: 11px; color: #94a3b8; text-align: center; }
+  .step-indicator { display: flex; gap: 4px; justify-content: center; padding: 8px 0; }
+  .step-dot { width: 6px; height: 6px; border-radius: 50%; background: #e2e8f0; }
+  .step-dot.active { background: #16a34a; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-badge">M01 AUTH</span>
+  <span class="header-title">시나리오 1 — 기본 인증 플로우</span>
+  <span class="header-sub">단감(DAN-GAM) · 목업 데이터</span>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="phone-inner">
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+          </div>
+        </div>
+        <div class="screen" id="phone-screen"></div>
+        <div class="home-bar"><div class="home-bar-line"></div></div>
+      </div>
+    </div>
+    <div class="phone-label" id="phone-user-label">사용자 A — 김민준 (신규)</div>
+  </div>
+
+  <div class="info-panel">
+    <div class="step-header">
+      <span class="step-id" id="step-id-badge"></span>
+      <span id="status-badge"></span>
+    </div>
+    <div class="step-title" id="step-title"></div>
+    <div class="step-desc" id="step-desc"></div>
+
+    <div class="api-block">
+      <div class="api-block-header">
+        <span class="method" id="api-method"></span>
+        <span class="path" id="api-path"></span>
+      </div>
+      <div class="code-block req" id="api-request"></div>
+      <div class="code-sep"></div>
+      <div class="code-block res" id="api-response"></div>
+    </div>
+
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" onclick="navigate(-1)">← 이전</button>
+      <span class="nav-counter" id="nav-counter"></span>
+      <button class="nav-btn primary" id="btn-next" onclick="navigate(1)">다음 →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STEPS = [
+  {
+    id: 'S01-01',
+    title: 'SMS 인증번호 발송',
+    desc: '의뢰자 김민준이 로그인 화면에서 휴대폰 번호를 입력하고 인증번호 발송을 요청합니다. 60초 쿨다운이 적용되며 발송 성공 시 OTP 입력 화면으로 전환됩니다.',
+    ok: true,
+    method: 'POST',
+    path: '/api/v1/auth/sms/send',
+    request: `{
+  <span class="k">"phone"</span>: <span class="vs">"01033334444"</span>
+}`,
+    response: `{
+  <span class="k">"success"</span>: <span class="vb-t">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"message"</span>: <span class="vs">"인증번호가 발송되었습니다."</span>,
+    <span class="k">"expires_in"</span>: <span class="vn">180</span>
+  },
+  <span class="k">"error"</span>: <span class="vb-f">null</span>
+}`,
+    userLabel: '사용자 A — 김민준 (신규)',
+    screen: `<div class="app-screen">
+      <div style="background:#fff;padding:32px 16px 16px;text-align:center;">
+        <div class="brand-name">단감</div>
+        <div class="brand-sub">농작업 O2O 플랫폼</div>
+      </div>
+      <div class="app-content">
+        <div>
+          <div class="input-label">휴대폰 번호</div>
+          <input class="input-field active" value="01033334444" readonly>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;font-size:11px;color:#16a34a;">
+          ✓ 인증번호 발송 완료 — 3분 내 입력하세요
+        </div>
+        <div class="btn-primary" style="text-align:center;padding:12px;background:#d1d5db;border-radius:10px;font-size:14px;font-weight:600;color:#fff;">
+          발송 완료 (60초 후 재발송)
+        </div>
+        <div class="timer-bar"><div class="timer-fill"></div></div>
+        <div class="hint-text">01033334444로 6자리 코드를 발송했습니다</div>
+      </div>
+    </div>`
+  },
+  {
+    id: 'S01-02',
+    title: 'OTP 인증 — 신규 사용자',
+    desc: '김민준이 수신한 인증번호 "482751"을 입력합니다. 최초 로그인이므로 is_new_user=true로 응답됩니다. access_token(1h)과 refresh_token(30d)이 발급됩니다.',
+    ok: true,
+    method: 'POST',
+    path: '/api/v1/auth/sms/verify',
+    request: `{
+  <span class="k">"phone"</span>: <span class="vs">"01033334444"</span>,
+  <span class="k">"code"</span>: <span class="vs">"482751"</span>
+}`,
+    response: `{
+  <span class="k">"success"</span>: <span class="vb-t">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"access_token"</span>: <span class="vs">"eyJhbGciOiJIUzI1NiJ9.eyJz..."</span>,
+    <span class="k">"refresh_token"</span>: <span class="vs">"eyJhbGciOiJIUzI1NiJ9.eyJz..."</span>,
+    <span class="k">"token_type"</span>: <span class="vs">"bearer"</span>,
+    <span class="k">"is_new_user"</span>: <span class="vb-t">true</span>
+  },
+  <span class="k">"error"</span>: <span class="vb-f">null</span>
+}`,
+    userLabel: '사용자 A — 김민준 (신규)',
+    screen: `<div class="app-screen">
+      <div style="background:#fff;padding:32px 16px 16px;text-align:center;">
+        <div class="brand-name">단감</div>
+        <div class="brand-sub">농작업 O2O 플랫폼</div>
+      </div>
+      <div class="app-content">
+        <div style="font-size:12px;color:#475569;text-align:center;line-height:1.5;">
+          <strong>01033334444</strong>으로<br>인증번호가 발송되었습니다.
+        </div>
+        <div class="otp-row">
+          <div class="otp-box filled">4</div>
+          <div class="otp-box filled">8</div>
+          <div class="otp-box filled">2</div>
+          <div class="otp-box filled">7</div>
+          <div class="otp-box filled">5</div>
+          <div class="otp-box filled">1</div>
+        </div>
+        <div class="success-card">
+          <div class="success-icon">🎉</div>
+          <div class="success-title">로그인 성공!</div>
+          <div class="success-sub">단감에 처음 오셨군요. 환영합니다!</div>
+          <span class="chip new-user">신규 가입</span>
+        </div>
+        <div class="token-row">
+          <div class="token-label">ACCESS TOKEN (1시간)</div>
+          <div class="token-val">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI...</div>
+        </div>
+      </div>
+    </div>`
+  },
+  {
+    id: 'S01-03',
+    title: 'OTP 인증 — 기존 사용자',
+    desc: '기존 사용자가 재인증을 시도합니다. is_new_user=false로 응답되며 기존 프로필 정보가 유지됩니다.',
+    ok: true,
+    method: 'POST',
+    path: '/api/v1/auth/sms/verify',
+    request: `{
+  <span class="k">"phone"</span>: <span class="vs">"01033334444"</span>,
+  <span class="k">"code"</span>: <span class="vs">"319204"</span>
+}`,
+    response: `{
+  <span class="k">"success"</span>: <span class="vb-t">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"access_token"</span>: <span class="vs">"eyJhbGciOiJIUzI1NiJ9.eyJz..."</span>,
+    <span class="k">"refresh_token"</span>: <span class="vs">"eyJhbGciOiJIUzI1NiJ9.eyJz..."</span>,
+    <span class="k">"token_type"</span>: <span class="vs">"bearer"</span>,
+    <span class="k">"is_new_user"</span>: <span class="vb-f">false</span>
+  },
+  <span class="k">"error"</span>: <span class="vb-f">null</span>
+}`,
+    userLabel: '사용자 A — 김민준 (기존)',
+    screen: `<div class="app-screen">
+      <div style="background:#fff;padding:32px 16px 16px;text-align:center;">
+        <div class="brand-name">단감</div>
+      </div>
+      <div class="app-content">
+        <div style="font-size:12px;color:#475569;text-align:center;line-height:1.5;">
+          <strong>01033334444</strong>으로<br>인증번호가 발송되었습니다.
+        </div>
+        <div class="otp-row">
+          <div class="otp-box filled">3</div>
+          <div class="otp-box filled">1</div>
+          <div class="otp-box filled">9</div>
+          <div class="otp-box filled">2</div>
+          <div class="otp-box filled">0</div>
+          <div class="otp-box filled">4</div>
+        </div>
+        <div class="success-card">
+          <div class="success-icon">👋</div>
+          <div class="success-title">다시 오셨군요!</div>
+          <div class="success-sub">김민준님, 반갑습니다</div>
+          <span class="chip existing">기존 사용자</span>
+        </div>
+        <div class="token-row">
+          <div class="token-label">ACCESS TOKEN (1시간)</div>
+          <div class="token-val">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI...</div>
+        </div>
+      </div>
+    </div>`
+  },
+  {
+    id: 'S01-04',
+    title: '토큰 갱신',
+    desc: 'access_token(1h) 만료 시 앱이 자동으로 refresh_token을 사용하여 새로운 access_token을 발급받습니다. 사용자는 이 과정을 인식하지 못합니다.',
+    ok: true,
+    method: 'POST',
+    path: '/api/v1/auth/token/refresh',
+    request: `{
+  <span class="k">"refresh_token"</span>: <span class="vs">"eyJhbGciOiJIUzI1NiJ9.eyJz..."</span>
+}`,
+    response: `{
+  <span class="k">"success"</span>: <span class="vb-t">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"access_token"</span>: <span class="vs">"eyJhbGciOiJIUzI1NiJ9.new..."</span>,
+    <span class="k">"token_type"</span>: <span class="vs">"bearer"</span>
+  },
+  <span class="k">"error"</span>: <span class="vb-f">null</span>
+}`,
+    userLabel: '사용자 A — 김민준',
+    screen: `<div class="app-screen">
+      <div class="app-header">내 프로필</div>
+      <div class="app-content">
+        <div style="display:flex;align-items:center;gap:12px;background:#fff;padding:14px;border-radius:12px;border:1px solid #f1f5f9;">
+          <div style="width:48px;height:48px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#16a34a;">김</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#0f172a;">김민준</div>
+            <div style="font-size:11px;color:#64748b;">의뢰자 · 01033334444</div>
+          </div>
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;">
+          <div style="font-size:11px;font-weight:700;color:#d97706;margin-bottom:6px;">🔄 토큰 자동 갱신</div>
+          <div style="font-size:10px;color:#92400e;line-height:1.5;">access_token 만료 감지 → refresh_token으로 자동 재발급 완료. 사용자 세션이 유지됩니다.</div>
+        </div>
+        <div class="divider"></div>
+        <div class="info-row">
+          <span class="info-key">이전 토큰</span>
+          <span class="info-val red">만료됨 (1h 초과)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">새 토큰</span>
+          <span class="info-val green">발급 완료</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">refresh_token 유효기간</span>
+          <span class="info-val">30일</span>
+        </div>
+      </div>
+    </div>`
+  },
+  {
+    id: 'S01-05',
+    title: '5회 실패 → 30분 차단',
+    desc: '동일 번호로 OTP 인증을 5회 연속 실패하면 30분간 접근이 차단됩니다.',
+    ok: false,
+    method: 'POST',
+    path: '/api/v1/auth/sms/verify',
+    request: `{
+  <span class="k">"phone"</span>: <span class="vs">"01033334444"</span>,
+  <span class="k">"code"</span>: <span class="vs">"000000"</span>  <span style="color:#4b5563">// 6번째 시도</span>
+}`,
+    response: `<span style="color:#f87171">HTTP 429 Too Many Requests</span>
+
+{
+  <span class="k">"success"</span>: <span class="vb-f">false</span>,
+  <span class="k">"data"</span>: <span class="vb-f">null</span>,
+  <span class="k">"error"</span>: {
+    <span class="k">"code"</span>: <span class="err-val">"DNNG-AUTH-005"</span>,
+    <span class="k">"message"</span>: <span class="err-val">"인증 시도가 너무 많습니다. 30분 후 다시 시도해주세요."</span>
+  }
+}`,
+    userLabel: '사용자 A — 김민준 (차단됨)',
+    screen: `<div class="app-screen">
+      <div style="background:#fff;padding:32px 16px 16px;text-align:center;">
+        <div class="brand-name" style="color:#dc2626;">단감</div>
+      </div>
+      <div class="app-content">
+        <div class="otp-row">
+          <div class="otp-box" style="border-color:#dc2626;color:#dc2626;">0</div>
+          <div class="otp-box" style="border-color:#dc2626;color:#dc2626;">0</div>
+          <div class="otp-box" style="border-color:#dc2626;color:#dc2626;">0</div>
+          <div class="otp-box" style="border-color:#dc2626;color:#dc2626;">0</div>
+          <div class="otp-box" style="border-color:#dc2626;color:#dc2626;">0</div>
+          <div class="otp-box" style="border-color:#dc2626;color:#dc2626;">0</div>
+        </div>
+        <div class="error-card">
+          <div class="error-title">🚫 계정이 일시 차단되었습니다</div>
+          <div class="error-msg">인증 시도가 너무 많습니다. 30분 후 다시 시도해주세요.</div>
+          <div class="error-code">DNNG-AUTH-005</div>
+        </div>
+        <div style="background:#fef2f2;border-radius:10px;padding:12px;text-align:center;">
+          <div style="font-size:11px;color:#dc2626;font-weight:600;">차단 해제까지</div>
+          <div style="font-size:28px;font-weight:800;color:#dc2626;margin-top:4px;">28:43</div>
+          <div class="timer-bar" style="margin-top:8px;"><div class="timer-fill red"></div></div>
+        </div>
+        <span class="chip blocked" style="align-self:center;">5회 실패 차단</span>
+      </div>
+    </div>`
+  },
+  {
+    id: 'S01-06',
+    title: '만료된 OTP 사용',
+    desc: 'SMS 발송 후 3분(180초)이 경과한 OTP를 사용하면 만료 오류가 반환됩니다.',
+    ok: false,
+    method: 'POST',
+    path: '/api/v1/auth/sms/verify',
+    request: `{
+  <span class="k">"phone"</span>: <span class="vs">"01033334444"</span>,
+  <span class="k">"code"</span>: <span class="vs">"482751"</span>  <span style="color:#4b5563">// 3분 초과</span>
+}`,
+    response: `<span style="color:#f87171">HTTP 400 Bad Request</span>
+
+{
+  <span class="k">"success"</span>: <span class="vb-f">false</span>,
+  <span class="k">"data"</span>: <span class="vb-f">null</span>,
+  <span class="k">"error"</span>: {
+    <span class="k">"code"</span>: <span class="err-val">"DNNG-AUTH-003"</span>,
+    <span class="k">"message"</span>: <span class="err-val">"인증번호가 만료되었습니다. 다시 요청해주세요."</span>
+  }
+}`,
+    userLabel: '사용자 A — 김민준',
+    screen: `<div class="app-screen">
+      <div style="background:#fff;padding:32px 16px 16px;text-align:center;">
+        <div class="brand-name">단감</div>
+      </div>
+      <div class="app-content">
+        <div class="otp-row">
+          <div class="otp-box" style="border-color:#dc2626;background:#fef2f2;color:#dc2626;">4</div>
+          <div class="otp-box" style="border-color:#dc2626;background:#fef2f2;color:#dc2626;">8</div>
+          <div class="otp-box" style="border-color:#dc2626;background:#fef2f2;color:#dc2626;">2</div>
+          <div class="otp-box" style="border-color:#dc2626;background:#fef2f2;color:#dc2626;">7</div>
+          <div class="otp-box" style="border-color:#dc2626;background:#fef2f2;color:#dc2626;">5</div>
+          <div class="otp-box" style="border-color:#dc2626;background:#fef2f2;color:#dc2626;">1</div>
+        </div>
+        <div class="error-card">
+          <div class="error-title">⏰ 인증번호가 만료되었습니다</div>
+          <div class="error-msg">인증번호 유효 시간(3분)이 초과되었습니다. SMS를 다시 요청해주세요.</div>
+          <div class="error-code">DNNG-AUTH-003</div>
+        </div>
+        <div class="timer-bar"><div class="timer-fill red"></div></div>
+        <div class="hint-text">남은 시간: 0초 (만료)</div>
+        <div class="btn-primary" style="text-align:center;padding:12px;background:#16a34a;border-radius:10px;font-size:14px;font-weight:600;color:#fff;cursor:pointer;">
+          인증번호 다시 받기
+        </div>
+      </div>
+    </div>`
+  }
+];
+
+let current = 0;
+
+function renderTabs() {
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = STEPS.map((s, i) => `
+    <div class="tab ${s.ok ? '' : 'error'} ${i === current ? 'active' : ''}" onclick="goTo(${i})">${s.id}</div>
+  `).join('');
+}
+
+function renderStep() {
+  const s = STEPS[current];
+  document.getElementById('phone-screen').innerHTML = s.screen;
+  document.getElementById('phone-user-label').textContent = s.userLabel;
+  document.getElementById('step-id-badge').textContent = s.id;
+  document.getElementById('status-badge').innerHTML = s.ok
+    ? '<span class="badge-ok">✓ 성공</span>'
+    : '<span class="badge-err">✕ 오류</span>';
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-desc').textContent = s.desc;
+
+  const methodEl = document.getElementById('api-method');
+  methodEl.textContent = s.method;
+  methodEl.className = 'method ' + s.method.toLowerCase();
+  document.getElementById('api-path').textContent = s.path;
+  document.getElementById('api-request').innerHTML = s.request;
+  const resEl = document.getElementById('api-response');
+  resEl.innerHTML = s.response;
+  resEl.className = 'code-block res ' + (s.ok ? 'ok' : 'err');
+
+  document.getElementById('nav-counter').textContent = `${current + 1} / ${STEPS.length}`;
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').disabled = current === STEPS.length - 1;
+  document.getElementById('btn-next').textContent = current === STEPS.length - 1 ? '완료' : '다음 →';
+  renderTabs();
+}
+
+function goTo(i) { current = i; renderStep(); }
+function navigate(d) { if (current + d >= 0 && current + d < STEPS.length) goTo(current + d); }
+
+renderStep();
+</script>
+</body>
+</html>

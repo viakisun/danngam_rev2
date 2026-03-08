@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S03 — 건조시설 플로우 | 단감 목업</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; color: #1e293b; min-height: 100vh; }
+  .header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 16px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  .header-badge { background: #0891b2; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+  .header-title { font-size: 16px; font-weight: 700; color: #0f172a; }
+  .header-sub { font-size: 12px; color: #64748b; margin-left: auto; }
+  .tabs { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 24px; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 12px 14px; font-size: 12px; font-weight: 500; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; }
+  .tab:hover { color: #0891b2; }
+  .tab.active { color: #0891b2; border-bottom-color: #0891b2; font-weight: 600; }
+  .tab.error { color: #dc2626; }
+  .tab.error.active { color: #dc2626; border-bottom-color: #dc2626; }
+  .main { display: flex; gap: 32px; padding: 32px; max-width: 1100px; margin: 0 auto; align-items: flex-start; }
+  .phone-wrap { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .phone-label { font-size: 11px; color: #94a3b8; font-weight: 500; text-align: center; }
+  .phone { width: 320px; height: 680px; background: #1a1a2e; border-radius: 50px; padding: 14px; box-shadow: 0 0 0 2px #2d2d44, 0 20px 60px rgba(0,0,0,0.35); position: relative; }
+  .phone-inner { width: 100%; height: 100%; background: #fff; border-radius: 38px; overflow: hidden; display: flex; flex-direction: column; }
+  .status-bar { background: #fff; height: 44px; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 20px 8px; flex-shrink: 0; }
+  .status-time { font-size: 13px; font-weight: 600; color: #0f172a; }
+  .notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 100px; height: 28px; background: #1a1a2e; border-radius: 0 0 18px 18px; z-index: 10; }
+  .screen { flex: 1; overflow-y: auto; scrollbar-width: none; }
+  .screen::-webkit-scrollbar { display: none; }
+  .home-bar { height: 28px; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .home-bar-line { width: 100px; height: 4px; background: #1a1a2e; border-radius: 2px; opacity: 0.25; }
+  .info-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .step-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .step-id { font-size: 11px; font-weight: 700; color: #64748b; background: #f1f5f9; padding: 3px 8px; border-radius: 4px; }
+  .step-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+  .step-desc { font-size: 13px; color: #475569; line-height: 1.6; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; }
+  .badge-ok { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; color: #16a34a; background: #dcfce7; padding: 3px 10px; border-radius: 20px; }
+  .badge-err { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; color: #dc2626; background: #fee2e2; padding: 3px 10px; border-radius: 20px; }
+  .who-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .who-a { background: #eff6ff; color: #2563eb; }
+  .who-c { background: #fff7ed; color: #c2410c; }
+  .api-block { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+  .api-block-header { padding: 10px 14px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; color: #64748b; }
+  .method { padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+  .method.post { background: #bbf7d0; color: #166534; }
+  .method.get { background: #bfdbfe; color: #1d4ed8; }
+  .method.patch { background: #fed7aa; color: #c2410c; }
+  .path { font-size: 12px; font-weight: 600; color: #0f172a; font-family: 'Courier New', monospace; }
+  .code-block { padding: 12px 14px; font-size: 11px; font-family: 'Courier New', monospace; line-height: 1.7; max-height: 230px; overflow-y: auto; }
+  .code-block.req { background: #1e293b; color: #94a3b8; }
+  .code-block.res { background: #0f172a; color: #94a3b8; }
+  .k { color: #7dd3fc; } .vs { color: #86efac; } .vn { color: #fbbf24; } .vb-t { color: #4ade80; } .vb-f { color: #f87171; } .err-val { color: #f87171; }
+  .code-sep { height: 1px; background: #1e293b; }
+  .nav { display: flex; align-items: center; justify-content: space-between; padding-top: 8px; }
+  .nav-btn { padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #e2e8f0; background: #fff; color: #475569; transition: all 0.15s; }
+  .nav-btn:hover { background: #f1f5f9; }
+  .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .nav-btn.primary { background: #0891b2; color: #fff; border-color: #0891b2; }
+  .nav-counter { font-size: 12px; color: #94a3b8; }
+
+  /* App components */
+  .app-bar { background: #0891b2; color: #fff; padding: 10px 16px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
+  .app-bar-sub { font-size: 10px; opacity: 0.8; }
+  .section-padding { padding: 12px 14px; }
+  .form-group { margin-bottom: 10px; }
+  .label { font-size: 10px; font-weight: 600; color: #64748b; margin-bottom: 3px; }
+  .field { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #0f172a; width: 100%; }
+  .field.active { border-color: #0891b2; }
+  .btn { width: 100%; padding: 11px; border-radius: 10px; font-size: 13px; font-weight: 600; text-align: center; cursor: pointer; border: none; }
+  .btn-blue { background: #0891b2; color: #fff; }
+  .btn-green { background: #16a34a; color: #fff; }
+  .divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+  .facility-card { background: #fff; border-radius: 12px; padding: 12px 14px; border: 1.5px solid #e2e8f0; margin-bottom: 8px; }
+  .reservation-card { background: #fff; border-radius: 12px; padding: 12px 14px; border: 1.5px solid #e2e8f0; }
+  .status-badge { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+  .status-pending { background: #fef3c7; color: #d97706; }
+  .status-approved { background: #dbeafe; color: #1d4ed8; }
+  .status-completed { background: #dcfce7; color: #16a34a; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 8px 0; }
+  .stat-box { background: #f8fafc; border-radius: 8px; padding: 8px 10px; }
+  .stat-label { font-size: 9px; color: #94a3b8; margin-bottom: 2px; }
+  .stat-val { font-size: 14px; font-weight: 800; color: #0f172a; }
+  .stat-val.highlight { color: #0891b2; }
+  .stat-val.green { color: #16a34a; }
+  .yield-big { text-align: center; padding: 20px; background: linear-gradient(135deg, #ecfeff, #e0f2fe); border-radius: 16px; margin: 8px 0; }
+  .yield-num { font-size: 48px; font-weight: 900; color: #0891b2; }
+  .yield-unit { font-size: 18px; color: #0891b2; font-weight: 700; }
+  .yield-label { font-size: 11px; color: #64748b; margin-top: 4px; }
+  .progress-bar { height: 8px; background: #e0f2fe; border-radius: 4px; overflow: hidden; margin: 6px 0; }
+  .progress-fill { height: 100%; background: #0891b2; border-radius: 4px; }
+  .info-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 4px 0; }
+  .info-key { color: #64748b; }
+  .info-val { color: #0f172a; font-weight: 600; }
+  .info-val.blue { color: #0891b2; }
+  .info-val.green { color: #16a34a; }
+  .error-toast { background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 10px; padding: 12px 14px; }
+  .error-title { font-size: 12px; font-weight: 700; color: #dc2626; }
+  .error-msg { font-size: 11px; color: #ef4444; margin-top: 3px; line-height: 1.4; }
+  .error-code { font-size: 9px; font-family: monospace; background: #fee2e2; color: #dc2626; padding: 1px 5px; border-radius: 3px; margin-top: 4px; display: inline-block; }
+  .flow-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .flow-step { font-size: 10px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+  .flow-done { background: #dcfce7; color: #16a34a; }
+  .flow-active { background: #0891b2; color: #fff; }
+  .flow-next { background: #f1f5f9; color: #94a3b8; }
+  .arrow { font-size: 10px; color: #94a3b8; }
+  .crop-tag { display: inline-flex; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: #e0f2fe; color: #0891b2; }
+  .quality-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+  .quality-chip { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .q-a { background: #dcfce7; color: #16a34a; }
+  .q-1st { background: #e0f2fe; color: #0891b2; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-badge">M04 DRYING</span>
+  <span class="header-title">시나리오 3 — 건조시설 예약 및 수율 기록</span>
+  <span class="header-sub">단감(DAN-GAM) · 목업 데이터</span>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="phone-inner">
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <span style="font-size:11px;">📶 🔋</span>
+        </div>
+        <div class="screen" id="phone-screen"></div>
+        <div class="home-bar"><div class="home-bar-line"></div></div>
+      </div>
+    </div>
+    <div class="phone-label" id="phone-user-label"></div>
+  </div>
+
+  <div class="info-panel">
+    <div class="step-header">
+      <span class="step-id" id="step-id-badge"></span>
+      <span id="status-badge"></span>
+      <span id="who-badge"></span>
+    </div>
+    <div class="step-title" id="step-title"></div>
+    <div class="step-desc" id="step-desc"></div>
+    <div class="api-block">
+      <div class="api-block-header">
+        <span class="method" id="api-method"></span>
+        <span class="path" id="api-path"></span>
+      </div>
+      <div class="code-block req" id="api-request"></div>
+      <div class="code-sep"></div>
+      <div class="code-block res" id="api-response"></div>
+    </div>
+    <div class="nav">
+      <button class="nav-btn" id="btn-prev" onclick="navigate(-1)">← 이전</button>
+      <span class="nav-counter" id="nav-counter"></span>
+      <button class="nav-btn primary" id="btn-next" onclick="navigate(1)">다음 →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STEPS = [
+  {
+    id:'S03-01', title:'운영자 C — 건조시설 등록', ok:true, who:'C',
+    desc:'박현숙(건조시설 운영자)이 논산 중앙 건조장을 등록합니다. 최대 용량 5,000kg, 벼/보리/콩 처리 가능.',
+    method:'POST', path:'/api/v1/drying/facilities',
+    request:`{
+  <span class="k">"name"</span>: <span class="vs">"논산 중앙 건조장"</span>,
+  <span class="k">"location_address"</span>: <span class="vs">"충남 논산시 중앙로 100"</span>,
+  <span class="k">"location_lat"</span>: <span class="vn">36.19</span>,
+  <span class="k">"location_lng"</span>: <span class="vn">127.09</span>,
+  <span class="k">"capacity_kg"</span>: <span class="vn">5000</span>,
+  <span class="k">"available_crops"</span>: [<span class="vs">"벼"</span>, <span class="vs">"보리"</span>, <span class="vs">"콩"</span>],
+  <span class="k">"description"</span>: <span class="vs">"최신 순환식 건조기 보유"</span>
+}`,
+    response:`{
+  <span class="k">"success"</span>: <span class="vb-t">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"id"</span>: <span class="vs">"fac-uuid-..."</span>,
+    <span class="k">"name"</span>: <span class="vs">"논산 중앙 건조장"</span>,
+    <span class="k">"capacity_kg"</span>: <span class="vn">5000</span>,
+    <span class="k">"is_active"</span>: <span class="vb-t">true</span>,
+    <span class="k">"created_at"</span>: <span class="vs">"2026-09-01T09:00:00Z"</span>
+  },
+  <span class="k">"error"</span>: <span class="vb-f">null</span>
+}`,
+    userLabel:'사용자 C — 박현숙 (시설 운영자)',
+    screen:`<div>
+      <div class="app-bar">건조시설 등록 <span class="app-bar-sub">M04 DRYING</span></div>
+      <div class="section-padding">
+        <div class="form-group"><div class="label">시설명</div><div class="field active">논산 중앙 건조장</div></div>
+        <div class="form-group"><div class="label">주소</div><div class="field">충남 논산시 중앙로 100</div></div>
+        <div class="form-group"><div class="label">최대 처리용량 (kg)</div><div class="field">5,000</div></div>
+        <div class="form-group">
+          <div class="label">처리 가능 작물</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+            <span class="crop-tag">✓ 벼</span>
+            <span class="crop-tag">✓ 보리</span>
+            <span class="crop-tag">✓ 콩</span>
+            <span style="font-size:10px;color:#94a3b8;padding:2px 8px;border:1px dashed #e2e8f0;border-radius:20px;">+ 추가</span>
+          </div>
+        </div>
+        <div class="form-group"><div class="label">시설 설명</div><div class="field" style="min-height:40px;font-size:11px;">최신 순환식 건조기 보유</div></div>
+        <div class="btn btn-blue">시설 등록하기</div>
+        <div style="text-align:center;margin-top:8px;font-size:11px;color:#0891b2;font-weight:600;">✓ 등록 완료! 예약을 받을 수 있습니다.</div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S03-02', title:'의뢰자 A — 건조시설 예약 신청', ok:true, who:'A',
+    desc:'김민준이 논산 중앙 건조장에 벼 1,000kg, 2026-09-20 예약을 신청합니다. 초기 상태는 PENDING입니다.',
+    method:'POST', path:'/api/v1/drying/reservations',
+    request:`{
+  <span class="k">"facility_id"</span>: <span class="vs">"fac-uuid-..."</span>,
+  <span class="k">"input_kg"</span>: <span class="vn">1000</span>,
+  <span class="k">"scheduled_date"</span>: <span class="vs">"2026-09-20"</span>,
+  <span class="k">"notes"</span>: <span class="vs">"벼베기 직후 반입 예정"</span>
+}`,
+    response:`{
+  <span class="k">"success"</span>: <span class="vb-t">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"id"</span>: <span class="vs">"res-uuid-..."</span>,
+    <span class="k">"facility_id"</span>: <span class="vs">"fac-uuid-..."</span>,
+    <span class="k">"input_kg"</span>: <span class="vn">1000</span>,
+    <span class="k">"scheduled_date"</span>: <span class="vs">"2026-09-20"</span>,
+    <span class="k">"status"</span>: <span class="vs">"PENDING"</span>
+  },
+  <span class="k">"error"</span>: <span class="vb-f">null</span>
+}`,
+    userLabel:'사용자 A — 김민준 (의뢰자)',
+    screen:`<div>
+      <div class="app-bar">건조시설 예약</div>
+      <div class="section-padding">
+        <div class="facility-card">
+          <div style="font-size:14px;font-weight:700;color:#0f172a;">🏭 논산 중앙 건조장</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">충남 논산시 중앙로 100</div>
+          <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;">
+            <span class="crop-tag">벼</span><span class="crop-tag">보리</span><span class="crop-tag">콩</span>
+          </div>
+          <div style="font-size:11px;color:#0891b2;font-weight:600;margin-top:4px;">최대 5,000kg</div>
+        </div>
+        <div class="form-group" style="margin-top:10px;"><div class="label">투입량 (kg)</div><div class="field active">1,000</div></div>
+        <div class="form-group"><div class="label">예약 날짜</div><div class="field">2026-09-20</div></div>
+        <div class="form-group"><div class="label">메모</div><div class="field" style="font-size:11px;">벼베기 직후 반입 예정</div></div>
+        <div class="btn btn-blue" style="margin-bottom:6px;">예약 신청하기</div>
+        <div style="background:#fff8ed;border:1px solid #fde68a;border-radius:8px;padding:8px 10px;font-size:11px;color:#d97706;text-align:center;">
+          ⏳ 운영자 승인 대기중 (PENDING)
+        </div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S03-03', title:'운영자 C — 예약 승인 (PENDING → APPROVED)', ok:true, who:'C',
+    desc:'박현숙이 김민준의 예약 요청을 확인하고 승인합니다. 상태가 PENDING → APPROVED로 변경됩니다.',
+    method:'PATCH', path:'/api/v1/drying/reservations/{id}/approve',
+    request:`<span style="color:#64748b">// Request Body 없음 (PATCH action)</span>`,
+    response:`{
+  <span class="k">"success"</span>: <span class="vb-t">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"id"</span>: <span class="vs">"res-uuid-..."</span>,
+    <span class="k">"status"</span>: <span class="vs">"APPROVED"</span>,
+    <span class="k">"updated_at"</span>: <span class="vs">"2026-09-11T10:00:00Z"</span>
+  },
+  <span class="k">"error"</span>: <span class="vb-f">null</span>
+}`,
+    userLabel:'사용자 C — 박현숙 (시설 운영자)',
+    screen:`<div>
+      <div class="app-bar">예약 관리 <span class="app-bar-sub">논산 중앙 건조장</span></div>
+      <div class="section-padding">
+        <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:8px;">승인 대기 예약 1건</div>
+        <div class="reservation-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#0f172a;">김민준</div>
+              <div style="font-size:10px;color:#64748b;margin-top:1px;">9/20 · 1,000kg · 벼베기 직후 반입</div>
+            </div>
+            <span class="status-badge status-pending">대기중</span>
+          </div>
+          <div class="divider"></div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <div class="btn btn-blue" style="flex:2;padding:8px;font-size:12px;">✓ 승인하기</div>
+            <div class="btn" style="flex:1;padding:8px;font-size:12px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;">거절</div>
+          </div>
+        </div>
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;margin-top:10px;font-size:11px;color:#1d4ed8;font-weight:600;">
+          ✓ 승인 완료! 김민준님에게 알림이 발송되었습니다.
+        </div>
+        <div style="margin-top:8px;">
+          <div style="font-size:10px;font-weight:600;color:#64748b;margin-bottom:4px;">예약 상태 흐름</div>
+          <div class="flow-row">
+            <span class="flow-step flow-done">신청</span><span class="arrow">→</span>
+            <span class="flow-step flow-active">승인됨</span><span class="arrow">→</span>
+            <span class="flow-step flow-next">건조중</span><span class="arrow">→</span>
+            <span class="flow-step flow-next">완료</span>
+          </div>
+        </div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S03-04', title:'운영자 C — 건조 완료 기록 (850kg, 14.5%)', ok:true, who:'C',
+    desc:'건조 완료 후 박현숙이 산출량(850kg), 수분함량(14.5%), 색상(A등급), 품질(1등급)을 기록합니다.',
+    method:'PATCH', path:'/api/v1/drying/reservations/{id}/complete',
+    request:`{
+  <span class="k">"output_kg"</span>: <span class="vn">850</span>,
+  <span class="k">"moisture_pct"</span>: <span class="vn">14.5</span>,
+  <span class="k">"color_grade"</span>: <span class="vs">"A"</span>,
+  <span class="k">"quality_grade"</span>: <span class="vs">"1등급"</span>
+}`,
+    response:`{
+  <span class="k">"success"</span>: <span class="vb-t">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"id"</span>: <span class="vs">"res-uuid-..."</span>,
+    <span class="k">"status"</span>: <span class="vs">"COMPLETED"</span>,
+    <span class="k">"input_kg"</span>: <span class="vn">1000</span>,
+    <span class="k">"output_kg"</span>: <span class="vn">850</span>,
+    <span class="k">"yield_pct"</span>: <span class="vn">85.0</span>,
+    <span class="k">"moisture_pct"</span>: <span class="vn">14.5</span>,
+    <span class="k">"color_grade"</span>: <span class="vs">"A"</span>,
+    <span class="k">"quality_grade"</span>: <span class="vs">"1등급"</span>
+  },
+  <span class="k">"error"</span>: <span class="vb-f">null</span>
+}`,
+    userLabel:'사용자 C — 박현숙 (시설 운영자)',
+    screen:`<div>
+      <div class="app-bar">건조 완료 기록</div>
+      <div class="section-padding">
+        <div style="background:#e0f2fe;border-radius:8px;padding:8px 12px;font-size:11px;color:#0891b2;margin-bottom:10px;">
+          <strong>김민준</strong>의 예약 · 투입량: 1,000kg · 9/20
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div class="form-group" style="flex:1"><div class="label">산출량 (kg)</div><div class="field active">850</div></div>
+          <div class="form-group" style="flex:1"><div class="label">수분함량 (%)</div><div class="field active">14.5</div></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div class="form-group" style="flex:1">
+            <div class="label">색상 등급</div>
+            <div class="field" style="color:#16a34a;font-weight:700;">A등급</div>
+          </div>
+          <div class="form-group" style="flex:1">
+            <div class="label">품질 등급</div>
+            <div class="field" style="color:#0891b2;font-weight:700;">1등급</div>
+          </div>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 12px;margin-bottom:8px;">
+          <div style="font-size:10px;color:#64748b;margin-bottom:2px;">수율 자동계산</div>
+          <div style="font-size:20px;font-weight:900;color:#16a34a;">85.0% <span style="font-size:12px;color:#64748b;font-weight:400;">(850 ÷ 1000 × 100)</span></div>
+        </div>
+        <div class="btn btn-blue">완료 기록 저장</div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S03-05', title:'수율 자동계산 결과 확인 (85.00%)', ok:true, who:'A',
+    desc:'건조 완료 후 김민준은 결과 리포트를 확인합니다. 수율 = 850 ÷ 1000 × 100 = 85.00%가 자동 계산되어 표시됩니다.',
+    method:'GET', path:'/api/v1/drying/reservations/{id}',
+    request:`<span style="color:#64748b">// Authorization: Bearer &lt;token&gt;</span>`,
+    response:`{
+  <span class="k">"success"</span>: <span class="vb-t">true</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"status"</span>: <span class="vs">"COMPLETED"</span>,
+    <span class="k">"input_kg"</span>: <span class="vn">1000</span>,
+    <span class="k">"output_kg"</span>: <span class="vn">850</span>,
+    <span class="k">"yield_pct"</span>: <span class="vn">85.0</span>,
+    <span class="k">"moisture_pct"</span>: <span class="vn">14.5</span>,
+    <span class="k">"color_grade"</span>: <span class="vs">"A"</span>,
+    <span class="k">"quality_grade"</span>: <span class="vs">"1등급"</span>
+  },
+  <span class="k">"error"</span>: <span class="vb-f">null</span>
+}`,
+    userLabel:'사용자 A — 김민준 (의뢰자)',
+    screen:`<div>
+      <div class="app-bar">건조 결과 리포트</div>
+      <div class="section-padding">
+        <span class="status-badge status-completed" style="margin-bottom:10px;display:inline-flex;">✓ 건조 완료</span>
+        <div class="yield-big">
+          <div class="yield-num">85.0<span class="yield-unit">%</span></div>
+          <div class="yield-label">수율 (산출량 ÷ 투입량 × 100)</div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-box">
+            <div class="stat-label">투입량</div>
+            <div class="stat-val">1,000<span style="font-size:10px;font-weight:400;color:#64748b;">kg</span></div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">산출량</div>
+            <div class="stat-val green">850<span style="font-size:10px;font-weight:400;color:#64748b;">kg</span></div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">수분함량</div>
+            <div class="stat-val highlight">14.5<span style="font-size:10px;color:#64748b;">%</span></div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">예약일</div>
+            <div class="stat-val" style="font-size:12px;">9/20</div>
+          </div>
+        </div>
+        <div class="quality-row">
+          <span class="quality-chip q-a">색상 A등급</span>
+          <span class="quality-chip q-1st">품질 1등급</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div>
+        <div style="font-size:10px;color:#64748b;text-align:right;">수율 85%</div>
+      </div>
+    </div>`
+  },
+  {
+    id:'S03-06', title:'[오류] 산출량 > 투입량 오류', ok:false, who:'C',
+    desc:'건조 완료 기록 시 output_kg(1,100)이 input_kg(1,000)보다 크면 DNNG-DRY-003 오류가 반환됩니다. 물리적으로 불가능한 값입니다.',
+    method:'PATCH', path:'/api/v1/drying/reservations/{id}/complete',
+    request:`{
+  <span class="k">"output_kg"</span>: <span class="vn">1100</span>,  <span style="color:#f87171">// 투입량(1000)보다 큼!</span>
+  <span class="k">"moisture_pct"</span>: <span class="vn">14.5</span>
+}`,
+    response:`<span style="color:#f87171">HTTP 400 Bad Request</span>
+
+{
+  <span class="k">"success"</span>: <span class="vb-f">false</span>,
+  <span class="k">"data"</span>: <span class="vb-f">null</span>,
+  <span class="k">"error"</span>: {
+    <span class="k">"code"</span>: <span class="err-val">"DNNG-DRY-003"</span>,
+    <span class="k">"message"</span>: <span class="err-val">"산출량은 투입량을 초과할 수 없습니다."</span>
+  }
+}`,
+    userLabel:'사용자 C — 박현숙 (시설 운영자)',
+    screen:`<div>
+      <div class="app-bar">건조 완료 기록</div>
+      <div class="section-padding">
+        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;font-size:11px;color:#dc2626;margin-bottom:10px;">
+          투입량: 1,000kg
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div class="form-group" style="flex:1">
+            <div class="label">산출량 (kg)</div>
+            <div class="field" style="border-color:#dc2626;color:#dc2626;font-weight:700;">1,100 ⚠️</div>
+          </div>
+          <div class="form-group" style="flex:1"><div class="label">수분함량 (%)</div><div class="field">14.5</div></div>
+        </div>
+        <div class="error-toast">
+          <div class="error-title">🚫 입력값 오류</div>
+          <div class="error-msg">산출량(1,100kg)이 투입량(1,000kg)을 초과합니다. 건조 과정에서 중량이 증가하는 것은 물리적으로 불가능합니다.</div>
+          <div class="error-code">DNNG-DRY-003</div>
+        </div>
+        <div style="background:#fff8ed;border:1px solid #fde68a;border-radius:8px;padding:8px 10px;margin-top:8px;font-size:10px;color:#d97706;line-height:1.5;">
+          💡 수율 범위: 0% ~ 100% (산출량 ≤ 투입량)
+        </div>
+      </div>
+    </div>`
+  }
+];
+
+let current = 0;
+
+function renderTabs() {
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = STEPS.map((s, i) => `
+    <div class="tab ${s.ok ? '' : 'error'} ${i === current ? 'active' : ''}" onclick="goTo(${i})">${s.id}</div>
+  `).join('');
+}
+
+function renderStep() {
+  const s = STEPS[current];
+  document.getElementById('phone-screen').innerHTML = s.screen;
+  document.getElementById('phone-user-label').textContent = s.userLabel;
+  document.getElementById('step-id-badge').textContent = s.id;
+  document.getElementById('status-badge').innerHTML = s.ok
+    ? '<span class="badge-ok">✓ 성공</span>'
+    : '<span class="badge-err">✕ 오류</span>';
+  const whoMap = {A:'<span class="who-badge who-a">사용자 A (의뢰자)</span>', C:'<span class="who-badge who-c">사용자 C (운영자)</span>'};
+  document.getElementById('who-badge').innerHTML = whoMap[s.who] || '';
+  document.getElementById('step-title').textContent = s.title;
+  document.getElementById('step-desc').textContent = s.desc;
+  const m = document.getElementById('api-method');
+  m.textContent = s.method; m.className = 'method ' + s.method.toLowerCase();
+  document.getElementById('api-path').textContent = s.path;
+  document.getElementById('api-request').innerHTML = s.request;
+  const r = document.getElementById('api-response');
+  r.innerHTML = s.response; r.className = 'code-block res ' + (s.ok ? 'ok' : 'err');
+  document.getElementById('nav-counter').textContent = `${current + 1} / ${STEPS.length}`;
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').disabled = current === STEPS.length - 1;
+  renderTabs();
+}
+
+function goTo(i) { current = i; renderStep(); }
+function navigate(d) { if (current + d >= 0 && current + d < STEPS.length) goTo(current + d); }
+renderStep();
+</script>
+</body>
+</html>
