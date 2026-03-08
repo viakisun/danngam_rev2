@@ -1,4 +1,4 @@
-# SDD_SKELETON.md — 단감(DAN-GAM) 모듈별 명세
+# SDD_SKELETON.md — 단감(DANNGAM) 모듈별 명세
 
 > Spec-Driven Definition | 비아 방법론 v6 | Phase 1 (Lv1 MVP)
 > 에러 코드 형식: `DNNG-{MODULE}-{NUMBER}`

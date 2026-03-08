@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     )
 
     # 앱 정보
-    app_name: str = "단감 (DAN-GAM)"
+    app_name: str = "단감(DANNGAM)"
     app_version: str = "0.1.0"
     environment: str = "development"
     debug: bool = True

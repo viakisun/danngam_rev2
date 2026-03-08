@@ -1,4 +1,4 @@
-"""단감(DAN-GAM) FastAPI 애플리케이션 엔트리포인트."""
+"""단감(DANNGAM) FastAPI 애플리케이션 엔트리포인트."""
 
 from contextlib import asynccontextmanager
 
@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
-    description="농작업 O2O 매칭 플랫폼 단감(DAN-GAM) API",
+    description="농작업 O2O 매칭 플랫폼 단감(DANNGAM) API",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",

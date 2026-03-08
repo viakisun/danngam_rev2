@@ -1,4 +1,4 @@
-# CLAUDE.md — 단감(DAN-GAM) 프로젝트
+# CLAUDE.md — 단감(DANNGAM) 프로젝트
 
 > 비아 방법론 v6 기준 필수 5섹션 + 단감 특화 규칙
 
@@ -6,7 +6,7 @@
 
 ## 01. 프로젝트 개요
 
-- **프로젝트명**: 단감 (DAN-GAM)
+- **프로젝트명**: 단감(DANNGAM)
 - **코드명**: DNNG
 - **유형**: Type B (Backend + Frontend + PostgreSQL + Redis + Proxy)
 - **한줄 설명**: 농작업을 필요로 하는 사람과 농작업을 제공하는 사람을 연결하는 양방향 O2O 플랫폼

@@ -1,4 +1,4 @@
-# 단감(DAN-GAM) Claude Code AI 태스크 프롬프트 v2
+# 단감(DANNGAM) Claude Code AI 태스크 프롬프트 v2
 
 > rev2 project_danngam.md 기준 · 5 EP × 56 프롬프트 · 비아 방법론 v6
 

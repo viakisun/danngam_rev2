@@ -1,6 +1,6 @@
 # Claude Code 이관 Instructions
 
-> 단감(DAN-GAM) 프로젝트를 Claude Code에서 시작하기 위한 단계별 가이드
+> 단감(DANNGAM) 프로젝트를 Claude Code에서 시작하기 위한 단계별 가이드
 > 비아 방법론 v6 기준 | S2(ARCHITECT) → S4(BUILD) 순서
 
 ---
@@ -39,7 +39,7 @@ claude
 ```
 /plan
 
-CLAUDE.md를 읽고, 단감(DAN-GAM) 프로젝트의 monorepo를 초기화해줘.
+CLAUDE.md를 읽고, 단감(DANNGAM) 프로젝트의 monorepo를 초기화해줘.
 
 요구사항:
 - CLAUDE.md 섹션 06 디렉토리 구조 그대로
